@@ -46,6 +46,18 @@ function install_required_packages(){
     echo "required npm packages installed" 
 }
 
+function install_Electron(){
+    echo "installing electron"
+    asd="$( sudo npm list -g | grep electron)"
+    if [[ ! -z "$asd" ]] ;then
+        echo "${asd}"
+        echo "Electron already is installed" 
+    else
+        sudo npm install -g electron --unsafe-perm=true --allow-root
+        echo "Electron has been installed"
+    fi
+}
+
 function python_packages()
 {
     read -p "Do you have a virtualenv for python(Y/N) : " dec
@@ -85,6 +97,7 @@ main(){
     clear
     isNodeInstalled
     isNpmInstalled
+    install_Electron
     install_required_packages
     python_packages
 }

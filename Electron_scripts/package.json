@@ -1,0 +1,16 @@
+{
+    "name": "Electorn_Trial",
+    "version": "0.1.0",
+    "main": "main.js",
+    "build": {
+        "extraResources": "python_scripts"
+    },
+    "dependencies": {
+        "bootstrap": "^3.3.7",
+        "express": "^4.16.2",
+        "ffmpeg": "0.0.4",
+        "jquery": "^3.2.1",
+        "rtsp-ffmpeg": "0.0.12",
+        "socket.io": "^2.0.4"
+    }
+}

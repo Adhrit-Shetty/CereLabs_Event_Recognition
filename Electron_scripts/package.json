@@ -2,12 +2,16 @@
     "name": "Electorn_Trial",
     "version": "0.1.0",
     "main": "main.js",
+    "scripts": {
+        "start": "electron ."
+    },
     "build": {
         "extraResources": "python_scripts"
     },
     "dependencies": {
         "async": "^2.6.0",
         "bootstrap": "^3.3.7",
+        "electron": "^1.7.10",
         "electron-spawn": "^5.0.0",
         "express": "^4.16.2",
         "ffmpeg": "0.0.4",

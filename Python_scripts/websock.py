@@ -6,29 +6,22 @@ import json
 import sys
 import traceback
 import logging
-logging.basicConfig(filename='./example.log',level=logging.DEBUG)
-count = 0
-
+import os
+if os.path.exists('./example.log'):
+    os.remove('./example.log')
+logging.basicConfig(filename='./example.log',level=logging.INFO)
 
 async def hello(websocket, path):
     print('here!!')
     logging.info('here!')
     try:
-        global count
         print(sys.argv[1])
         video = cv2.VideoCapture(sys.argv[2])
         while True:
-            print('here!' + str(count))
-            print(video)
             rval, frame = video.read()
-            # print(frame)
-            print(rval)
             if rval:
-                if count == 0:
-                    await websocket.send(json.dumps({"height": np.shape(frame)[0], "width": np.shape(frame)[1]}))
-                    count = 10
+                print('sending',end="-")
                 format, img = cv2.imencode('.jpg', frame)
-                print(img)
                 await websocket.send(img.tobytes())
             else:
                 print("Exiting...")
@@ -40,9 +33,7 @@ async def hello(websocket, path):
         print(sys.exc_info()[0])
 if __name__ == "__main__":
     print(sys.version_info)
-    logging.debug('-------------------------------------------------------------------------')
     logging.info(sys.version_info)  
-    # logging.warning('And this, too')
     try:
         arg = sys.argv
         if len(arg) > 2:

@@ -1,14 +1,16 @@
-var $ = require('jquery') // jQuery now loaded and assigned to $
-var ipAddress = 'http://localhost'
-var port = 3000
+var $ = require('jquery'); // jQuery now loaded and assigned to $
+var ipAddress = 'http://localhost';
+var port = 3000;
 const io = require('socket.io-client');
 var spawn = require("child_process").spawn;
-var path = require('path')
+var path = require('path');
 // var isPortFree = require('is-port-free');
-var ports = [3000, 4000, 5000, 8765, 8000, 9000]
-var count = 0
+var valid = 0;
+var ports = [3000, 4000, 5000, 8765, 8000, 9000];
+var count = 0;
+var sock_list =[];
 var unused_port = require('get-unused-port-in-list')
-var async = require('async')
+var async = require('async');
 
 function start_websocket(data) {
     var url = document.getElementById('path').value
@@ -16,33 +18,31 @@ function start_websocket(data) {
     console.log(url);
     unused_port(ports)
         .then((unusedPort) => {
-            async.series([function(next){
-                console.log(unusedPort); 
+            async.series([function (next) {
+                console.log(unusedPort);
                 console.log(__dirname);
-                var python = spawn('python', [path.join(__dirname, '..', 'Python_scripts/websock.py'), unusedPort.toString(), url ]);
+                var python = spawn('python', [path.join(__dirname, '..', 'Python_scripts/websock.py'), unusedPort.toString(), url], {
+                    detached: true,
+                    stdio: 'ignore'
+                });
+                python.unref();
                 console.log(python);
-                python.stderr.on('data', function (buf) {
-                    var textChunk = buf.toString('utf8');
-                    console.log('buf=', textChunk);
-                    next(textChunk);
-                })
                 next();
-                // python.stdout.on('data', function (buf) {
-                //     var textChunk = buf.toString('utf8')
-                //     console.log('buf=', textChunk)
-                // })                    
-            }], function(err) {
-                if(err){
+            }], function (err) {
+                if (err) {
                     console.log(err);
-                }
-                else{
+                } else {
+                    x = valid
+                    valid++;
+                    console.log(x)
                     setTimeout(() => {
-                        connect(unusedPort);                        
+                        connect(unusedPort, x);
                     }, 2000);
                 }
             })
         })
-        .catch(() => {
+        .catch((error) => {
+            console.log(error)
             console.log('all used')
             // All ports are busy 
         })
@@ -50,49 +50,43 @@ function start_websocket(data) {
 }
 
 
-function connect(port) {
-    // const socket = io('http://localhost:3000');
-    // console.log(socket)
-    // var onevent = socket.onevent;
-    // console.log(onevent)
-    // socket.on("*",function(event,data) {
-    //     console.log(event);
-    //     console.log(data);
-    // });
+function connect(port, value) {
+    console.log(port+'---'+value+"---"+valid);
     var ws = new WebSocket("ws://localhost:"+port);
     var x = 0;
     var height;
     var width;
     ws.onmessage = function (evt) {
-        var received_msg = evt.data;
-        if (x == 0) {
-            data = JSON.parse(received_msg)
-            if (data.message) {
-                console.log(data.message)
-            } else {
-                console.log(data)
-                console.log(data.width);
-                console.log(data.height);
-                height = data.height;
-                width = data.width;
-                x++;
-                console.log(x)
-            }
-        } else {
-            console.log(received_msg)
+        console.log(port+'---'+value+"---"+valid);
+        if (value == (valid - 1)) {
+            var received_msg = evt.data;
             var urlCreator = window.URL || window.webkitURL;
             var imageUrl = urlCreator.createObjectURL(received_msg);
             document.querySelector("#img").src = imageUrl;
         }
+        else{
+            console.log('has to close'+port);
+            ws.close();
+            console.log('done!');
+        }
     };
     ws.onclose = function () {
         // websocket is closed.
-        alert("Connection is closed...");
+        console.log('Connection is closed:'+port)
     };
 
     // window.onbeforeunload = function(event) {
     //    socket.close();
     // };
+}
+
+
+function switch_con() {
+    var url = document.getElementById('loadPy').value
+    console.log('connecting to:' + url);
+    x = valid;
+    valid++;
+    connect(url,x)
 }
 
 function run_py() {

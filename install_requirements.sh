@@ -42,7 +42,7 @@ function isNpmInstalled() {
 
 function install_required_packages(){
     echo "installing required node packages"
-    sudo npm --prefix ./Electron_scripts/ install
+    sudo npm --prefix ./Electron_scripts/ install --verbose
     echo "required npm packages installed" 
 }
 

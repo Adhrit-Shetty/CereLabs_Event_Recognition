@@ -3,44 +3,63 @@ import websockets
 import cv2
 import numpy as np
 import json
-count=0
+import sys
+import traceback
+import logging
+logging.basicConfig(filename='./example.log',level=logging.DEBUG)
+count = 0
+
+
 async def hello(websocket, path):
-    global count
-    video = cv2.VideoCapture("rtsp://admin:admin1234@192.168.1.207:1027/MPEG-4/ch06/main/av_stream")
-    while True: 
-        print('here!'+str(count))
-        print(video)    
-        rval, frame = video.read()
-        # print(frame)
-        if count == 0:
-            await websocket.send(json.dumps({"height":np.shape(frame)[0],"width":np.shape(frame)[1]}))
-            count = 10
-        print(rval)
-        if rval:
-            format,img = cv2.imencode('.jpg',frame)
-            print(img)
-            await websocket.send(img.tobytes())
-            # print("> {}".format(greeting))
-    #     for i in range(4):
-    #         a.append(x[b:b+chunk_size])
-    #         b+=chunk_size
-    #     message='@@ '+' '.join(map(str,np.shape(frame)))+" "+str(np.shape(a)[0])+" "+str(chunk_size)
-    #     x = 100-len(message)
-    #     for i in range(x):
-    #         message+='-'
-    #     client.sendto(message.encode('utf-8'), (host, port))
-    #     for i in range(np.shape(a)[0]):
-    #         client.sendto(a[i], (host, port))
-    # else:
-    #     message='##'
-    #     x = 100-len(message)
-    #     for i in range(x):
-    #         message+='-'
-    #     client.sendto(message.encode('utf-8'), (host, port))
-    #     client.close()
-    #     break
-
-start_server = websockets.serve(hello, 'localhost', 8765)
-
-asyncio.get_event_loop().run_until_complete(start_server)
-asyncio.get_event_loop().run_forever()
+    print('here!!')
+    logging.info('here!')
+    try:
+        global count
+        print(sys.argv[1])
+        video = cv2.VideoCapture(sys.argv[2])
+        while True:
+            print('here!' + str(count))
+            print(video)
+            rval, frame = video.read()
+            # print(frame)
+            print(rval)
+            if rval:
+                if count == 0:
+                    await websocket.send(json.dumps({"height": np.shape(frame)[0], "width": np.shape(frame)[1]}))
+                    count = 10
+                format, img = cv2.imencode('.jpg', frame)
+                print(img)
+                await websocket.send(img.tobytes())
+            else:
+                print("Exiting...")
+                await websocket.send(json.dumps({"message": 'No frames to send'}))
+                exit()
+    except:
+        tb = traceback.format_exc()
+        logging.info("Unexpected error: {}".format(sys.exc_info()[0]))  
+        print(sys.exc_info()[0])
+if __name__ == "__main__":
+    print(sys.version_info)
+    logging.debug('-------------------------------------------------------------------------')
+    logging.info(sys.version_info)  
+    # logging.warning('And this, too')
+    try:
+        arg = sys.argv
+        if len(arg) > 2:
+            logging.info(sys.argv)  
+            print(sys.argv)
+            # First argument is free port number
+            # Second argument is the video or rtsp link
+            start_server = websockets.serve(hello, 'localhost', int(sys.argv[1]))
+            logging.info('server started')
+            asyncio.get_event_loop().run_until_complete(start_server)
+            logging.info('server started')
+            asyncio.get_event_loop().run_forever()
+            logging.info('server started')
+        else:
+            print('Exiting as no source is specified')
+    except:
+        tb = traceback.format_exc()
+        logging.info("Unexpected error: {}".format(sys.exc_info()[0]))  
+        print ("Unexpected error: {}".format(sys.exc_info()[0]))
+        print (tb)

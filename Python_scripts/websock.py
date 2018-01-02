@@ -10,8 +10,9 @@ import os
 if os.path.exists('./example.log'):
     os.remove('./example.log')
 logging.basicConfig(filename='./example.log',level=logging.INFO)
-
+ct=0
 async def hello(websocket, path):
+    global ct
     print('here!!')
     logging.info('here!')
     try:
@@ -20,8 +21,13 @@ async def hello(websocket, path):
         while True:
             rval, frame = video.read()
             if rval:
-                print('sending',end="-")
+                ct+=1
+                if ct %50 == 0:
+                    pong_waiter = await websocket.ping()
+                    await pong_waiter
+                    print (pong_waiter) 
                 format, img = cv2.imencode('.jpg', frame)
+                # print(frame)
                 await websocket.send(img.tobytes())
             else:
                 print("Exiting...")

@@ -19,5 +19,6 @@
         "jquery": "^3.2.1",
         "rtsp-ffmpeg": "0.0.12",
         "socket.io": "^2.0.4"
-    }
+    },
+    "devDependencies": {}
 }

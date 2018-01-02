@@ -56,9 +56,12 @@ function connect(port, value) {
     var x = 0;
     var height;
     var width;
+    if (value != (valid - 1)) {
+        ws.close();
+    }
     ws.onmessage = function (evt) {
         console.log(port+'---'+value+"---"+valid);
-        if (value == (valid - 1)) {
+        if(value == (valid - 1)) {
             var received_msg = evt.data;
             var urlCreator = window.URL || window.webkitURL;
             var imageUrl = urlCreator.createObjectURL(received_msg);

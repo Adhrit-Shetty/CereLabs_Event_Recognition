@@ -11,6 +11,10 @@ import { LoginComponent } from './login/login.component';
 import {ReactiveFormsModule} from "@angular/forms";
 import { AddKnownComponent } from './add-known/add-known.component';
 
+import { HistoryComponent } from './history/history.component';
+import {LoginService} from "./shared/login.service";
+import { ROUTES } from './app.routing';
+import { RouterModule } from '@angular/router'
 
 @NgModule({
   declarations: [
@@ -20,13 +24,16 @@ import { AddKnownComponent } from './add-known/add-known.component';
     ControlpanelComponent,
     HomeComponent,
     LoginComponent,
-    AddKnownComponent
+    AddKnownComponent,
+    HistoryComponent
   ],
   imports: [
     BrowserModule,
+    RouterModule,
+    ROUTES,
     ReactiveFormsModule
   ],
-  providers: [],
+  providers: [LoginService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

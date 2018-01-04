@@ -4,8 +4,8 @@ import { NgModule } from '@angular/core';
 
 import { AppComponent } from './app.component';
 import { NavbarComponent } from './navbar/navbar.component';
-import { VideoboxComponent } from './videobox/videobox.component';
-import { ControlpanelComponent } from './controlpanel/controlpanel.component';
+import { VideoboxComponent } from './home/videobox/videobox.component';
+import { ControlpanelComponent } from './home/controlpanel/controlpanel.component';
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
 

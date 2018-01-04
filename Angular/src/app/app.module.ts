@@ -9,7 +9,10 @@ import { ControlpanelComponent } from './home/controlpanel/controlpanel.componen
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
 import {ReactiveFormsModule} from "@angular/forms";
-
+import { HistoryComponent } from './history/history.component';
+import {LoginService} from "./shared/login.service";
+import { ROUTES } from './app.routing';
+import { RouterModule } from '@angular/router'
 
 @NgModule({
   declarations: [
@@ -18,13 +21,16 @@ import {ReactiveFormsModule} from "@angular/forms";
     VideoboxComponent,
     ControlpanelComponent,
     HomeComponent,
-    LoginComponent
+    LoginComponent,
+    HistoryComponent
   ],
   imports: [
     BrowserModule,
+    RouterModule,
+    ROUTES,
     ReactiveFormsModule
   ],
-  providers: [],
+  providers: [LoginService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

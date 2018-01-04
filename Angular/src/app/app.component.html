@@ -1,8 +1,13 @@
-<div class="nav-holder">
+<div *ngIf="checkLogin()" class="nav-holder">
   <app-navbar></app-navbar>
 </div>
-<div class="container-fluid h-100">
+<div class="container-fluid h-100" *ngIf="!checkLogin();else load">
   <app-login></app-login>
-  <!--<app-home></app-home>-->
 </div>
+<ng-template #load>
+  <div class="container-fluid h-100">
+    <router-outlet></router-outlet>
+  </div>
+</ng-template>
+<!--<app-home></app-home>-->
 <!--</div>-->

@@ -1,16 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import {FormArray, FormControl, FormGroup, Validators} from "@angular/forms";
-import {Observable} from "rxjs/Observable";
-
+import {FormControl, FormGroup, Validators} from "@angular/forms";
+import { LoginService } from '../shared/login.service'
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit {
-  genders = ['male', 'female'];
   signupForm: FormGroup;
-
+  constructor(private login: LoginService){}
   ngOnInit() {
     this.signupForm = new FormGroup({
       'userData': new FormGroup({
@@ -24,6 +22,7 @@ export class LoginComponent implements OnInit {
     console.log(this.signupForm.status);
     if(this.signupForm.status === 'VALID'){
       console.log('do something!');
+      console.log("Login status : "+this.login.setLoggedIn());
     }
     // this.signupForm.reset();
   }

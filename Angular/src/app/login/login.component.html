@@ -12,27 +12,38 @@
               class="form-control">
             <span
               *ngIf="!signupForm.get('userData.username').valid && signupForm.get('userData.username').touched"
-              class="help-block">
-              <span *ngIf="signupForm.get('userData.username').errors['nameIsForbidden']">
-                This username is invalid!
-              </span>
+              class="form-text text-muted">
               <span *ngIf="signupForm.get('userData.username').errors['required']">
-                This field is required !
+                This field is required !<br>
+              </span>
+              <span *ngIf="signupForm.get('userData.username').errors['badLength']">
+                This username has to more than 3 characters !<br>
               </span>
             </span>
           </div>
           <div class="form-group">
-            <label for="email">Password</label>
+            <label for="pass">Password</label>
             <input
               type="password"
-              id="email"
-              formControlName="email"
+              id="pass"
+              formControlName="pass"
               class="form-control">
             <span
-              *ngIf="!signupForm.get('userData.email').valid && signupForm.get('userData.email').touched"
-              class="help-block">Enter a vaild email!</span>
+              *ngIf="!signupForm.get('userData.pass').valid && signupForm.get('userData.pass').touched"
+              class="form-text text-muted">
+              <span *ngIf="signupForm.get('userData.pass').errors['required']">
+                This field is required !<br>
+              </span>
+              <span *ngIf="signupForm.get('userData.pass').errors['badLength']">
+                This username has to more than 3 characters !<br>
+              </span>
+              <span *ngIf="signupForm.get('userData.pass').errors['badCharacter']">
+                Need atleast one uppercase and numeric character !<br>
+              </span>
+            </span>
           </div>
         </div>
+        <button class="btn btn-primary" type="submit">Submit</button>
       </form>
     </div>
   </div>

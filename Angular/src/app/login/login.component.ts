@@ -10,63 +10,40 @@ import {Observable} from "rxjs/Observable";
 export class LoginComponent implements OnInit {
   genders = ['male', 'female'];
   signupForm: FormGroup;
-  forbiddenusernames = ['a', 'aa'];
 
   ngOnInit() {
     this.signupForm = new FormGroup({
       'userData': new FormGroup({
-        'username': new FormControl(null, [Validators.required, this.forbiddenNames.bind(this)]),
-        'email': new FormControl(null, [Validators.required, Validators.email],this.forbiddenEmails),
+        'username': new FormControl(null, [Validators.required, this.lengthCheck.bind(this)]),
+        'pass': new FormControl(null, [Validators.required, this.lengthCheck.bind(this), this.characterCheck.bind(this)]),
       }),
-      'gender': new FormControl('male'),
-      'hobbies': new FormArray([])
     });
-    this.signupForm.statusChanges.subscribe((value)=>{
-      console.log(value);
-
-    });
-    this.signupForm.setValue({
-      'userData':{
-        'username':'Akshat',
-        'email':'a@a.com'
-      },
-      'gender':'male',
-      'hobbies':[]
-    });
-    // this.signupForm.valueChanges.subscribe((value)=>{
-    //   console.log(value)
-    // });
   }
 
   onSubmit() {
-    console.log(this.signupForm);
-    this.signupForm.reset();
-  }
-
-  onAddHobby() {
-    const control = new FormControl(null, Validators.required);
-    (<FormArray>this.signupForm.get('hobbies')).push(control);
-  }
-
-  forbiddenNames(control: FormControl): { [s: string]: boolean } {
-    if (this.forbiddenusernames.indexOf(control.value) !== -1) {
-      return {'nameIsForbidden': true}
+    console.log(this.signupForm.status);
+    if(this.signupForm.status === 'VALID'){
+      console.log('do something!');
     }
-    return null;
+    // this.signupForm.reset();
   }
 
-  forbiddenEmails(control: FormControl): Promise<any> | Observable<any> {
-    const promise = new Promise<any>((resolve, reject) => {
-      setTimeout(() => {
-        if (control.value === 'test@test.com') {
-          resolve({'emailIsForbidden': true})
-        }
-        else {
-          resolve(null)
-        }
-      }, 1500);
-    });
-    return promise;
+  lengthCheck(control: FormControl): { [s: string]: boolean } {
+    console.log('here');
+    if(control.value !== null && control.value.length>=3)
+    {
+      return null;
+    }
+    return  {'badLength': true};
   }
 
+  characterCheck(control: FormControl): { [s: string]: boolean } {
+    var pattern1 = /.*[0-9].*/;
+    var pattern2 = /.*[A-Z].*/;
+    var name = control.value;
+    if(pattern1.test(name) === true && pattern2.test(name) === true){
+      return null;
+    }
+    return  {'badCharacter': true};
+  }
 }

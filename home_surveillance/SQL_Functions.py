@@ -191,6 +191,21 @@ class AdminHelper:
         except:
             print('{} Error fetching data'.format(self.LOG_TAG))
             return list()
+    
+    def verify_admin(self, username, password):
+        cursor = self.db.cursor()
+        password_hashed = hashlib.sha256(password.encode()).hexdigest()
+        sql = "SELECT admin_id, emp_id, privilege_level FROM admin WHERE username = '%s' AND password = '%s'" % (username, password_hashed)
+
+        try:
+            cursor.execute(sql)
+            results = cursor.fetchone()
+            print('{} fetching Successful!'.format(self.LOG_TAG))
+            print('Results are: {}'.format(results))
+            return results
+        except:
+            print('{} Error fetching data'.format(self.LOG_TAG))
+            return list()
 
 
 class RoomHelper:
@@ -323,9 +338,9 @@ class CamMasterHelper:
     def __init__(self, db):
         self.db = db
 
-    def add_cam(self, cam_id, room_id, resolution, model):
+    def add_cam(self, cam_id, room_id, resolution, model, rtsp_link):
         cursor = self.db.cursor()
-        sql = "INSERT INTO cam_master(cam_id, room_id, resolution, model) values(%d, %d, '%s', '%s')" % (cam_id, room_id, resolution, model)
+        sql = "INSERT INTO cam_master(cam_id, room_id, resolution, model, rtsp_link) values(%d, %d, '%s', '%s', '%s')" % (cam_id, room_id, resolution, model)
         try:
             cursor.execute(sql)
             self.db.commit()
@@ -441,6 +456,59 @@ class TypeMasterHelper:
             print('{} Error fetching data'.format(self.LOG_TAG))
             return list()
 
+class RiskLevelMasterHelper:
+    LOG_TAG = '[RISK_LEVEL_MASTER_HELPER]'
+
+    def __init__(self, db):
+        self.db = db
+
+    def add_risk_level(self, risk_level, description):
+        cursor = self.db.cursor()
+        sql = "INSERT INTO risk_level_master(risk_level, description) values(%d, '%s')" % (risk_level, description)
+        try:
+            cursor.execute(sql)
+            self.db.commit()
+            print('{} add Successful!'.format(self.LOG_TAG))
+        except:
+            self.db.rollback()
+            print('{} Error: add Unsuccessful!'.format(self.LOG_TAG))
+    
+    def update_risk_level(self, description):
+        cursor = self.db.cursor()
+        sql = "UPDATE risk_level_master SET description = '%s'" % (description)
+        try:
+            cursor.execute(sql)
+            self.db.commit()
+            print('{} update Successful!'.format(self.LOG_TAG))
+        except:
+            self.db.rollback()
+            print('{} Error: update Unsuccessful!'.format(self.LOG_TAG))
+
+    def remove_risk_level(self, risk_level):
+        cursor = self.db.cursor()
+        sql = "DELETE FROM risk_level_master WHERE risk_level = %d" % (risk_level)
+        try:
+            cursor.execute(sql)
+            self.db.commit()
+            print('{} removal Successful!'.format(self.LOG_TAG))
+        except:
+            self.db.rollback()
+            print('{} Error: removal Unsuccessful!'.format(self.LOG_TAG))
+
+    def get_risk_level(self, risk_level):
+            cursor = self.db.cursor()
+            sql = "SELECT * FROM risk_level_master WHERE risk_level = %d" % (risk_level)
+            try:
+                cursor.execute(sql)
+                results = cursor.fetchone()
+                print('{} fetching Successful!'.format(self.LOG_TAG))
+                return results
+            except:
+                print('{} Error fetching data'.format(self.LOG_TAG))
+                return list()
+        
+
+# This is the class you should import
 class DatabaseHelper:
     LOG_TAG = '[DATABASE_HELPER]'
 
@@ -504,7 +572,8 @@ class DatabaseHelper:
             'insert': a.add_admin,
             'update': a.update_admin_details,
             'delete': a.remove_admin,
-            'get': a.get_admin_details
+            'get': a.get_admin_details,
+            'verify': a.verify_admin
         }.get(intent, None)
 
     def clearance_master(self, intent):
@@ -532,4 +601,13 @@ class DatabaseHelper:
             'update': t.update_type_details,
             'delete': t.remove_type,
             'get': t.get_type_details
+        }.get(intent, None)
+    
+    def risk_level_master(self, intent):
+        r = RiskLevelMasterHelper(self.db)
+        return {
+            'insert': r.add_risk_level,
+            'update': r.update_risk_level,
+            'delete': r.remove_risk_level,
+            'get': r.get_risk_level
         }.get(intent, None)

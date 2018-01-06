@@ -1,3 +1,6 @@
+# models directory in home_surveillance which has to be downloaded seperately from google drive
+home_surveillance/models/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

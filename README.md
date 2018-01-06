@@ -1,5 +1,9 @@
-# CereLabs_Event_Recognition
-Internship related Event Recognition System
-<h3>All the Electron scripts are in a folder and the python scripts are in the other</h3>
-<h3>All db related stuff can be added to a separate folder. Whoever adds that please make that folder and structure it appropriately</h3>
-<h3>Run the install_requirements script as sudo user to install all requirements</h3>
+# Cerelabs Internship - Event Recognition System
+### Prerequisites: 
+1. Download [**models**](*https://drive.google.com/file/d/1cyWfndBLEfKTe8eBIOivDIIbBsy-E_eA/view*) and extract it to *home_surveillance/* directory  
+2. Download [openface](https://github.com/cmusatyalab/openface) then add it to your PYTHONPATH environment variable
+3. Download and build [LightGBM](https://lightgbm.readthedocs.io/en/latest/) then add it to your PYTHONPATH environment variable
+4. Database schema is available [here](https://drive.google.com/file/d/1uFFRcAVv_o5hRzeb8HriKBN87KehcOiT/view). MySQL 5.7+ required
+
+After completing the pre-requisites to run the server, navigate to *home_surveillance/system* and run `python WebApp.py` then access website at http://localhost:5000
+

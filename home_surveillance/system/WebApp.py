@@ -80,6 +80,62 @@ def login():
 
     return render_template('login.html', error = error)
 
+@app.route('/master', methods=['GET','POST'])
+def master():
+    error = None
+    success = None
+    value = None
+    if request.method == 'POST':
+        print(request.form)
+        if "add_camera" in request.form:
+            print("add_camera")
+            cam_id = request.form['cam_id']
+            room_id = request.form['room_id']
+            res = request.form['res']
+            model = request.form['model']
+            link = request.form['link']
+            print(str(cam_id),str(room_id),str(res),str(model),str(link))
+            data = DataBase.cam_master('insert')(int(cam_id),int(room_id),res,model,link)
+            data = json.loads(data)
+            value = 1
+            if int(data.get('status')) == 1:
+                success = data.get('message')
+                print(data.get('message'),"asdsa")
+            else:
+                print(data.get('message'))
+                error = data.get('message')
+        elif "add_emp" in request.form:
+            print("add_emp")
+            
+        elif "add_admin" in request.form:
+            print("add_admin")
+
+        elif "add_room" in request.form:
+            print("add_room")
+            level = request.form['level1']
+            room_id = request.form['room_id1']
+            print(str(level),str(room_id))
+            data = DataBase.room('insert')(int(room_id),int(level))
+            data = json.loads(data)
+            value = 2
+            if int(data.get('status')) == 1:
+                success = data.get('message')
+                print(data.get('message'),"asdsa")
+            else:
+                print(data.get('message'))
+                error = data.get('message')
+            
+        elif "add_event_type" in request.form:
+            print("add_event_type")
+        elif "add_risk" in request.form:
+            print("add_risk")
+        elif "add_privilege" in request.form:
+            print("add_privilege")
+        elif "add_clearance" in request.form:
+            print("add_clearance")        
+    return render_template('master.html', error = error, success = success, value = value)
+
+
 @app.route('/home')
 def home():
     if g.user:

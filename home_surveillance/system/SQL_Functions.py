@@ -3,6 +3,7 @@ import time
 import datetime
 import os
 import hashlib
+import json
 
 class EventsHelper:
     LOG_TAG = '[EVENTS_HELPER]'
@@ -228,14 +229,16 @@ class RoomHelper:
 
     def add_room(self, room_id, accessiblity):
         cursor = self.db.cursor()
-        sql = "INSERT INTO room(room_id, accessiblity) values(%d, '%s')" % (room_id, accessiblity)
+        sql = "INSERT INTO room(room_id, accessiblity) values(%d, '%d')" % (room_id, accessiblity)
         try:
             cursor.execute(sql)
             self.db.commit()
             print('{} Add Successful!'.format(self.LOG_TAG))
+            return json.dumps({"status":1, "message":'Add Successful'})
         except:
             self.db.rollback()
             print('{} Error: Add Unsuccessful!'.format(self.LOG_TAG))
+            return json.dumps({"status":-1, "message":'Add Unsuccessful. Please check validity of input data'})
 
     def update_room_details(self, room_id, **kwargs):
         cursor = self.db.cursor()
@@ -357,14 +360,16 @@ class CamMasterHelper:
 
     def add_cam(self, cam_id, room_id, resolution, model, rtsp_link):
         cursor = self.db.cursor()
-        sql = "INSERT INTO cam_master(cam_id, room_id, resolution, model, rtsp_link) values(%d, %d, '%s', '%s', '%s')" % (cam_id, room_id, resolution, model)
+        sql = "INSERT INTO cam_master(cam_id, room_id, resolution, model, rtsp_link) values(%d, %d, '%s', '%s', '%s')" % (cam_id, room_id, resolution, model, rtsp_link)
         try:
             cursor.execute(sql)
             self.db.commit()
             print('{} Add Successful!'.format(self.LOG_TAG))
+            return json.dumps({"status":1, "message":'Add Successful'})
         except:
             self.db.rollback()
             print('{} Error: Add Unsuccessful!'.format(self.LOG_TAG))
+            return json.dumps({"status":-1, "message":'Add Unsuccessful. Please check validity of input data'})
 
     def update_cam_details(self, cam_id, **kwargs):
         cursor = self.db.cursor()

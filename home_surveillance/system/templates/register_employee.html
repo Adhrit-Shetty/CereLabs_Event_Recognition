@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta name="description" content="">
   <meta name="author" content="">
-  <title>Register Employee</title>
+  <title>Surveillance System | Register Employee</title>
   <!-- Bootstrap core CSS-->
   <link href="static/bootstrap/css/bootstrap.css" rel="stylesheet">
   <!-- Custom fonts for this template-->
@@ -42,12 +42,12 @@
           <button type="submit" class="btn btn-primary btn-block">Register</button>
         </form>
         {%if error%}
-        <p class="error">
+        <p class="alert alert-danger" role="alert">
           <strong>Error:</strong> {{error}} 
         </p>
         {%endif%}
         {%if emp_id != None %}
-        <p class="error">
+        <p class="alert alert-success">
           <strong>Employee hired!</strong> Your employee id is {{emp_id}} !
         </p>
         {%endif%}

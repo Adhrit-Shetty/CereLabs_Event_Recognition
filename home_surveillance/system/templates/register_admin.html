@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta name="description" content="">
   <meta name="author" content="">
-  <title>Register Admin</title>
+  <title>Surveillance System | Register Admin</title>
   <!-- Bootstrap core CSS-->
   <link href="static/bootstrap/css/bootstrap.css" rel="stylesheet">
   <!-- Custom fonts for this template-->
@@ -68,8 +68,13 @@
           <button type="submit" class="btn btn-primary btn-block">Register</button>
         </form>
         {%if error%}
-        <div class="error">
+        <div class="alert alert-danger" role="alert">
           <strong>Error:</strong> <div>{{error}} </div>
+        </div>
+        {%endif%}
+        {%if success%}
+        <div class="alert alert-success" role="alert">
+          <strong>Error:</strong> <div>New Admin has been successfully added!</div>
         </div>
         {%endif%}
         <div id="error"></div>
@@ -89,11 +94,15 @@
     $('form').submit(function(evt) {
       console.log($('#input_password').val() === $('#input_confirm_password').val());
       if ($('#input_password').val() === $('#input_confirm_password').val()) {
-        return true;
+        if (/[A-Z]+[a-z]*[1-9]+/.test($('#input_password').val())) {
+          return true;
+        } else {
+          $('#error').html('Password should have at least 1 Cap, 1 small and 1 number');    
+        }
       } else {
         $('#error').html('Passwords donot match!');  
-        return false;
       }
+      return false;
     });
   </script>
 </body>

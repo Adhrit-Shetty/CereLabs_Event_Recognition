@@ -434,9 +434,11 @@ class TypeMasterHelper:
             cursor.execute(sql)
             self.db.commit()
             print('{} Add Successful!'.format(self.LOG_TAG))
+            return json.dumps({"status":1, "message":'Add Successful'})
         except:
             self.db.rollback()
             print('{} Error: Add Unsuccessful!'.format(self.LOG_TAG))
+            return json.dumps({"status":-1, "message":'Add Unsuccessful. Please check validity of input data'})
 
     def update_type_details(self, type_id, **kwargs):
         cursor = self.db.cursor()

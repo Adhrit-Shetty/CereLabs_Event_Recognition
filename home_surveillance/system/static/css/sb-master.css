@@ -1,0 +1,47 @@
+@media (min-width: 992px) {
+    .card-columns {
+        column-count: 2;
+    }
+    
+}
+
+@media (min-width: 768px) {
+    .card-columns {
+        column-count: 2;}}
+
+@media (min-width: 512px) {
+    .card-columns {
+        column-count: 2;
+    }
+    
+}
+
+@media (min-width: 1200px) {
+    .card-columns {
+        column-count: 2;
+    }
+}
+
+@media (min-width: 1500px) {
+    .card-columns {
+        column-count: 3 !important; }}
+
+
+.max_out{
+    height: 87vh;
+}
+
+
+.card{
+    background-color: rgba(216, 211, 211, 0.699);
+    width: 100%;
+    height:100%;
+}
+
+.clear{
+    background-color: #c6fbc3b8;
+}
+
+.error{
+    background-color: #ffdedef2;
+}

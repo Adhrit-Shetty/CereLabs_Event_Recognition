@@ -126,6 +126,20 @@ def master():
             print("add_event_type")
         elif "add_risk" in request.form:
             print("add_risk")
+            level = request.form['level2']
+            desc = request.form['desc2']
+            print(str(level),str(desc))
+            data = DataBase.risk_level_master('insert')(int(level),str(desc))
+            data = json.loads(data)
+            value = 3
+            if int(data.get('status')) == 1:
+                success = data.get('message')
+                print(data.get('message'),"asdsa")
+            else:
+                print(data.get('message'))
+                error = data.get('message')
+            
+
         elif "add_privilege" in request.form:
             print("add_privilege")
         elif "add_clearance" in request.form:

@@ -503,10 +503,12 @@ class RiskLevelMasterHelper:
             cursor.execute(sql)
             self.db.commit()
             print('{} add Successful!'.format(self.LOG_TAG))
+            return json.dumps({"status":1, "message":'Add Successful'})
         except:
             self.db.rollback()
             print('{} Error: add Unsuccessful!'.format(self.LOG_TAG))
-    
+            return json.dumps({"status":-1, "message":'Add Unsuccessful. Please check validity of input data'})
+
     def update_risk_level(self, description):
         cursor = self.db.cursor()
         sql = "UPDATE risk_level_master SET description = '%s'" % (description)

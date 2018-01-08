@@ -64,9 +64,6 @@ def login():
     if request.method == 'POST':
         session.pop('user',None) # Drops session everytime user tries to login
 
-        # Required during adding admin
-        # regex_to_match = re.compile('[A-Z]+[a-z]*[1-9]+') # 1 or more Cap, 0 or more small, 1 or more number
-
         if len(request.form['username']) == 0 or len(request.form['password']) == 0:
             error = 'The username or password field(s) cannot be empty. Please try again'
         else:
@@ -117,7 +114,7 @@ def register_employee():
             error = "Name is invalid"
         if not error:
             print('{} Valid data Posted'.format(LOG_TAG))
-            # TODO: Add module which converts recog_data to vector then add to db
+            # TODO: Add module which converts recog_data to vector and returns it
             # emp_id = DataBase.employee('insert')(name, clearance_level, recog_data)
     return render_template('register_employee.html', error = error, data = data, emp_id = emp_id)
 
@@ -126,6 +123,7 @@ def register_admin():
     """Register an Administrator"""
     error = None
     data = DataBase.privilege_master('get')()
+    success = None
     g.user = 'admin' # Hack
     if request.method == 'POST' and g.user:
         print("HERE!!!!!")
@@ -146,25 +144,29 @@ def register_admin():
         password = request.form['password']
         if not (len(username) > 0 and regex_to_match.match(username) != None):
             error = "Invalid Username"
-        # regex_to_match = re.compile('')
-        # if not (len(password) > 0 and regex_to_match.match(password) != None);
-            # error = "Password should be ...."
+        
+        regex_to_match = re.compile('[A-Z]+[a-z]*[1-9]+') # 1 or more Cap, 0 or more small, 1 or more number
+        if not (len(password) > 0 and regex_to_match.match(password) != None):
+            error = "Password should have 1 or more Cap, 0 or more small, 1 or more number"
+        
         result = False
         if not error:
             print('{} Valid data Posted'.format(LOG_TAG))
             print(emp_id, privilege_level, username, password)
             result = DataBase.admin('insert')(emp_id, privilege_level, username, password)
+            success = True
         if result == True:
             redirect(url_for('home'))
 
-    return render_template('register_admin.html', error = error, data = data)
+    return render_template('register_admin.html', error = error, data = data, success = success)
 
 @app.before_request
 def before_request():
     """Initialise session"""
-    g.user = None
-    if 'user' in session:
-        g.user = session['user']
+    # g.user = None
+    g.user = 'admin' # Hack
+    # if 'user' in session:
+    #     g.user = session['user']
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
@@ -497,6 +499,11 @@ def connect():
 def disconnect():
     #print('Client disconnected')
     app.logger.info("Client disconnected")
+
+@app.route('/logout', methods=['GET'])
+def logout():
+    session.pop('user', None)
+    return redirect(url_for('login'))
 
 
 if __name__ == '__main__':

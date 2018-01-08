@@ -305,9 +305,11 @@ class ClearanceLevelMasterHelper:
             cursor.execute(sql)
             self.db.commit()
             print('{} Add Successful!'.format(self.LOG_TAG))
+            return json.dumps({"status":1, "message":'Add Successful'})
         except:
             self.db.rollback()
             print('{} Error: Add Unsuccessful!'.format(self.LOG_TAG))
+            return json.dumps({"status":-1, "message":'Add Unsuccessful. Please check validity of input data'})
 
     def update_clearance_level(self, level, description):
         cursor = self.db.cursor()
@@ -564,9 +566,11 @@ class PrivilegeMasterHelper:
             cursor.execute(sql)
             self.db.commit()
             print('{} add Successful!'.format(self.LOG_TAG))
+            return json.dumps({"status":1, "message":'Add Successful'})
         except:
             self.db.rollback()
             print('{} Error: add Unsuccessful!'.format(self.LOG_TAG))
+            return json.dumps({"status":-1, "message":'Add Unsuccessful. Please check validity of input data'})
 
     def update_privilege_description(self, description):
         cursor = self.db.cursor()

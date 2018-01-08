@@ -83,23 +83,21 @@ def master():
     success = None
     value = None
     if request.method == 'POST':
-        print(request.form)
         if "add_camera" in request.form:
-            print("add_camera")
+            print("{} add_camera".format(LOG_TAG))
             cam_id = request.form['cam_id']
             room_id = request.form['room_id']
             res = request.form['res']
             model = request.form['model']
             link = request.form['link']
-            print(str(cam_id),str(room_id),str(res),str(model),str(link))
             data = DataBase.cam_master('insert')(int(cam_id),int(room_id),res,model,link)
             data = json.loads(data)
             value = 1
             if int(data.get('status')) == 1:
                 success = data.get('message')
-                print(data.get('message'),"asdsa")
+                print("{} {}".format(LOG_TAG,data.get('message')))
             else:
-                print(data.get('message'))
+                print("{} {}".format(LOG_TAG,data.get('message')))
                 error = data.get('message')
         elif "add_emp" in request.form:
             print("add_emp")
@@ -108,57 +106,76 @@ def master():
             print("add_admin")
 
         elif "add_room" in request.form:
-            print("add_room")
+            print("{} add_room".format(LOG_TAG))
             level = request.form['level1']
             room_id = request.form['room_id1']
-            print(str(level),str(room_id))
             data = DataBase.room('insert')(int(room_id),int(level))
             data = json.loads(data)
             value = 2
             if int(data.get('status')) == 1:
                 success = data.get('message')
-                print(data.get('message'),"asdsa")
+                print("{} {}".format(LOG_TAG,data.get('message')))
             else:
-                print(data.get('message'))
+                print("{} {}".format(LOG_TAG,data.get('message')))
                 error = data.get('message')
             
         elif "add_event_type" in request.form:
-            print("add_event_type")
+            print("{} add_event_type".format(LOG_TAG))
             type_id = request.form['type_id3']
             level = request.form['level3']
             desc = request.form['desc3']
-            print(str(level),str(desc))
             data = DataBase.type_master('insert')(int(type_id),int(level),str(desc))
             data = json.loads(data)
             value = 4
             if int(data.get('status')) == 1:
                 success = data.get('message')
-                print(data.get('message'),"asdsa")
+                print("{} {}".format(LOG_TAG,data.get('message')))
             else:
-                print(data.get('message'))
+                print("{} {}".format(LOG_TAG,data.get('message')))
                 error = data.get('message')
             
         elif "add_risk" in request.form:
-            print("add_risk")
+            print("{} add_risk".format(LOG_TAG))
             level = request.form['level2']
             desc = request.form['desc2']
-            print(str(level),str(desc))
             data = DataBase.risk_level_master('insert')(int(level),str(desc))
             data = json.loads(data)
             value = 3
             if int(data.get('status')) == 1:
                 success = data.get('message')
-                print(data.get('message'),"asdsa")
+                print("{} {}".format(LOG_TAG,data.get('message')))
             else:
-                print(data.get('message'))
+                print("{} {}".format(LOG_TAG,data.get('message')))
                 error = data.get('message')
             
-
         elif "add_privilege" in request.form:
-            print("add_privilege")
+            print("{} add_privilege".format(LOG_TAG))
+            level = request.form['level4']
+            desc = request.form['desc4']
+            data = DataBase.privilege_master('insert')(int(level),str(desc))
+            data = json.loads(data)
+            value = 5
+            if int(data.get('status')) == 1:
+                success = data.get('message')
+                print("{} {}".format(LOG_TAG,data.get('message')))
+            else:
+                print("{} {}".format(LOG_TAG,data.get('message')))
+                error = data.get('message')
             
         elif "add_clearance" in request.form:
-            print("add_clearance")        
+            print("{} add_clearance".format(LOG_TAG))
+            level = request.form['level5']
+            desc = request.form['desc5']
+            data = DataBase.clearance_master('insert')(int(level),str(desc))
+            data = json.loads(data)
+            value = 6
+            if int(data.get('status')) == 1:
+                success = data.get('message')
+                print("{} {}".format(LOG_TAG,data.get('message')))
+            else:
+                print("{} {}".format(LOG_TAG,data.get('message')))
+                error = data.get('message')
+                    
     return render_template('master.html', error = error, success = success, value = value)
 
 

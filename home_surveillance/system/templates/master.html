@@ -372,7 +372,7 @@
                             </div>
                         </div>
                         <div class="col-12">
-                            <div class="card">
+                            <div class="card {{'error' if error and value == 5}} {{'clear' if success and value == 5}}">
                                 <div class="card-header">
                                     <i class="fa fa-id-badge pull-left" style="font-size:32px" aria-hidden="true"></i>
                                     <h4 class="text-center">Add Privilege Level (Admin)</h4>
@@ -380,21 +380,35 @@
                                 <div class="card-body">
                                     <form id="add_privilege" name="add_privilege" action="" method="post">
                                         <div class="form-group">
-                                            <label for="level">Privilege Level</label>
-                                            <input type="number" id="level" class="form-control" placeholder="Privilege Level" name="level" value="{{request.form.level}}"
+                                            <label for="level4">Privilege Level</label>
+                                            <input type="number" id="level4" class="form-control" placeholder="Privilege Level" name="level4" value="{{request.form.level4}}"
                                                 required>
                                         </div>
                                         <div class="form-group">
                                             <label for="level">Description</label>
-                                            <input type="text" id="desc" class="form-control" placeholder="Description" name="desc" value="{{request.form.desc}}" required>
+                                            <input type="text" id="desc4" class="form-control" placeholder="Description" name="desc4" value="{{request.form.desc4}}" required>
                                         </div>
+                                        <div class="row">
+                                                <div class=" col-12 card-subtitle mt-2 ml-2 text-muted">
+                                                        {%if error and value == 5 %}
+                                                        <p>
+                                                          <strong>Error:</strong> {{error}} 
+                                                        </p>
+                                                        {%endif%}
+                                                        {%if success and value == 5 %}
+                                                        <p>
+                                                          {{success}} 
+                                                        </p>
+                                                        {%endif%}                                        
+                                                </div>        
+                                            </div>
                                         <button type="submit" name="add_privilege" class="btn btn-outline-success btn-block">Add Privilege Level</button>
                                     </form>
                                 </div>
                             </div>
                         </div>
                         <div class="col-12">
-                            <div class="card">
+                            <div class="card {{'error' if error and value == 6}} {{'clear' if success and value == 6}}">
                                 <div class="card-header">
                                     <i class="fa fa-id-badge pull-left" style="font-size:32px" aria-hidden="true"></i>
                                     <h4 class="text-center">Add Clearance Level (Employee)</h4>
@@ -402,14 +416,28 @@
                                 <div class="card-body">
                                     <form id="add_clearance" name="add_clearance" action="" method="post">
                                         <div class="form-group">
-                                            <label for="level">Clearance Level</label>
-                                            <input type="number" id="level" class="form-control" placeholder="Clearance Level" name="level" value="{{request.form.level}}"
+                                            <label for="level5">Clearance Level</label>
+                                            <input type="number" id="level5" class="form-control" placeholder="Clearance Level" name="level5" value="{{request.form.level5}}"
                                                 required>
                                         </div>
                                         <div class="form-group">
-                                            <label for="level">Description</label>
-                                            <input type="text" id="desc" class="form-control" placeholder="Description" name="desc" value="{{request.form.desc}}" required>
+                                            <label for="desc5">Description</label>
+                                            <input type="text" id="desc5" class="form-control" placeholder="Description" name="desc5" value="{{request.form.desc5}}" required>
                                         </div>
+                                        <div class="row">
+                                                <div class=" col-12 card-subtitle mt-2 ml-2 text-muted">
+                                                        {%if error and value == 6 %}
+                                                        <p>
+                                                          <strong>Error:</strong> {{error}} 
+                                                        </p>
+                                                        {%endif%}
+                                                        {%if success and value == 6 %}
+                                                        <p>
+                                                          {{success}} 
+                                                        </p>
+                                                        {%endif%}                                        
+                                                </div>        
+                                            </div>
                                         <button type="submit" name="add_clearance" class="btn btn-outline-success btn-block">Add Cameras</button>
                                     </form>
                                 </div>

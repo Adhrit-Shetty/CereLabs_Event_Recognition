@@ -190,32 +190,59 @@
                 <div class="col-12">
                     <div class="card-columns">
                         <div class="col-12">
-                            <div class="card {{'error' if error and value == 2}} {{'clear' if success and value == 2}}">
+                            <div class="card">
+                                <div class="card-header">
+                                    <i class="fa fa-id-badge pull-left" style="font-size:32px" aria-hidden="true"></i>
+                                    <h4 class="text-center">Remove Clearance Level</h4>
+                                </div>
+                                <div class="card-body">
+                                    <li class=" mt-1 list-group-item list-group-item-warning">
+                                        <div class="row">
+                                            <div class="col-3 right">Clearance Level</div>
+                                            <div class="col-8">Description</div>
+                                        </div>
+                                    </li>
+                                    <ul class="list-group flow">
+                                        {% for key,value in clear_data.items() %}
+                                        <li class=" mt-1 list-group-item list-group-item-light">
+                                            <div class="row">
+                                                <div class="col-3 right">{{ key }}</div>
+                                                <div class="col-7">{{ value }}</div>
+                                                <div class="col-1">
+                                                    <button class="btn btn-outline-danger" onclick='load_modal(2,{{ key }})'>x</button>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="card">
                                 <div class="card-header">
                                     <i class="fa fa-home pull-left" style="font-size:32px" aria-hidden="true"></i>
                                     <h4 class="text-center">Remove Room</h4>
                                 </div>
                                 <div class="card-body">
-                                    <ul class="list-group flow">
-                                        <li class=" mt-1 list-group-item list-group-item-warning">
-                                            <div class="row">
-                                                <div class="col-4 right">
-                                                    Room Id
+                                    <li class=" mt-1 list-group-item list-group-item-warning">
+                                        <div class="row">
+                                            <div class="col-3 right">Room Id</div>
+                                            <div class="col-8">Accessiblity</div>
+                                        </div>
+                                    </li>
+                                    <ul class="list-group">
+                                        <!-- <li class=" mt-1 list-group-item list-group-item-warning">
+                                                <div class="row">
+                                                    <div class="col-4 right">Room Id</div>
+                                                    <div class="col-8">Accessiblity</div>
                                                 </div>
-                                                <div class="col-8">
-                                                    Accessiblity
-                                                </div>
-                                            </div>
-                                        </li>
+                                            </li> -->
                                         {% for key,value in room_data.items() %}
-                                        <li class=" mt-1 list-group-item list-group-item-light">
+                                        <li class="list-group-item list-group-item-light">
                                             <div class="row">
-                                                <div class="col-4 right">
-                                                    {{ key }}
-                                                </div>
-                                                <div class="col-7">
-                                                    {{ value }}
-                                                </div>
+                                                <div class="col-3 right">{{ key }}</div>
+                                                <div class="col-7">{{ value }}</div>
                                                 <div class="col-1">
                                                     <button class="btn btn-outline-danger" onclick='load_modal(1,{{ key }})'>x</button>
                                                 </div>
@@ -225,103 +252,116 @@
                                     </ul>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-11">
-                                <div class="card {{'error' if error and value == 2}} {{'clear' if success and value == 2}}">
+                            <div class="col-12">
+                                <div class="card">
                                     <div class="card-header">
                                         <i class="fa fa-home pull-left" style="font-size:32px" aria-hidden="true"></i>
                                         <h4 class="text-center">Remove Room</h4>
                                     </div>
                                     <div class="card-body">
-                                        <ul class="list-group flow">
-                                            <li class=" mt-1 list-group-item list-group-item-warning">
-                                                <div class="row">
-                                                    <div class="col-4 right">Room Id</div>
-                                                    <div class="col-8">Accessiblity</div>
-                                                </div>
-                                            </li>
-                                            {% for key,value in room_data.items() %}
-                                            <li class="list-group-item list-group-item-light">
-                                                <div class="row">
-                                                    <div class="col-4 right">{{ key }}</div>
-                                                    <div class="col-7">{{ value }}</div>
-                                                    <div class="col-1">
-                                                        <button class="btn btn-outline-danger" onclick='load_modal(1,{{ key }})'>x</button>
+                                        <li class=" mt-1 list-group-item list-group-item-warning">
+                                            <div class="row">
+                                                <div class="col-3 right">Room Id</div>
+                                                <div class="col-8">Accessiblity</div>
+                                            </div>
+                                        </li>
+                                        <ul class="list-group">
+                                            <!-- <li class=" mt-1 list-group-item list-group-item-warning">
+                                                        <div class="row">
+                                                            <div class="col-4 right">Room Id</div>
+                                                            <div class="col-8">Accessiblity</div>
+                                                        </div>
+                                                    </li> -->
+                                            <div class="flow">
+                                                {% for key,value in room_data.items() %}
+                                                <li class="list-group-item list-group-item-light">
+                                                    <div class="row">
+                                                        <div class="col-3 right">{{ key }}</div>
+                                                        <div class="col-7">{{ value }}</div>
+                                                        <div class="col-1">
+                                                            <button class="btn btn-outline-danger" onclick='load_modal(1,{{ key }})'>x</button>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </li>
-                                            {% endfor %}
+                                                </li>
+                                                {% endfor %}
+                                            </div>
                                         </ul>
                                     </div>
                                 </div>
                             </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <!-- /.container-fluid-->
-    <!-- /.content-wrapper-->
-    <footer class="sticky-footer">
-        <div class="container">
-            <div class="text-center">
-                <small>Copyright &copy; Surveillance System</small>
-            </div>
-        </div>
-    </footer>
-    <!-- Scroll to Top Button-->
-    <a class="scroll-to-top rounded" href="#page-top">
-        <i class="fa fa-angle-up"></i>
-    </a>
-    <!-- Logout Modal-->
-    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="/logout">Logout</a>
+        <!-- /.container-fluid-->
+        <!-- /.content-wrapper-->
+        <footer class="sticky-footer">
+            <div class="container">
+                <div class="text-center">
+                    <small>Copyright &copy; Surveillance System</small>
                 </div>
             </div>
+        </footer>
+        <!-- Scroll to Top Button-->
+        <a class="scroll-to-top rounded" href="#page-top">
+            <i class="fa fa-angle-up"></i>
+        </a>
+        <!-- Logout Modal-->
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                        <a class="btn btn-primary" href="/logout">Logout</a>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-    <div id="snackbar">Some text some message..</div>
-    <!-- All Modals are loaded here! -->
-    <div id="genMyModal"></div>
-    <!-- Bootstrap core JavaScript-->
-    <script src="../static/jquery/jquery.min.js"></script>
-    <script src="../static/popper/popper.min.js"></script>
-    <script src="../static/bootstrap/js/bootstrap.min.js"></script>
-    <!-- Core plugin JavaScript-->
-    <script src="../static/jquery-easing/jquery.easing.min.js"></script>
-    <!-- Custom scripts for all pages-->
-    <script src="../static/js/sb-admin.min.js"></script>
+        <div id="snackbar">Some text some message..</div>
+        <!-- All Modals are loaded here! -->
+        <div id="genMyModal"></div>
+        <!-- Bootstrap core JavaScript-->
+        <script src="../static/jquery/jquery.min.js"></script>
+        <script src="../static/popper/popper.min.js"></script>
+        <script src="../static/bootstrap/js/bootstrap.min.js"></script>
+        <!-- Core plugin JavaScript-->
+        <script src="../static/jquery-easing/jquery.easing.min.js"></script>
+        <!-- Custom scripts for all pages-->
+        <script src="../static/js/sb-admin.min.js"></script>
     </div>
     <script>
         function load_modal(id, data) {
             console.log('here!!');
             console.log(id);
             console.log(data);
-            var modalId1,message,post_data;
-            switch(parseInt(id)){
+            var modalId1, message, post_data;
+            switch (parseInt(id)) {
                 case 1:
                     modalId1 = 'removeRoomModal';
                     message = 'Are you sure you want to remove the room?';
                     post_data = data;
-                break;
+                    break;
+                case 2:
+                    modalId1 = 'removeClearanceModal';
+                    message = 'Are you sure you want to remove the clearance level?';
+                    post_data = data;
+                    break;
+
             }
             $('#genMyModal').html(`
-      <div class="modal fade" id="${ modalId1 }" tabindex="-1" role="dialog"  aria-labelledby="removeCam" aria-hidden="true">
+      <div class="modal fade" id="${ modalId1}" tabindex="-1" role="dialog"  aria-labelledby="removeCam" aria-hidden="true">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="${ modalId1 }">${ message }</h5>
+            <h5 class="modal-title" id="${ modalId1}">${message}</h5>
             <button class="close" type="button" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">×</span>
             </button>
@@ -329,47 +369,52 @@
           <div class="modal-body">Select Remove to confirm.</div>
           <div class="modal-footer">
             <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-            <button class="btn btn-primary" onclick="post('${ modalId1 }',${ id },${ post_data })">Remove</button>
+            <button class="btn btn-primary" onclick="post('${ modalId1}',${id},${post_data})">Remove</button>
           </div>
         </div>
       </div>
     </div>`);
-        console.log('#'+modalId1);
-            $('#'+modalId1).modal('show');
+            console.log('#' + modalId1);
+            $('#' + modalId1).modal('show');
         }
 
-        function post(modal,id,data){
+        function post(modal, id, data) {
             console.log(modal);
-            $('#'+modal).modal('hide');
+            $('#' + modal).modal('hide');
             console.log('reached here!!');
             $.ajax({
-            type: 'post',
-            url: location.origin+'/master_remove',
-            data: {
-                "id":id,
-                "content":data
-            },
-            dataType: 'json',
-            success: function (data) {
-                console.log('form was submitted');
-                if(data['url'] == true){
+                type: 'post',
+                url: location.origin + '/master_remove',
+                data: {
+                    "id": id,
+                    "content": data
+                },
+                dataType: 'json',
+                success: function (data) {
+                    console.log('form was submitted');
+                    if (data['url'] == true) {
+                    }
+                    else{
+                        var x = document.getElementById("snackbar");
+                        x.style.setProperty('background-color','#ffa300');
+                    }
                     show_snackbar(data['message']);
+                    
+                },
+                error: function () {
+                    console.log('faiure to submit form')
                 }
-            },
-            error: function(){
-                console.log('faiure to submit form')
-            }
-          });
+            });
         }
         function show_snackbar(data) {
-       var x = document.getElementById("snackbar")
-       x.innerHTML=data
-        x.className = "show";
-        setTimeout(function(){
-            x.className = x.className.replace("show", "");
-            window.location.reload();
-        }, 3000);
-    }
+            var x = document.getElementById("snackbar")
+            x.innerHTML = data
+            x.className = "show";
+            setTimeout(function () {
+                x.className = x.className.replace("show", "");
+                window.location.reload();
+            }, 3000);
+        }
     </script>
 
 </body>

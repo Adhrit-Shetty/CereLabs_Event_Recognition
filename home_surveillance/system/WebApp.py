@@ -82,43 +82,53 @@ def master():
     error = None
     success = None
     value = None
+    clear_data = DataBase.clearance_master('get')()
+    room_data = DataBase.room('get_ids')()
+    risk_data = DataBase.risk_level_master('get')()
+    privilege_data = DataBase.privilege_master('get')()
+    print(privilege_data)
     if request.method == 'POST':
         if "add_camera" in request.form:
             print("{} add_camera".format(LOG_TAG))
-            cam_id = request.form['cam_id']
             room_id = request.form['room_id']
-            res = request.form['res']
-            model = request.form['model']
-            link = request.form['link']
-            data = DataBase.cam_master('insert')(int(cam_id),int(room_id),res,model,link)
-            data = json.loads(data)
             value = 1
-            if int(data.get('status')) == 1:
-                success = data.get('message')
-                print("{} {}".format(LOG_TAG,data.get('message')))
+            if not str(room_id) == "false":
+                cam_id = request.form['cam_id']
+                res = request.form['res']
+                model = request.form['model']
+                link = request.form['link']
+                data = DataBase.cam_master('insert')(int(cam_id),int(room_id),res,model,link)
+                data = json.loads(data)
+                if int(data.get('status')) == 1:
+                    success = data.get('message')
+                    print("{} {}".format(LOG_TAG,data.get('message')))
+                else:
+                    print("{} {}".format(LOG_TAG,data.get('message')))
+                    error = data.get('message')
             else:
-                print("{} {}".format(LOG_TAG,data.get('message')))
-                error = data.get('message')
+                error = "Please select a Room Id"
         elif "add_emp" in request.form:
             print("add_emp")
-            
+            return redirect(url_for('register_employee'))
         elif "add_admin" in request.form:
             print("add_admin")
-
+            return redirect(url_for('register_admin'))
         elif "add_room" in request.form:
             print("{} add_room".format(LOG_TAG))
             level = request.form['level1']
-            room_id = request.form['room_id1']
-            data = DataBase.room('insert')(int(room_id),int(level))
-            data = json.loads(data)
             value = 2
-            if int(data.get('status')) == 1:
-                success = data.get('message')
-                print("{} {}".format(LOG_TAG,data.get('message')))
+            if not str(level) == "false":
+                room_id = request.form['room_id1']
+                data = DataBase.room('insert')(int(room_id),int(level))
+                data = json.loads(data)
+                if int(data.get('status')) == 1:
+                    success = data.get('message')
+                    print("{} {}".format(LOG_TAG,data.get('message')))
+                else:
+                    print("{} {}".format(LOG_TAG,data.get('message')))
+                    error = data.get('message')
             else:
-                print("{} {}".format(LOG_TAG,data.get('message')))
-                error = data.get('message')
-            
+                error="Please select a clearance level"
         elif "add_event_type" in request.form:
             print("{} add_event_type".format(LOG_TAG))
             type_id = request.form['type_id3']
@@ -176,7 +186,7 @@ def master():
                 print("{} {}".format(LOG_TAG,data.get('message')))
                 error = data.get('message')
                     
-    return render_template('master.html', error = error, success = success, value = value)
+    return render_template('master.html', error = error, success = success, value = value, room_data = room_data, clear_data = clear_data, risk_data = risk_data)
 
 
 @app.route('/home')
@@ -199,25 +209,26 @@ def register_employee():
         except:
             print('{} Clearance Level Data is incorrect'.format(LOG_TAG))
             error = "Please select a clearance level from the dropdown"
-        files = request.files.getlist('recog_data')
-        recog_data = list()
-        if len(files) > 0:
-            for file in files:
-                filename = photos.save(file)
-                name = request.form.get('name')
-                image = 'uploads/imgs/' + filename
-                with open(image, "rb") as imageFile:
-                    image_data = imageFile.read()
-                    recog_data.append(image_data)
-                    os.remove(image)
-        regex_to_match = re.compile('^[A-Za-z ]+$')
-        name = request.form['fullname'].strip()
-        if not (len(name) > 0 and regex_to_match.match(name) != None):
-            error = "Name is invalid"
         if not error:
-            print('{} Valid data Posted'.format(LOG_TAG))
-            # TODO: Add module which converts recog_data to vector and returns it
-            # emp_id = DataBase.employee('insert')(name, clearance_level, recog_data)
+            files = request.files.getlist('recog_data')
+            recog_data = list()
+            if len(files) > 0:
+                for file in files:
+                    filename = photos.save(file)
+                    name = request.form.get('name')
+                    image = 'uploads/imgs/' + filename
+                    with open(image, "rb") as imageFile:
+                        image_data = imageFile.read()
+                        recog_data.append(image_data)
+                        os.remove(image)
+            regex_to_match = re.compile('^[A-Za-z ]+$')
+            name = request.form['fullname'].strip()
+            if not (len(name) > 0 and regex_to_match.match(name) != None):
+                error = "Name is invalid"
+            if not error:
+                print('{} Valid data Posted'.format(LOG_TAG))
+                # TODO: Add module which converts recog_data to vector and returns it
+                # emp_id = DataBase.employee('insert')(name, clearance_level, recog_data)
     return render_template('register_employee.html', error = error, data = data, emp_id = emp_id)
 
 @app.route('/register_admin', methods=['GET', 'POST'])

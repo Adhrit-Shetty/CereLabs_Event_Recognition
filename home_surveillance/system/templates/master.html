@@ -198,15 +198,19 @@
                                 <div class="card-body">
                                     <form id="add_camera" name="add_camera" action="" method="post">
                                         <div class="row">
-                                            <div class="form-group col-4">
+                                            <div class="form-group col-3">
                                                 <label for="cam_id">Camera Id</label>
                                                 <input type="number" id="cam_id" class="form-control" placeholder="Camera Id" name="cam_id" value="{{request.form.cam_id}}"
                                                     required>
                                             </div>
-                                            <div class="form-group col-4">
+                                            <div class="form-group col-5">
                                                 <label for="room_id">Room Id</label>
-                                                <input type="number" id="room_id" class="form-control" placeholder="Room Id" name="room_id" value="{{request.form.room_id}}"
-                                                    required>
+                                                <select class="custom-select w-100" id="room_id" name="room_id" required>
+                                                        <option selected value="false">Select Room</option>
+                                                        {% for value in room_data %}
+                                                          <option value="{{ value }}">{{ value }}</option>
+                                                        {% endfor %}
+                                                      </select>              
                                             </div>
                                             <div class="form-group col-4">
                                                 <label for="res">Resolution</label>
@@ -254,8 +258,12 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="level1">Clearance Level</label>
-                                            <input type="number" id="level1" class="form-control" placeholder="Set Clearance Level" name="level1" value="{{request.form.level1}}"
-                                                required>
+                                            <select class="custom-select w-100" id="level1" name="level1" required>
+                                                    <option selected value="false">Select Clearance Level</option>
+                                                    {% for key,value in clear_data.items() %}
+                                                      <option value="{{ key }}">{{ value }}</option>
+                                                    {% endfor %}
+                                                  </select>
                                         </div>
                                         <div class="row">
                                                 <div class=" col-12 card-subtitle mt-2 ml-2 text-muted">
@@ -346,8 +354,13 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="level3">Risk Level</label>
-                                            <input type="number" id="level3" class="form-control" placeholder="Risk Level" name="level3" value="{{request.form.level3}}" required>
-                                        </div>
+                                            <select class="custom-select w-100" id="level3" name="level3" required>
+                                                    <option selected value="false">Select Risk Level</option>
+                                                    {% for key,value in risk_data.items() %}
+                                                        <option value="{{ key }}">{{ value }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
                                         <div class="form-group">
                                                 <label for="desc3">Description</label>
                                                 <input type="text" id="desc3" class="form-control" placeholder="Description" name="desc3" value="{{request.form.desc3}}" required>

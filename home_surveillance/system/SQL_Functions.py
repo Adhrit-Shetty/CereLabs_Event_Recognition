@@ -272,6 +272,28 @@ class RoomHelper:
             self.db.rollback()
             print('{} Error: removal Unsuccessful!'.format(self.LOG_TAG))
 
+    def get_room_ids(self):
+        cursor = self.db.cursor()
+        # projection = ''
+        # for arg in args:
+        #     projection = projection.join(arg + ' ,')
+        # projection = projection[:-2]  # Remove trailing comma and space
+
+        # print('{} get_event projection = {}'.format(self.LOG_TAG, projection))
+
+        sql = "SELECT %s FROM room " % ('room_id')
+        try:
+            cursor.execute(sql)
+            results = cursor.fetchall()
+            res=[]
+            for ele in results:
+                res.append(ele[0])
+            print('{} fetching Successful!'.format(self.LOG_TAG))
+            return res
+        except:
+            print('{} Error fetching data'.format(self.LOG_TAG))
+            return list()
+
     def get_room_details(self, room_id, *args):
         cursor = self.db.cursor()
         projection = ''
@@ -544,7 +566,7 @@ class RiskLevelMasterHelper:
                 sql = "SELECT * FROM risk_level_master WHERE risk_level = %d" % (risk_level)
             try:
                 cursor.execute(sql)
-                results = cursor.fetchone()
+                results = cursor.fetchall()
                 print('{} fetching Successful!'.format(self.LOG_TAG))
                 if type_of_fetch == 1:
                     return dict((x,y) for x,y in results)
@@ -658,7 +680,8 @@ class DatabaseHelper:
             'insert': r.add_room,
             'update': r.update_room_details,
             'delete': r.delete_room,
-            'get': r.get_room_details
+            'get': r.get_room_details,
+            'get_ids': r.get_room_ids
         }.get(intent, None)
 
     def employee(self, intent):

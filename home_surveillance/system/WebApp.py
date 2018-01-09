@@ -74,7 +74,7 @@ def login():
                 print('{} {} has logged in successfully'.format(LOG_TAG, request.form['username']))
                 session['user'] = request.form['username']
                 return redirect(url_for('home'))
-
+    
     return render_template('login.html', error = error)
 
 @app.route('/master_remove', methods=['GET','POST'])
@@ -332,7 +332,7 @@ def gen(camera):
     is recommended"""
     print('Entered gen')
     while True:
-        frame = camera.read_processed()    # read_jpg()  # read_processed()    
+        frame = camera.read_jpg()    # read_jpg()  # read_processed()    
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')  # Builds 'jpeg' data with header and payload
 
@@ -390,6 +390,7 @@ def add_camera():
 @app.route('/remove_camera', methods = ['GET','POST'])
 def remove_camera():
     if request.method == 'POST':
+        print('In remove camera!')
         camID = request.form.get('camID')
         sd, camNum = camID.split('_')
         app.logger.info("Removing camera: ")
@@ -492,11 +493,12 @@ def add_face():
 @app.route('/retrain_classifier', methods = ['GET','POST'])
 def retrain_classifier():
     if request.method == 'POST':
+        print("It has begun!")
         app.logger.info("retrain button pushed. clearing event in surveillance objt and calling trainingEvent")
-        o_fname, n_fname, retrained = HomeSurveillance.recogniser.trainClassifier(DataBase)#calling the module in FaceRecogniser to start training
-        print(o_fname, n_fname)
+        o_fname, n_fname, o_fname2, n_fname2, retrained = HomeSurveillance.recogniser.trainClassifier(DataBase)#calling the module in FaceRecogniser to start training
+        #print(o_fname, n_fname, o_fname2, n_fname2)
         HomeSurveillance.trainingEvent.clear() # Block processing threads
-        HomeSurveillance.recogniser.switchClassifiers(o_fname, n_fname)
+        HomeSurveillance.recogniser.switchClassifiers(o_fname, n_fname, o_fname2, n_fname2)
         HomeSurveillance.trainingEvent.set() # Release processing threads       
         data = {"finished":  retrained}
         app.logger.info("Finished re-training")
@@ -626,7 +628,7 @@ def connect():
     #         #print alertData
     #         app.logger.info(alertData)
     #         alerts.append(alertData)
-   
+    '''
     allCameras = DataBase.cam_master('get')()
     with HomeSurveillance.camerasLock :
         for key, value in allCameras.items():
@@ -634,7 +636,7 @@ def connect():
             app.logger.info(cameraData)
             cameras.append(cameraData)
             HomeSurveillance.add_camera(SurveillanceSystem.Camera.IPCamera(value))
-
+    '''
     systemData = {'camNum': len(HomeSurveillance.cameras) ,
      'people': HomeSurveillance.peopleDB, 
      'cameras': cameras, 
@@ -649,16 +651,14 @@ def disconnect():
 
 
 if __name__ == '__main__':
-     # Starts server on default port 5000 and makes socket connection available to other hosts (host = '0.0.0.0')
-     formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-     handler = RotatingFileHandler(LOG_FILE, maxBytes=1000000, backupCount=10)
-     handler.setLevel(logging.DEBUG)
-     handler.setFormatter(formatter)
-     app.logger.addHandler(handler)
-     app.logger.setLevel(logging.DEBUG)
-
-     log = logging.getLogger('werkzeug')
-     log.setLevel(logging.DEBUG)
-     log.addHandler(handler)
-     socketio.run(app, host='0.0.0.0', debug=False, use_reloader=False) 
-    
+    # Starts server on default port 5000 and makes socket connection available to other hosts (host = '0.0.0.0')
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    handler = RotatingFileHandler(LOG_FILE, maxBytes=1000000, backupCount=10)
+    handler.setLevel(logging.DEBUG)
+    handler.setFormatter(formatter)
+    app.logger.addHandler(handler)
+    app.logger.setLevel(logging.DEBUG)  
+    log = logging.getLogger('werkzeug')
+    log.setLevel(logging.DEBUG)
+    log.addHandler(handler)
+    socketio.run(app, host='0.0.0.0', debug=False, use_reloader=False)

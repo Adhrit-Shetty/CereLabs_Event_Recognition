@@ -79,17 +79,16 @@ class EmployeeHelper:
 
     def update_employee_details(self, emp_id, **kwargs):
         cursor = self.db.cursor()
-
         updates = ''
-        for k, v in kwargs:
-            updates = updates.join(' %s = %s, ' % (k, v))
+        for k, v in kwargs.items():
+            updates = updates + str(" %s = '%s', " % (k, v))
         # Remove trailing comma and space
-        sql = "UPDATE employee SET".join(updates[:-2])
-
+        sql = "UPDATE employee SET" + str(updates[:-2])
+        
         try:
-            sql = sql.join(" WHERE emp_id = %d" % (emp_id))
+            sql = sql + str(" WHERE emp_id = %d" % (emp_id))
 
-            print('{} Update Query => {}'.format(self.LOG_TAG, sql))
+            #print('{} Update Query => {}'.format(self.LOG_TAG, sql))
 
             cursor.execute(sql)
             self.db.commit()
@@ -97,7 +96,7 @@ class EmployeeHelper:
         except:
             self.db.rollback()
             print('{} Error: Update Unsuccessful!'.format(self.LOG_TAG))
-
+        
     def fire_employee(self, emp_id):
         cursor = self.db.cursor()
         sql = "DELETE FROM employee WHERE emp_id = %d" % (emp_id)

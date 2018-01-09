@@ -436,7 +436,7 @@ class CamMasterHelper:
             sql = "SELECT * FROM cam_master JOIN room ON cam_master.room_id = room.room_id WHERE cam_id = %d" % (cam_id)
         try:
             cursor.execute(sql)
-            results = cursor.fetchone()
+            results = cursor.fetchall()
             print('{} fetching Successful!'.format(self.LOG_TAG))
             if type_of_fetch == 1:
                 return dict((x,y) for x,y in results)

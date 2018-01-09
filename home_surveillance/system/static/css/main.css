@@ -24,3 +24,11 @@ body {
     margin-right: auto;
     margin-left: auto;
 }
+
+.knob-label {
+    text-align: center;
+    color: #333;
+    font-weight: 100;
+    font-size: 12px;
+    margin-bottom: 0.3em;
+}

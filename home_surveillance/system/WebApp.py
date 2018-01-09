@@ -313,6 +313,7 @@ def gen(camera):
     class, you can see all detection bounding boxes. This
     however slows down streaming and therefore read_jpg()
     is recommended"""
+    print('Entered gen')
     while True:
         frame = camera.read_processed()    # read_jpg()  # read_processed()    
         yield (b'--frame\r\n'
@@ -321,6 +322,8 @@ def gen(camera):
 @app.route('/video_streamer/<camNum>')
 def video_streamer(camNum):
     """Used to stream frames to client, camNum represents the camera index in the cameras array"""
+    print('\n================\nsun zara\n================\n')
+    print(HomeSurveillance.cameras[int(camNum)])
     return Response(gen(HomeSurveillance.cameras[int(camNum)]),
                     mimetype='multipart/x-mixed-replace; boundary=frame') # A stream where each part replaces the previous part the multipart/x-mixed-replace content type must be used.
 
@@ -356,15 +359,14 @@ def add_camera():
     """Adds camera new camera to SurveillanceSystem's cameras array"""
     if request.method == 'POST':  
         camURL = request.form.get('camURL')
-        application = request.form.get('application')
-        detectionMethod = request.form.get('detectionMethod')
-        fpsTweak = request.form.get('fpstweak')
+        # application = request.form.get('application')
+        # detectionMethod = request.form.get('detectionMethod')
+        # fpsTweak = request.form.get('fpstweak')
         with HomeSurveillance.camerasLock :
-            HomeSurveillance.add_camera(SurveillanceSystem.Camera.IPCamera(camURL,application,detectionMethod,fpsTweak))
+            HomeSurveillance.add_camera(SurveillanceSystem.Camera.IPCamera(camURL))
         data = {"camNum": len(HomeSurveillance.cameras) -1}
         app.logger.info("Addding a new camera with url: ")
         app.logger.info(camURL)
-        app.logger.info(fpsTweak)
         return jsonify(data)
     return render_template('index.html')
 
@@ -382,44 +384,44 @@ def remove_camera():
         return jsonify(data)
     return render_template('index.html')
 
-@app.route('/create_alert', methods = ['GET','POST'])
-def create_alert():
-    if request.method == 'POST':
-        camera = request.form.get('camera')
-        emailAddress = request.form.get('emailAddress')
-        event = request.form.get('eventdetail')
-        alarmstate = request.form.get('alarmstate')
-        person = request.form.get('person')
-        push_alert = request.form.get('push_alert')
-        email_alert = request.form.get('email_alert')
-        trigger_alarm = request.form.get('trigger_alarm')
-        notify_police = request.form.get('notify_police')
-        confidence = request.form.get('confidence')
+# @app.route('/create_alert', methods = ['GET','POST'])
+# def create_alert():
+#     if request.method == 'POST':
+#         camera = request.form.get('camera')
+#         emailAddress = request.form.get('emailAddress')
+#         event = request.form.get('eventdetail')
+#         alarmstate = request.form.get('alarmstate')
+#         person = request.form.get('person')
+#         push_alert = request.form.get('push_alert')
+#         email_alert = request.form.get('email_alert')
+#         trigger_alarm = request.form.get('trigger_alarm')
+#         notify_police = request.form.get('notify_police')
+#         confidence = request.form.get('confidence')
 
-        #print "unknownconfidence: " + confidence
-        app.logger.info("unknownconfidence: " + confidence)
+#         #print "unknownconfidence: " + confidence
+#         app.logger.info("unknownconfidence: " + confidence)
 
-        actions = {'push_alert': push_alert , 'email_alert':email_alert , 'trigger_alarm':trigger_alarm , 'notify_police':notify_police}
-        with HomeSurveillance.alertsLock:
-            HomeSurveillance.alerts.append(SurveillanceSystem.Alert(alarmstate,camera, event, person, actions, emailAddress, int(confidence))) 
-        HomeSurveillance.alerts[-1].id 
-        data = {"alert_id": HomeSurveillance.alerts[-1].id, "alert_message": "Alert if " + HomeSurveillance.alerts[-1].alertString}
-        return jsonify(data)
-    return render_template('index.html')
+#         actions = {'push_alert': push_alert , 'email_alert':email_alert , 'trigger_alarm':trigger_alarm , 'notify_police':notify_police}
+#         with HomeSurveillance.alertsLock:
+#             HomeSurveillance.alerts.append(SurveillanceSystem.Alert(alarmstate,camera, event, person, actions, emailAddress, int(confidence))) 
+#         HomeSurveillance.alerts[-1].id 
+#         data = {"alert_id": HomeSurveillance.alerts[-1].id, "alert_message": "Alert if " + HomeSurveillance.alerts[-1].alertString}
+#         return jsonify(data)
+#     return render_template('index.html')
 
-@app.route('/remove_alert', methods = ['GET','POST'])
-def remove_alert():
-    if request.method == 'POST':
-        alertID = request.form.get('alert_id')
-        with HomeSurveillance.alertsLock:
-            for i, alert in enumerate(HomeSurveillance.alerts):
-                if alert.id == alertID:
-                    del HomeSurveillance.alerts[i]
-                    break
+# @app.route('/remove_alert', methods = ['GET','POST'])
+# def remove_alert():
+#     if request.method == 'POST':
+#         alertID = request.form.get('alert_id')
+#         with HomeSurveillance.alertsLock:
+#             for i, alert in enumerate(HomeSurveillance.alerts):
+#                 if alert.id == alertID:
+#                     del HomeSurveillance.alerts[i]
+#                     break
            
-        data = {"alert_status": "removed"}
-        return jsonify(data)
-    return render_template('index.html')
+#         data = {"alert_status": "removed"}
+#         return jsonify(data)
+#     return render_template('index.html')
 
 @app.route('/remove_face', methods = ['GET','POST'])
 def remove_face():
@@ -534,30 +536,30 @@ def update_faces():
         socketio.emit('people_detected', json.dumps(peopledata) ,namespace='/surveillance')
         time.sleep(4)
 
-def alarm_state():
-     """Used to push alarm state to client"""
-     while True:
-            alarmstatus = {'state': HomeSurveillance.alarmState , 'triggered': HomeSurveillance.alarmTriggerd }
-            socketio.emit('alarm_status', json.dumps(alarmstatus) ,namespace='/surveillance')
-            time.sleep(3)
+# def alarm_state():
+#      """Used to push alarm state to client"""
+#      while True:
+#             alarmstatus = {'state': HomeSurveillance.alarmState , 'triggered': HomeSurveillance.alarmTriggerd }
+#             socketio.emit('alarm_status', json.dumps(alarmstatus) ,namespace='/surveillance')
+#             time.sleep(3)
 
 
-@socketio.on('alarm_state_change', namespace='/surveillance') 
-def alarm_state_change():   
-    HomeSurveillance.change_alarm_state()
+# @socketio.on('alarm_state_change', namespace='/surveillance') 
+# def alarm_state_change():   
+#     HomeSurveillance.change_alarm_state()
 
-@socketio.on('panic', namespace='/surveillance') 
-def panic(): 
-    HomeSurveillance.trigger_alarm()
+# @socketio.on('panic', namespace='/surveillance') 
+# def panic(): 
+#     HomeSurveillance.trigger_alarm()
    
 
-@socketio.on('my event', namespace='/surveillance') # socketio used to receive websocket messages, Namespaces allow a cliet to open multiple connections to the server that are multiplexed on a single socket
-def test_message(message):   # Custom events deliver JSON payload
-    emit('my response', {'data': message['data']}) # emit() sends a message under a custom event name
+# @socketio.on('my event', namespace='/surveillance') # socketio used to receive websocket messages, Namespaces allow a cliet to open multiple connections to the server that are multiplexed on a single socket
+# def test_message(message):   # Custom events deliver JSON payload
+#     emit('my response', {'data': message['data']}) # emit() sends a message under a custom event name
 
-@socketio.on('my broadcast event', namespace='/surveillance')
-def test_message(message):
-    emit('my response', {'data': message['data']}, broadcast=True) # broadcast=True optional argument all clients connected to the namespace receive the message
+# @socketio.on('my broadcast event', namespace='/surveillance')
+# def test_message(message):
+#     emit('my response', {'data': message['data']}, broadcast=True) # broadcast=True optional argument all clients connected to the namespace receive the message
 
                    
 @socketio.on('connect', namespace='/surveillance') 
@@ -571,11 +573,11 @@ def connect():
     #print "\n\nclient connected\n\n"
     app.logger.info("client connected")
 
-    if not alarmStateThread.isAlive():
-        #print "Starting alarmStateThread"
-        app.logger.info("Starting alarmStateThread")
-        alarmStateThread = threading.Thread(name='alarmstate_process_thread_',target= alarm_state, args=())
-        alarmStateThread.start()
+    # if not alarmStateThread.isAlive():
+    #     #print "Starting alarmStateThread"
+    #     app.logger.info("Starting alarmStateThread")
+    #     alarmStateThread = threading.Thread(name='alarmstate_process_thread_',target= alarm_state, args=())
+    #     alarmStateThread.start()
    
     if not facesUpdateThread.isAlive():
         #print "Starting facesUpdateThread"
@@ -592,34 +594,41 @@ def connect():
     cameraData = {}
     cameras = []
 
-    with HomeSurveillance.camerasLock :
-        for i, camera in enumerate(HomeSurveillance.cameras):
-            with HomeSurveillance.cameras[i].peopleDictLock:
-                cameraData = {'camNum': i , 'url': camera.url}
-                #print cameraData
-                app.logger.info(cameraData)
-                cameras.append(cameraData)
-    alertData = {}
-    alerts = []
-    for i, alert in enumerate(HomeSurveillance.alerts):
-        with HomeSurveillance.alertsLock:
-            alertData = {'alert_id': alert.id , 'alert_message':  "Alert if " + alert.alertString}
-            #print alertData
-            app.logger.info(alertData)
-            alerts.append(alertData)
+    # with HomeSurveillance.camerasLock :
+    #     for i, camera in enumerate(HomeSurveillance.cameras):
+    #         with HomeSurveillance.cameras[i].peopleDictLock:
+    #             cameraData = {'camNum': i , 'url': camera.url}
+    #             #print cameraData
+    #             app.logger.info(cameraData)
+    #             cameras.append(cameraData)
+    # alertData = {}
+    # alerts = []
+    # for i, alert in enumerate(HomeSurveillance.alerts):
+    #     with HomeSurveillance.alertsLock:
+    #         alertData = {'alert_id': alert.id , 'alert_message':  "Alert if " + alert.alertString}
+    #         #print alertData
+    #         app.logger.info(alertData)
+    #         alerts.append(alertData)
    
-    systemData = {'camNum': len(HomeSurveillance.cameras) , 'people': HomeSurveillance.peopleDB, 'cameras': cameras, 'alerts': alerts, 'onConnect': True}
+    allCameras = DataBase.cam_master('get')()
+    with HomeSurveillance.camerasLock :
+        for key, value in allCameras.items():
+            cameraData = {'camNum': key, 'url': value}
+            app.logger.info(cameraData)
+            cameras.append(cameraData)
+            HomeSurveillance.add_camera(SurveillanceSystem.Camera.IPCamera(value))
+
+    systemData = {'camNum': len(HomeSurveillance.cameras) ,
+     'people': HomeSurveillance.peopleDB, 
+     'cameras': cameras, 
+    #  'alerts': alerts, 
+     'onConnect': True}
     socketio.emit('system_data', json.dumps(systemData) ,namespace='/surveillance')
 
 @socketio.on('disconnect', namespace='/surveillance')
 def disconnect():
     #print('Client disconnected')
     app.logger.info("Client disconnected")
-
-@app.route('/logout', methods=['GET'])
-def logout():
-    session.pop('user', None)
-    return redirect(url_for('login'))
 
 
 if __name__ == '__main__':

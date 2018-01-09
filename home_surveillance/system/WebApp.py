@@ -77,6 +77,11 @@ def login():
 
     return render_template('login.html', error = error)
 
+@app.route('/master_remove', methods=['GET','POST'])
+def master_remove():
+    return render_template('master_remove.html')
+
+
 @app.route('/master_add', methods=['GET','POST'])
 def master_add():
     error = None

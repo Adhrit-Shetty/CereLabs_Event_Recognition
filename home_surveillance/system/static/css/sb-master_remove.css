@@ -1,30 +1,35 @@
-@media (min-width: 992px) {
+@media (min-width: 512px) {
     .card-columns {
-        column-count: 2;
+        column-count: 1;
     }
     
 }
 
 @media (min-width: 768px) {
     .card-columns {
-        column-count: 2;}}
+        column-count: 1;
+    }
+}
 
-@media (min-width: 512px) {
+@media (min-width: 992px) {
     .card-columns {
-        column-count: 2;
+        column-count: 1;
     }
     
 }
 
 @media (min-width: 1200px) {
     .card-columns {
-        column-count: 2;
+        column-count: 1;
     }
 }
 
 @media (min-width: 1500px) {
     .card-columns {
-        column-count: 2 !important; }}
+        column-count: 2
+         !important; 
+    }
+}
 
 
 .max_out{

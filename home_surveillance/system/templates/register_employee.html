@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <title>Surveillance System | Register Employee</title>
+  <!-- Bootstrap core CSS-->
+  <link href="static/bootstrap/css/bootstrap.css" rel="stylesheet">
+  <!-- Custom fonts for this template-->
+  <link href="static/font-awesome/css/font-awesome.css" rel="stylesheet" type="text/css">
+  <!-- Custom styles for this template-->
+  <link href="static/css/sb-admin.css" rel="stylesheet">
+</head>
+
+<body class="bg-dark" style="height:90vh;">
+  <div class="container-fluid h-100">
+    <div class="row justify-content-center align-items-center" style="height:15% !important;">
+      <h1 style="color:whitesmoke;">Surveillance</h1>&nbsp;<h1 style="color:lightslategray;">System</h1>
+    </div>
+    <div class="row h-75 justify-content-center">
+      <div class="col-4 justify-content-center">
+          <div class="card card-register">
+              <div class="card-header">Register an Account for Employee</div>
+              <div class="card-body">
+                <form action="" method="post" enctype="multipart/form-data">
+                  <div class="form-group">
+                    <label for="input_name" class="sr-only">Enter Full Name</label>
+                    <input class="form-control" id="input_name" type="text" aria-describedby="nameHelp" placeholder="Enter full name" name="fullname"
+                      value="{{request.form.fullname}}">
+                  </div>
+                  <div class="divider"></div>
+                  <div class="form-group">
+                    <label for="customFile" title="More images implies better detection">Upload Recognition data</label>
+                    <input type="file" class="form-control-file" id="customFile" name="recog_data" multiple>
+                  </div>
+                  <div class="form-group">
+                    <select class="custom-select" name="clearance_level">
+                      <option selected>Select Clearance Level</option>
+                      {% for key, value in data.items() %}
+                      <option value="{{ key }}">{{ value }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-block">Register</button>
+                </form>
+                {%if error%}
+                <p class="alert alert-danger" role="alert">
+                  <strong>Error:</strong> {{error}}
+                </p>
+                {%endif%} {%if emp_id != None %}
+                <p class="alert alert-success">
+                  <strong>Employee hired!</strong> Your employee id is {{emp_id}} !
+                </p>
+                {%endif%}
+                <div class="text-center">
+                  <a class="d-block small" href="/forgot-password">Forgot Password?</a>
+                </div>
+              </div>
+            </div>
+      </div>
+    </div>
+  </div>
+  <!-- Bootstrap core JavaScript-->
+  <script src="static/jquery/jquery.js"></script>
+  <script src="static/popper/popper.js"></script>
+  <script src="static/bootstrap/js/bootstrap.js"></script>
+  <!-- Core plugin JavaScript-->
+  <script src="static/jquery-easing/jquery.easing.js"></script>
+</body>
+
+</html>

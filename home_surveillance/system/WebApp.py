@@ -32,6 +32,7 @@ import sys
 import cv2
 import psutil
 import SQL_Functions
+import re
 
 LOG_FILE = 'logs/WebApp.log'
 
@@ -54,19 +55,142 @@ photos = UploadSet('photos', IMAGES)
 app.config['UPLOADED_PHOTOS_DEST'] = 'uploads/imgs'
 configure_uploads(app, photos)
 
+LOG_TAG = '[WEB_APP.PY]'
+
 
 @app.route('/', methods=['GET','POST'])
 def login():
     error = None
     if request.method == 'POST':
         session.pop('user',None) # Drops session everytime user tries to login
-        if request.form['username'] != 'admin' or request.form['password'] != 'admin':
-            error = 'Invalid username or password. Please try again'
+
+        if len(request.form['username']) == 0 or len(request.form['password']) == 0:
+            error = 'The username or password field(s) cannot be empty. Please try again'
         else:
-            session['user'] = request.form['username']
-            return redirect(url_for('home'))
+            auth = DataBase.admin('verify')(request.form['username'], request.form['password']) # Database Auth
+            if len(auth) == 0 or auth[0] == False:
+                error = 'Invalid username or password. Please try again'
+            elif auth[0] == True:
+                print('{} {} has logged in successfully'.format(LOG_TAG, request.form['username']))
+                session['user'] = request.form['username']
+                return redirect(url_for('home'))
 
     return render_template('login.html', error = error)
+
+@app.route('/master_remove', methods=['GET','POST'])
+def master_remove():
+    return render_template('master_remove.html')
+
+
+@app.route('/master_add', methods=['GET','POST'])
+def master_add():
+    error = None
+    success = None
+    value = None
+    clear_data = DataBase.clearance_master('get')()
+    room_data = DataBase.room('get_ids')()
+    risk_data = DataBase.risk_level_master('get')()
+    if request.method == 'POST':
+        if "add_camera" in request.form:
+            print("{} add_camera".format(LOG_TAG))
+            room_id = request.form['room_id']
+            value = 1
+            if not str(room_id) == "false":
+                cam_id = request.form['cam_id']
+                res = request.form['res']
+                model = request.form['model']
+                link = request.form['link']
+                data = DataBase.cam_master('insert')(int(cam_id),int(room_id),res,model,link)
+                data = json.loads(data)
+                if int(data.get('status')) == 1:
+                    success = data.get('message')
+                    print("{} {}".format(LOG_TAG,data.get('message')))
+                else:
+                    print("{} {}".format(LOG_TAG,data.get('message')))
+                    error = data.get('message')
+            else:
+                error = "Please select a Room Id"
+        elif "add_emp" in request.form:
+            print("add_emp")
+            return redirect(url_for('register_employee'))
+        elif "add_admin" in request.form:
+            print("add_admin")
+            return redirect(url_for('register_admin'))
+        elif "add_room" in request.form:
+            print("{} add_room".format(LOG_TAG))
+            level = request.form['level1']
+            value = 2
+            if not str(level) == "false":
+                room_id = request.form['room_id1']
+                data = DataBase.room('insert')(int(room_id),int(level))
+                data = json.loads(data)
+                if int(data.get('status')) == 1:
+                    success = data.get('message')
+                    print("{} {}".format(LOG_TAG,data.get('message')))
+                else:
+                    print("{} {}".format(LOG_TAG,data.get('message')))
+                    error = data.get('message')
+            else:
+                error="Please select a clearance level"
+        elif "add_event_type" in request.form:
+            print("{} add_event_type".format(LOG_TAG))
+            type_id = request.form['type_id3']
+            level = request.form['level3']
+            desc = request.form['desc3']
+            data = DataBase.type_master('insert')(int(type_id),int(level),str(desc))
+            data = json.loads(data)
+            value = 4
+            if int(data.get('status')) == 1:
+                success = data.get('message')
+                print("{} {}".format(LOG_TAG,data.get('message')))
+            else:
+                print("{} {}".format(LOG_TAG,data.get('message')))
+                error = data.get('message')
+            
+        elif "add_risk" in request.form:
+            print("{} add_risk".format(LOG_TAG))
+            level = request.form['level2']
+            desc = request.form['desc2']
+            data = DataBase.risk_level_master('insert')(int(level),str(desc))
+            data = json.loads(data)
+            value = 3
+            if int(data.get('status')) == 1:
+                success = data.get('message')
+                print("{} {}".format(LOG_TAG,data.get('message')))
+            else:
+                print("{} {}".format(LOG_TAG,data.get('message')))
+                error = data.get('message')
+            
+        elif "add_privilege" in request.form:
+            print("{} add_privilege".format(LOG_TAG))
+            level = request.form['level4']
+            desc = request.form['desc4']
+            data = DataBase.privilege_master('insert')(int(level),str(desc))
+            data = json.loads(data)
+            value = 5
+            if int(data.get('status')) == 1:
+                success = data.get('message')
+                print("{} {}".format(LOG_TAG,data.get('message')))
+            else:
+                print("{} {}".format(LOG_TAG,data.get('message')))
+                error = data.get('message')
+            
+        elif "add_clearance" in request.form:
+            print("{} add_clearance".format(LOG_TAG))
+            level = request.form['level5']
+            desc = request.form['desc5']
+            data = DataBase.clearance_master('insert')(int(level),str(desc))
+            data = json.loads(data)
+            value = 6
+            if int(data.get('status')) == 1:
+                success = data.get('message')
+                print("{} {}".format(LOG_TAG,data.get('message')))
+            else:
+                print("{} {}".format(LOG_TAG,data.get('message')))
+                error = data.get('message')
+                    
+    return render_template('master_add.html', error = error, success = success, value = value, room_data = room_data, clear_data = clear_data, risk_data = risk_data)
+
 
 @app.route('/home')
 def home():
@@ -74,12 +198,91 @@ def home():
         return render_template('index.html')
     return redirect(url_for('login'))
 
+@app.route('/register_employee', methods=['GET', 'POST'])
+def register_employee():
+    """Register an Employee"""
+    error = None
+    data = DataBase.clearance_master('get')()
+    emp_id = None
+    g.user = 'admin' # Hack
+    if request.method == 'POST' and g.user:
+        clearance_level = request.form['clearance_level']
+        try:
+            assert int(clearance_level) in data.keys()
+        except:
+            print('{} Clearance Level Data is incorrect'.format(LOG_TAG))
+            error = "Please select a clearance level from the dropdown"
+        if not error:
+            files = request.files.getlist('recog_data')
+            recog_data = list()
+            if len(files) > 0:
+                for file in files:
+                    filename = photos.save(file)
+                    name = request.form.get('name')
+                    image = 'uploads/imgs/' + filename
+                    with open(image, "rb") as imageFile:
+                        image_data = imageFile.read()
+                        recog_data.append(image_data)
+                        os.remove(image)
+            regex_to_match = re.compile('^[A-Za-z ]+$')
+            name = request.form['fullname'].strip()
+            if not (len(name) > 0 and regex_to_match.match(name) != None):
+                error = "Name is invalid"
+            if not error:
+                print('{} Valid data Posted'.format(LOG_TAG))
+                # TODO: Add module which converts recog_data to vector and returns it
+                # emp_id = DataBase.employee('insert')(name, clearance_level, recog_data)
+    return render_template('register_employee.html', error = error, data = data, emp_id = emp_id)
+
+@app.route('/register_admin', methods=['GET', 'POST'])
+def register_admin():
+    """Register an Administrator"""
+    error = None
+    data = DataBase.privilege_master('get')()
+    success = None
+    g.user = 'admin' # Hack
+    if request.method == 'POST' and g.user:
+        print("HERE!!!!!")
+        privilege_level = int(request.form['privilege_level'])
+        try:
+            assert int(privilege_level) in data.keys()
+        except:
+            print('{} Privilege Level Data is incorrect'.format(LOG_TAG))
+            error = "Please select a privilege level from the dropdown"
+        emp_id = int(request.form['emp_id'])
+        db_result = DataBase.employee('get')(emp_id)
+        if emp_id not in db_result:
+            emp_id = None
+            error = "Employee does not exist"
+        
+        regex_to_match = re.compile('^[A-Za-z0-9@$#]+')
+        username = request.form['username'].strip()
+        password = request.form['password']
+        if not (len(username) > 0 and regex_to_match.match(username) != None):
+            error = "Invalid Username"
+        
+        regex_to_match = re.compile('[A-Z]+[a-z]*[1-9]+') # 1 or more Cap, 0 or more small, 1 or more number
+        if not (len(password) > 0 and regex_to_match.match(password) != None):
+            error = "Password should have 1 or more Cap, 0 or more small, 1 or more number"
+        
+        result = False
+        if not error:
+            print('{} Valid data Posted'.format(LOG_TAG))
+            print(emp_id, privilege_level, username, password)
+            result = DataBase.admin('insert')(emp_id, privilege_level, username, password)
+            success = True
+        if result == True:
+            redirect(url_for('home'))
+
+    return render_template('register_admin.html', error = error, data = data, success = success)
+
 @app.before_request
 def before_request():
     """Initialise session"""
-    g.user = None
-    if 'user' in session:
-        g.user = session['user']
+    # g.user = None
+    g.user = 'admin' # Hack
+    # if 'user' in session:
+    #     g.user = session['user']
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
@@ -412,6 +615,11 @@ def connect():
 def disconnect():
     #print('Client disconnected')
     app.logger.info("Client disconnected")
+
+@app.route('/logout', methods=['GET'])
+def logout():
+    session.pop('user', None)
+    return redirect(url_for('login'))
 
 
 if __name__ == '__main__':

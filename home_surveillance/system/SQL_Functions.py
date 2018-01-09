@@ -3,6 +3,7 @@ import time
 import datetime
 import os
 import hashlib
+import json
 
 class EventsHelper:
     LOG_TAG = '[EVENTS_HELPER]'
@@ -43,7 +44,7 @@ class EventsHelper:
             projection = projection.join(arg + ' ,')
         projection = projection[:-2]  # Remove trailing comma and space
         print('{} get_event projection => {}'.format(self.LOG_TAG, projection))
-        sql = "SELECT %s FROM events WHERE event_id = %d" % (projection, event_id)
+        sql = "SELECT %s FROM events JOIN type_master ON events.type_id = type_master.type_id JOIN cam_master ON events.cam_id = cam_master.cam_id WHERE event_id = %d " % (projection, event_id)
         try:
             cursor.execute(sql)
             results = cursor.fetchone()
@@ -60,13 +61,18 @@ class EmployeeHelper:
     def __init__(self, db):
         self.db = db
 
-    def add_employee(self, name, recog_data, clearance_level):
+    def add_employee(self, name, clearance_level, recog_data='NULL'):
         cursor = self.db.cursor()
-        sql = "INSERT INTO `employee` (`name`, `recog_data`, `clearance_level`) VALUES (%s, %s, %d)"
+
+        sql = "INSERT INTO employee(name, recog_data, clearance_level) VALUES('%s', '%s', %d)" % (name, recog_data, clearance_level)
         try:
-            cursor.execute(sql, ('Adhs', 'dsa', 1))
+            cursor.execute(sql)
             self.db.commit()
             print('{} Add Successful!'.format(self.LOG_TAG))
+            sql = "SELECT emp_id FROM employee WHERE name = '%s' ORDER BY emp_id DESC LIMIT 1" % (name)# fetch the inserted emp_id
+            cursor.execute(sql)
+            results = cursor.fetchone()
+            return results[0]
         except:
             self.db.rollback()
             print('{} Error: Add Unsuccessful!'.format(self.LOG_TAG))
@@ -105,18 +111,21 @@ class EmployeeHelper:
 
     def get_employee_details(self, emp_id, *args):
         cursor = self.db.cursor()
-        projection = ''
-        for arg in args:
-            projection = projection.join(arg + ' ,')
-        projection = projection[:-2]  # Remove trailing comma and space
+        projection = '*'
+        if len(args) > 0:
+            for arg in args:
+                projection = projection.join(arg + ' ,')
+                projection = projection[:-2]  # Remove trailing comma and space
 
-        print('{} get_event projection = {}'.format(self.LOG_TAG, projection))
+        print('{} get_employee projection = {}'.format(self.LOG_TAG, projection))
 
-        sql = "SELECT %s FROM employee WHERE emp_id = %d" % (projection, emp_id)
+        sql = "SELECT %s FROM employee JOIN clearance_level_master ON employee.clearance_level = clearance_level_master.level WHERE emp_id = %d" % (projection, emp_id)
         try:
             cursor.execute(sql)
             results = cursor.fetchone()
             print('{} fetching Successful!'.format(self.LOG_TAG))
+            if results == None:
+                results = list()
             return results
         except:
             print('{} Error fetching data'.format(self.LOG_TAG))
@@ -137,9 +146,11 @@ class AdminHelper:
             cursor.execute(sql)
             self.db.commit()
             print('{} add Successful!'.format(self.LOG_TAG))
+            return True
         except:
             self.db.rollback()
             print('{} Error: add Unsuccessful!'.format(self.LOG_TAG))
+            return False
 
     def update_admin_details(self, admin_id, **kwargs):
         cursor = self.db.cursor()
@@ -182,7 +193,7 @@ class AdminHelper:
 
         print('{} get_event projection = {}'.format(self.LOG_TAG, projection))
 
-        sql = "SELECT %s FROM admin JOIN employee ON admin.emp_id = employee.emp_id WHERE admin_id = %d" % (projection, admin_id)
+        sql = "SELECT %s FROM admin JOIN employee ON admin.emp_id = employee.emp_id JOIN privilege_master ON admin.privilege_level = privilege_master.plvl WHERE admin_id = %d" % (projection, admin_id)
         try:
             cursor.execute(sql)
             results = cursor.fetchone()
@@ -201,8 +212,10 @@ class AdminHelper:
             cursor.execute(sql)
             results = cursor.fetchone()
             print('{} fetching Successful!'.format(self.LOG_TAG))
-            print('Results are: {}'.format(results))
-            return results
+            if len(results) > 0:
+                return [True]
+            else:
+                return [False]
         except:
             print('{} Error fetching data'.format(self.LOG_TAG))
             return list()
@@ -216,14 +229,16 @@ class RoomHelper:
 
     def add_room(self, room_id, accessiblity):
         cursor = self.db.cursor()
-        sql = "INSERT INTO room(room_id, accessiblity) values(%d, '%s')" % (room_id, accessiblity)
+        sql = "INSERT INTO room(room_id, accessiblity) values(%d, '%d')" % (room_id, accessiblity)
         try:
             cursor.execute(sql)
             self.db.commit()
             print('{} Add Successful!'.format(self.LOG_TAG))
+            return json.dumps({"status":1, "message":'Add Successful'})
         except:
             self.db.rollback()
             print('{} Error: Add Unsuccessful!'.format(self.LOG_TAG))
+            return json.dumps({"status":-1, "message":'Add Unsuccessful. Please check validity of input data'})
 
     def update_room_details(self, room_id, **kwargs):
         cursor = self.db.cursor()
@@ -257,6 +272,28 @@ class RoomHelper:
             self.db.rollback()
             print('{} Error: removal Unsuccessful!'.format(self.LOG_TAG))
 
+    def get_room_ids(self):
+        cursor = self.db.cursor()
+        # projection = ''
+        # for arg in args:
+        #     projection = projection.join(arg + ' ,')
+        # projection = projection[:-2]  # Remove trailing comma and space
+
+        # print('{} get_event projection = {}'.format(self.LOG_TAG, projection))
+
+        sql = "SELECT %s FROM room " % ('room_id')
+        try:
+            cursor.execute(sql)
+            results = cursor.fetchall()
+            res=[]
+            for ele in results:
+                res.append(ele[0])
+            print('{} fetching Successful!'.format(self.LOG_TAG))
+            return res
+        except:
+            print('{} Error fetching data'.format(self.LOG_TAG))
+            return list()
+
     def get_room_details(self, room_id, *args):
         cursor = self.db.cursor()
         projection = ''
@@ -266,7 +303,7 @@ class RoomHelper:
 
         print('{} get_event projection = {}'.format(self.LOG_TAG, projection))
 
-        sql = "SELECT %s FROM employee WHERE room_id = %d" % (projection, room_id)
+        sql = "SELECT %s FROM room JOIN clearance_level_master clm ON room.accessiblity = clm.level WHERE room_id = %d" % (projection, room_id)
         try:
             cursor.execute(sql)
             results = cursor.fetchone()
@@ -290,9 +327,11 @@ class ClearanceLevelMasterHelper:
             cursor.execute(sql)
             self.db.commit()
             print('{} Add Successful!'.format(self.LOG_TAG))
+            return json.dumps({"status":1, "message":'Add Successful'})
         except:
             self.db.rollback()
             print('{} Error: Add Unsuccessful!'.format(self.LOG_TAG))
+            return json.dumps({"status":-1, "message":'Add Unsuccessful. Please check validity of input data'})
 
     def update_clearance_level(self, level, description):
         cursor = self.db.cursor()
@@ -318,14 +357,19 @@ class ClearanceLevelMasterHelper:
             self.db.rollback()
             print('{} Error: removal Unsuccessful!'.format(self.LOG_TAG))
 
-    def get_clearance_details(self, level):
+    def get_clearance_details(self, level=None):
         cursor = self.db.cursor()
-
-        sql = "SELECT * FROM clearance_level_master WHERE level = %d" % (level)
+        type_of_fetch = 1
+        sql = "SELECT level, description from clearance_level_master"
+        if level != None:
+            type_of_fetch = 2
+            sql = "SELECT * FROM clearance_level_master WHERE level = %d" % (level)
         try:
             cursor.execute(sql)
-            results = cursor.fetchone()
+            results = cursor.fetchall()
             print('{} fetching Successful!'.format(self.LOG_TAG))
+            if type_of_fetch == 1:
+                return dict((x,y) for x,y in results)
             return results
         except:
             print('{} Error fetching data'.format(self.LOG_TAG))
@@ -340,14 +384,16 @@ class CamMasterHelper:
 
     def add_cam(self, cam_id, room_id, resolution, model, rtsp_link):
         cursor = self.db.cursor()
-        sql = "INSERT INTO cam_master(cam_id, room_id, resolution, model, rtsp_link) values(%d, %d, '%s', '%s', '%s')" % (cam_id, room_id, resolution, model)
+        sql = "INSERT INTO cam_master(cam_id, room_id, resolution, model, rtsp_link) values(%d, %d, '%s', '%s', '%s')" % (cam_id, room_id, resolution, model, rtsp_link)
         try:
             cursor.execute(sql)
             self.db.commit()
             print('{} Add Successful!'.format(self.LOG_TAG))
+            return json.dumps({"status":1, "message":'Add Successful'})
         except:
             self.db.rollback()
             print('{} Error: Add Unsuccessful!'.format(self.LOG_TAG))
+            return json.dumps({"status":-1, "message":'Add Unsuccessful. Please check validity of input data'})
 
     def update_cam_details(self, cam_id, **kwargs):
         cursor = self.db.cursor()
@@ -381,14 +427,19 @@ class CamMasterHelper:
             self.db.rollback()
             print('{} Error: removal Unsuccessful!'.format(self.LOG_TAG))
 
-    def get_cam_details(self, cam_id):
+    def get_cam_details(self, cam_id=None):
         cursor = self.db.cursor()
-
-        sql = "SELECT * FROM cam_master WHERE cam_id = %d" % (cam_id)
+        type_of_fetch = 1
+        sql = "SELECT cam_id, rtsp_link FROM cam_master"
+        if cam_id != None:
+            type_of_fetch = 2
+            sql = "SELECT * FROM cam_master JOIN room ON cam_master.room_id = room.room_id WHERE cam_id = %d" % (cam_id)
         try:
             cursor.execute(sql)
             results = cursor.fetchone()
             print('{} fetching Successful!'.format(self.LOG_TAG))
+            if type_of_fetch == 1:
+                return dict((x,y) for x,y in results)
             return results
         except:
             print('{} Error fetching data'.format(self.LOG_TAG))
@@ -407,9 +458,11 @@ class TypeMasterHelper:
             cursor.execute(sql)
             self.db.commit()
             print('{} Add Successful!'.format(self.LOG_TAG))
+            return json.dumps({"status":1, "message":'Add Successful'})
         except:
             self.db.rollback()
             print('{} Error: Add Unsuccessful!'.format(self.LOG_TAG))
+            return json.dumps({"status":-1, "message":'Add Unsuccessful. Please check validity of input data'})
 
     def update_type_details(self, type_id, **kwargs):
         cursor = self.db.cursor()
@@ -434,6 +487,7 @@ class TypeMasterHelper:
 
     def remove_type(self, type_id):
         cursor = self.db.cursor()
+        
         sql = "DELETE FROM type_master WHERE type_id = %d" % (type_id)
         try:
             cursor.execute(sql)
@@ -443,15 +497,21 @@ class TypeMasterHelper:
             self.db.rollback()
             print('{} Error: removal Unsuccessful!'.format(self.LOG_TAG))
 
-    def get_type_details(self, type_id):
+    def get_type_details(self, type_id=None):
         cursor = self.db.cursor()
-
-        sql = "SELECT * FROM type_master WHERE type_id = %d" % (type_id)
+        type_of_fetch = 1
+        sql = "SELECT type_id, description FROM type_master"
+        if type_id != None:
+            type_of_fetch = 2
+            sql = "SELECT * FROM type_master JOIN risk_level_master rlm ON type_master.risk_level = rlm.risk_level WHERE type_id = %d" % (type_id)
         try:
             cursor.execute(sql)
             results = cursor.fetchone()
             print('{} fetching Successful!'.format(self.LOG_TAG))
+            if type_of_fetch == 1:
+                return dict((x,y) for x,y in results)
             return results
+
         except:
             print('{} Error fetching data'.format(self.LOG_TAG))
             return list()
@@ -469,10 +529,12 @@ class RiskLevelMasterHelper:
             cursor.execute(sql)
             self.db.commit()
             print('{} add Successful!'.format(self.LOG_TAG))
+            return json.dumps({"status":1, "message":'Add Successful'})
         except:
             self.db.rollback()
             print('{} Error: add Unsuccessful!'.format(self.LOG_TAG))
-    
+            return json.dumps({"status":-1, "message":'Add Unsuccessful. Please check validity of input data'})
+
     def update_risk_level(self, description):
         cursor = self.db.cursor()
         sql = "UPDATE risk_level_master SET description = '%s'" % (description)
@@ -495,18 +557,83 @@ class RiskLevelMasterHelper:
             self.db.rollback()
             print('{} Error: removal Unsuccessful!'.format(self.LOG_TAG))
 
-    def get_risk_level(self, risk_level):
+    def get_risk_level(self, risk_level=None):
             cursor = self.db.cursor()
-            sql = "SELECT * FROM risk_level_master WHERE risk_level = %d" % (risk_level)
+            type_of_fetch = 1
+            sql = "SELECT risk_level, description FROM risk_level_master"
+            if risk_level != None:
+                type_of_fetch = 2
+                sql = "SELECT * FROM risk_level_master WHERE risk_level = %d" % (risk_level)
             try:
                 cursor.execute(sql)
-                results = cursor.fetchone()
+                results = cursor.fetchall()
                 print('{} fetching Successful!'.format(self.LOG_TAG))
+                if type_of_fetch == 1:
+                    return dict((x,y) for x,y in results)
                 return results
             except:
                 print('{} Error fetching data'.format(self.LOG_TAG))
                 return list()
         
+class PrivilegeMasterHelper:
+    LOG_TAG = '[PRIVILEGE_MASTER_HELPER]'
+
+    def __init__(self, db):
+        self.db = db
+
+    def add_privilege_level(self, plvl, description):
+        cursor = self.db.cursor()
+        sql = "INSERT INTO privilege_master(plvl, description) values(%d, '%s')" % (plvl, description)
+        try:
+            cursor.execute(sql)
+            self.db.commit()
+            print('{} add Successful!'.format(self.LOG_TAG))
+            return json.dumps({"status":1, "message":'Add Successful'})
+        except:
+            self.db.rollback()
+            print('{} Error: add Unsuccessful!'.format(self.LOG_TAG))
+            return json.dumps({"status":-1, "message":'Add Unsuccessful. Please check validity of input data'})
+
+    def update_privilege_description(self, description):
+        cursor = self.db.cursor()
+        sql = "UPDATE privilege_master SET description = '%s'" % (description)
+        try:
+            cursor.execute(sql)
+            self.db.commit()
+            print('{} update Successful!'.format(self.LOG_TAG))
+        except:
+            self.db.rollback()
+            print('{} Error: update Unsuccessful!'.format(self.LOG_TAG))
+
+    def remove_privilege(self, plvl):
+        cursor = self.db.cursor()
+        sql = "DELETE FROM privilege_master WHERE plvl = %d" % (plvl)
+        try:
+            cursor.execute(sql)
+            self.db.commit()
+            print('{} removal Successful!'.format(self.LOG_TAG))
+        except:
+            self.db.rollback()
+            print('{} Error: removal Unsuccessful!'.format(self.LOG_TAG))
+
+    def get_privileges(self, plvl=None):
+        cursor = self.db.cursor()
+        type_of_fetch = 1
+        sql = "SELECT plvl, description from privilege_master"
+        if plvl != None:
+            type_of_fetch = 2
+            sql = "SELECT * FROM privilege_master WHERE plvl = %d" % (plvl)
+        try:
+            cursor.execute(sql)
+            results = cursor.fetchall()
+            print('{} fetching Successful!'.format(self.LOG_TAG))
+            if type_of_fetch == 1:
+                return dict((x,y) for x,y in results)
+            return results
+
+        except:
+            print('{} Error fetching data'.format(self.LOG_TAG))
+            return list()
 
 # This is the class you should import
 class DatabaseHelper:
@@ -539,7 +666,7 @@ class DatabaseHelper:
             print('{} Error: Not connected to database'.format(self.LOG_TAG))
 
     
-    def  events(self, intent):
+    def events(self, intent):
         e = EventsHelper(self.db)
         return {
             'insert': e.insert_event,
@@ -553,11 +680,11 @@ class DatabaseHelper:
             'insert': r.add_room,
             'update': r.update_room_details,
             'delete': r.delete_room,
-            'get': r.get_room_details
+            'get': r.get_room_details,
+            'get_ids': r.get_room_ids
         }.get(intent, None)
 
     def employee(self, intent):
-        print(intent)
         e = EmployeeHelper(self.db)
         return {
             'insert': e.add_employee,
@@ -610,4 +737,13 @@ class DatabaseHelper:
             'update': r.update_risk_level,
             'delete': r.remove_risk_level,
             'get': r.get_risk_level
+        }.get(intent, None)
+    
+    def privilege_master(self, intent):
+        p = PrivilegeMasterHelper(self.db)
+        return {
+            'insert': p.add_privilege_level,
+            'update': p.update_privilege_description,
+            'delete': p.remove_privilege,
+            'get': p.get_privileges
         }.get(intent, None)

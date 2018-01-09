@@ -79,8 +79,23 @@ def login():
 
 @app.route('/master_remove', methods=['GET','POST'])
 def master_remove():
-    return render_template('master_remove.html')
-
+    alert=None
+    room_data = DataBase.room('get')(None,'room_id','description')
+    if request.method == 'POST':
+        data = dict(request.form)
+        id = data.get('id')[0]
+        content = data.get('content')
+        if str(id) == '1':
+            print(id,content)
+            output = DataBase.room('delete')(int(content[0]))
+            print(output)
+            if output == True:
+                alert ="Operation Successful"
+                room_data = DataBase.room('get')(None,'room_id','description')
+                return Response(json.dumps({'url': output,'message':'Room is successfully removed'}), mimetype='text/json')
+    return render_template('master_remove.html', room_data = room_data,alert=alert)
+     
+   
 
 @app.route('/master_add', methods=['GET','POST'])
 def master_add():
@@ -134,19 +149,21 @@ def master_add():
                 error="Please select a clearance level"
         elif "add_event_type" in request.form:
             print("{} add_event_type".format(LOG_TAG))
-            type_id = request.form['type_id3']
             level = request.form['level3']
-            desc = request.form['desc3']
-            data = DataBase.type_master('insert')(int(type_id),int(level),str(desc))
-            data = json.loads(data)
-            value = 4
-            if int(data.get('status')) == 1:
-                success = data.get('message')
-                print("{} {}".format(LOG_TAG,data.get('message')))
+            if not str(room_id) == "false":
+                type_id = request.form['type_id3']
+                desc = request.form['desc3']
+                data = DataBase.type_master('insert')(int(type_id),int(level),str(desc))
+                data = json.loads(data)
+                value = 4
+                if int(data.get('status')) == 1:
+                    success = data.get('message')
+                    print("{} {}".format(LOG_TAG,data.get('message')))
+                else:
+                    print("{} {}".format(LOG_TAG,data.get('message')))
+                    error = data.get('message')
             else:
-                print("{} {}".format(LOG_TAG,data.get('message')))
-                error = data.get('message')
-            
+                error="Please select a risk level"
         elif "add_risk" in request.form:
             print("{} add_risk".format(LOG_TAG))
             level = request.form['level2']

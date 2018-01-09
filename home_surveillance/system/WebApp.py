@@ -77,16 +77,19 @@ def login():
 
     return render_template('login.html', error = error)
 
-@app.route('/master', methods=['GET','POST'])
-def master():
+@app.route('/master_remove', methods=['GET','POST'])
+def master_remove():
+    return render_template('master_remove.html')
+
+
+@app.route('/master_add', methods=['GET','POST'])
+def master_add():
     error = None
     success = None
     value = None
     clear_data = DataBase.clearance_master('get')()
     room_data = DataBase.room('get_ids')()
     risk_data = DataBase.risk_level_master('get')()
-    privilege_data = DataBase.privilege_master('get')()
-    print(privilege_data)
     if request.method == 'POST':
         if "add_camera" in request.form:
             print("{} add_camera".format(LOG_TAG))
@@ -186,7 +189,7 @@ def master():
                 print("{} {}".format(LOG_TAG,data.get('message')))
                 error = data.get('message')
                     
-    return render_template('master.html', error = error, success = success, value = value, room_data = room_data, clear_data = clear_data, risk_data = risk_data)
+    return render_template('master_add.html', error = error, success = success, value = value, room_data = room_data, clear_data = clear_data, risk_data = risk_data)
 
 
 @app.route('/home')

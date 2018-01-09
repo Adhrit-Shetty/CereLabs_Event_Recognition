@@ -471,7 +471,7 @@ def add_face():
 def retrain_classifier():
     if request.method == 'POST':
         app.logger.info("retrain button pushed. clearing event in surveillance objt and calling trainingEvent")
-        o_fname, n_fname, retrained = HomeSurveillance.recogniser.trainClassifier()#calling the module in FaceRecogniser to start training
+        o_fname, n_fname, retrained = HomeSurveillance.recogniser.trainClassifier(DataBase)#calling the module in FaceRecogniser to start training
         print(o_fname, n_fname)
         HomeSurveillance.trainingEvent.clear() # Block processing threads
         HomeSurveillance.recogniser.switchClassifiers(o_fname, n_fname)

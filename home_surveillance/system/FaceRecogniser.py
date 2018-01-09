@@ -51,6 +51,7 @@ import pandas as pd
 import aligndlib
 import openface
 import lightgbm as lgbm
+from sklearn.neighbors import KNeighborsClassifier 
 
 logger = logging.getLogger(__name__)
 
@@ -87,10 +88,15 @@ class FaceRecogniser(object):
         self.neuralNetLock = threading.Lock()
         self.predictor = dlib.shape_predictor(args.dlibFacePredictor)
 
-        logger.info("Opening classifier.pkl to load existing known faces db")
-        if os.path.getsize("generated-embeddings/lgbm_classifier.pkl") > 0:
-            with open("generated-embeddings/lgbm_classifier.pkl", 'rb') as f: # le = labels, clf = classifier
-                (self.le, self.clf) = pickle.load(f, encoding='latin1')# Loads labels and classifier SVM or GMM
+        if os.path.isfile("generated-embeddings/lgbm_classifier.pkl"):
+            logger.info("Opening classifier.pkl to load existing known faces db")
+            if os.path.getsize("generated-embeddings/lgbm_classifier.pkl") > 0:
+                with open("generated-embeddings/lgbm_classifier.pkl", 'rb') as f: # le = labels, clf = classifier
+                    (self.le, self.clf) = pickle.load(f, encoding='latin1')# Loads labels and classifier SVM or GMM
+        if os.path.isfile("generated-embeddings/knc_classifier.pkl"):
+            if os.path.getsize("generated-embeddings/knc_classifier.pkl") > 0:
+                with open("generated-embeddings/knc_classifier.pkl", 'rb') as f: # le = labels, clf = classifier
+                    (self.le2, self.clf2) = pickle.load(f, encoding='latin1')# Loads labels and classifier SVM or GMM
 
     def make_prediction(self,rgbFrame,bb):
         """The function uses the location of a face
@@ -105,7 +111,11 @@ class FaceRecogniser(object):
         if landmarks == None:
             logger.info("///  FACE LANDMARKS COULD NOT BE FOUND  ///")
             return None
-        alignedFace = self.align.align(args.imgDim, rgbFrame, bb,landmarks=landmarks,landmarkIndices=openface.AlignDlib.OUTER_EYES_AND_NOSE)
+        alignedFace = self.align.align(args.imgDim, 
+            rgbFrame, 
+            bb,
+            landmarks=landmarks,
+            landmarkIndices=openface.AlignDlib.OUTER_EYES_AND_NOSE)
 
         if alignedFace is None:
             logger.info("///  FACE COULD NOT BE ALIGNED  ///")
@@ -131,9 +141,14 @@ class FaceRecogniser(object):
         start = time.time()
         logger.info("Submitting array for prediction.")
         predictions = self.clf.predict_proba(rep).ravel() # Computes probabilities of possible outcomes for samples in classifier(clf).
+        neigh_dist, neigh_ind = self.clf2.kneighbors(rep, n_neighbors=1, return_distance=True)
         #logger.info("We need to dig here to know why the probability are not right.")
         maxI = np.argmax(predictions)
         person1 = self.le.inverse_transform(maxI)
+        print(person1, neigh_dist[0][0])
+        if neigh_dist[0][0] >= 0.75:
+            person1 = "unknown"
+        
         confidence1 = int(math.ceil(predictions[maxI]*100))
 
         logger.info("Recognition took {} seconds.".format(time.time() - start))
@@ -157,12 +172,14 @@ class FaceRecogniser(object):
 
     def reloadClassifier(self):
         print('Reloaded!')
-        with open("generated-embeddings/classifier.pkl", 'rb') as f: # Reloads character stream from pickle file
+        with open("generated-embeddings/lgbm_classifier.pkl", 'rb') as f: # Reloads character stream from pickle file
             (self.le, self.clf) = pickle.load(f, encoding='latin1') # Loads labels and classifier SVM or GMM
+        with open("generated-embeddings/knc_classifier.pkl", 'rb') as f: # Reloads character stream from pickle file
+            (self.le2, self.clf2) = pickle.load(f, encoding='latin1') # Loads labels and classifier SVM or GMM
         logger.info("reloadClassifier called")
         return True
 
-    def trainClassifier(self):
+    def trainClassifier(self, database):
         """Trainng the classifier begins by aligning any images in the
         training-images directory and putting them into the aligned images
         directory. Each of the aligned face images are passed through the
@@ -191,12 +208,12 @@ class FaceRecogniser(object):
             logger.info("Representation Generation (Classification Model) took {} seconds.".format(time.time() - start))
             start = time.time()
             # Train Model
-            o_fname, n_fname = self.train("generated-embeddings/","LGBM",-1)
+            o_fname, n_fname, o_fname2, n_fname2 = self.train("generated-embeddings/",-1, database)
             logger.info("Training took {} seconds.".format(time.time() - start))
         else:
             logger.info("Generate representation did not return True")
         
-        return o_fname, n_fname, done
+        return o_fname, n_fname, o_fname2, n_fname2, done
 
     def generate_representation(self):
         logger.info("lua Directory:    " + luaDir)
@@ -222,7 +239,7 @@ class FaceRecogniser(object):
         return True
 
 
-    def train(self,workDir,classifier,ldaDim):
+    def train(self,workDir,ldaDim, database):
         fname = "{}labels.csv".format(workDir) #labels of faces
         logger.info("Loading labels " + fname + " csv size: ")#+  str(os.path.getsize("/root/home_surveillance/system/generated-embeddings/reps.csv")))
         if os.path.getsize(fname) > 0:
@@ -247,39 +264,73 @@ class FaceRecogniser(object):
             logger.info(fname + " file is empty")
             embeddings = np.zeros((2,150)) #creating an empty array since csv is empty
         labels = list(labels)
+        #Store vectors in database
+        rep_str = [None] * len(embeddings)
+        for i,row in enumerate(embeddings):
+            rep_str[i] = ""
+            for j,column in enumerate(row):
+                if j == 0:
+                    rep_str[i] = rep_str[i] + str(column)
+                else:
+                    rep_str[i] = rep_str[i] + "," + str(column)
+        
+        prevName = ""
+        for i in range(0,len(labels)):
+            if labels[i] == prevName:
+                vector = vector +";"+ rep_str[i] 
+            else:
+                #Store in db
+                print(prevName, 'recog_data='+vector)
+                #database.employee('update')(labels[i], 'recog_data='+vector)
+                #Reinitialise vector
+                vector = rep_str[i]        
+                prevName = labels[i]
+        #Delete files - aligned-images, training-images, label, reps
         self.le = LabelEncoder().fit(labels) # LabelEncoder is a utility class to help normalize labels such that they contain only values between 0 and n_classes-1
+        self.le2 = LabelEncoder().fit(labels)
         # Fits labels to model
         labelsNum = self.le.transform(labels)
         nClasses = len(self.le.classes_)
         logger.info("Training for {} classes.".format(nClasses))
 
-        if classifier == 'LinearSvm':
-            self.clf = SVC(C=1, kernel='linear', probability=True)
-            prefix = 'lsvm'
-        elif classifier == 'GMM':
-            self.clf = GMM(n_components=nClasses)
-            prefix = 'gmm'
-        elif classifier == 'LGBM':
-            self.clf = lgbm.LGBMClassifier(objective='Multiclassova')
-            prefix = 'lgbm'
+        self.clf = lgbm.LGBMClassifier(
+            objective='Multiclassova',
+            num_leaves = 31, 
+            num_iterations = 100,
+            learning_rate = 0.1)
         
+        self.clf2 = KNeighborsClassifier(
+            n_neighbors=4,
+            weights='distance')
+            
         if ldaDim > 0:
             clf_final =  self.clf
             self.clf = Pipeline([('lda', LDA(n_components=ldaDim)),
                 ('clf', clf_final)])
 
         self.clf.fit(embeddings, labelsNum) #link embeddings to labels
-        
-        o_fName = "{}/".format(workDir)+prefix+"_classifier.pkl"
-        n_fName = "{}/".format(workDir)+prefix+"_temp_classifier.pkl"
+        self.clf2.fit(embeddings, labelsNum)
+
+        o_fName = "{}/".format(workDir)+"lgbm_classifier.pkl"
+        n_fName = "{}/".format(workDir)+"lgbm_temp_classifier.pkl"
+        o_fName2 = "{}/".format(workDir)+"knc_classifier.pkl"
+        n_fName2 = "{}/".format(workDir)+"knc_temp_classifier.pkl"
+    
         logger.info("Saving classifier to '{}'".format(n_fName))
+        logger.info("Saving classifier2 to '{}'".format(n_fName2))
+        
         with open(n_fName, 'wb') as f:
             pickle.dump((self.le,  self.clf), f) # Creates character stream and writes to file to use for recognition
-        return o_fName, n_fName
+        with open(n_fName2, 'wb') as f:
+            pickle.dump((self.le2,  self.clf2), f) # Creates character stream and writes to file to use for recognition
+        
+        return o_fName, n_fName, o_fName2, n_fName2
     
-    def switchClassifiers(self, o_fname, n_fname):
+    def switchClassifiers(self, o_fname, n_fname, o_fname2, n_fname2):
         os.remove(o_fname)
         os.rename(n_fname, o_fname)
+        os.remove(o_fname2)
+        os.rename(n_fname2, o_fname2)
         self.reloadClassifier()
 
     def getSquaredl2Distance(self,rep1,rep2):
@@ -288,3 +339,5 @@ class FaceRecogniser(object):
         to the same person"""
         d = distance.euclidean(rep1,rep2)
         return d
+
+        

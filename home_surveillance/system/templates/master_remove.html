@@ -226,6 +226,43 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-12">
+                                <div class="card {{'error' if error and value == 2}} {{'clear' if success and value == 2}}">
+                                    <div class="card-header">
+                                        <i class="fa fa-home pull-left" style="font-size:32px" aria-hidden="true"></i>
+                                        <h4 class="text-center">Remove Room</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-group flow">
+                                            <li class=" mt-1 list-group-item list-group-item-warning">
+                                                <div class="row">
+                                                    <div class="col-4 right">
+                                                        Room Id
+                                                    </div>
+                                                    <div class="col-8">
+                                                        Accessiblity
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            {% for key,value in room_data.items() %}
+                                            <li class=" mt-1 list-group-item list-group-item-light">
+                                                <div class="row">
+                                                    <div class="col-4 right">
+                                                        {{ key }}
+                                                    </div>
+                                                    <div class="col-7">
+                                                        {{ value }}
+                                                    </div>
+                                                    <div class="col-1">
+                                                        <button class="btn btn-outline-danger" onclick='load_modal(1,{{ key }})'>x</button>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
                     </div>
                 </div>
             </div>

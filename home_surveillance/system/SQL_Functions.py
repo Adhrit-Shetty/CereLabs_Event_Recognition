@@ -358,10 +358,12 @@ class ClearanceLevelMasterHelper:
             cursor.execute(sql)
             self.db.commit()
             print('{} removal Successful!'.format(self.LOG_TAG))
+            return True
         except:
             self.db.rollback()
             print('{} Error: removal Unsuccessful!'.format(self.LOG_TAG))
-
+            return False
+        
     def get_clearance_details(self, level=None):
         cursor = self.db.cursor()
         type_of_fetch = 1

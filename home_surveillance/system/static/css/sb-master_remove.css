@@ -18,7 +18,7 @@
     
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1400px) {
     .card-columns {
         column-count: 1;
     }
@@ -26,8 +26,7 @@
 
 @media (min-width: 1500px) {
     .card-columns {
-        column-count: 2
-         !important; 
+        column-count: 3!important; 
     }
 }
 
@@ -40,14 +39,13 @@
 .card{
     
     background-color: rgba(216, 211, 211, 0.699);
-    min-width: 40vw;
-    height:100%;
+    /* max-width: 30vw; */
 }
 
-.flow{
+/* .list-group{
     overflow-y: scroll;
-    max-height: 25vh;
-}
+    height: 20vh;
+} */
 
 .right{
     border-right: rgb(105, 100, 100) 1px solid;

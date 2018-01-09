@@ -81,6 +81,8 @@ def login():
 def master_remove():
     alert=None
     room_data = DataBase.room('get')(None,'room_id','description')
+    clear_data = DataBase.clearance_master('get')()
+    print(clear_data)
     if request.method == 'POST':
         data = dict(request.form)
         id = data.get('id')[0]
@@ -90,10 +92,20 @@ def master_remove():
             output = DataBase.room('delete')(int(content[0]))
             print(output)
             if output == True:
-                alert ="Operation Successful"
-                room_data = DataBase.room('get')(None,'room_id','description')
+                # room_data = DataBase.room('get')(None,'room_id','description')
                 return Response(json.dumps({'url': output,'message':'Room is successfully removed'}), mimetype='text/json')
-    return render_template('master_remove.html', room_data = room_data,alert=alert)
+            else:
+                return Response(json.dumps({'url': output,'message':'Failed to remove room'}), mimetype='text/json')
+        elif str(id) == '2':
+            print(id,content)
+            output = DataBase.clearance_master('delete')(int(content[0]))
+            print(output)
+            if output == True:
+                # room_data = DataBase.room('get')(None,'room_id','description')
+                return Response(json.dumps({'url': output,'message':'Clearance level is successfully removed'}), mimetype='text/json')
+            else:
+                return Response(json.dumps({'url': output,'message':'Failed to remove clearance level'}), mimetype='text/json')
+    return render_template('master_remove.html', room_data = room_data, clear_data = clear_data)
      
    
 

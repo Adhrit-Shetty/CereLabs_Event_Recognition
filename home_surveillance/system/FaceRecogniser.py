@@ -24,6 +24,7 @@ from scipy.spatial import distance
 import cv2
 import numpy as np
 import os
+import shutil
 import glob
 import dlib
 import sys
@@ -87,7 +88,7 @@ class FaceRecogniser(object):
         self.align = openface.AlignDlib(args.dlibFacePredictor)
         self.neuralNetLock = threading.Lock()
         self.predictor = dlib.shape_predictor(args.dlibFacePredictor)
-
+        self.clf, self.le, self.clf2, self.le2 = [None] * 4
         if os.path.isfile("generated-embeddings/lgbm_classifier.pkl"):
             logger.info("Opening classifier.pkl to load existing known faces db")
             if os.path.getsize("generated-embeddings/lgbm_classifier.pkl") > 0:
@@ -106,6 +107,10 @@ class FaceRecogniser(object):
         generates 128 measurements which uniquly identify that face.
         These measurements are known as an embedding, and are used
         by the classifier to predict the identity of the person"""
+
+        if self.clf == None or self.clf2 == None:
+            print('No classifier!')
+            return None
 
         landmarks = self.align.findLandmarks(rgbFrame, bb)
         if landmarks == None:
@@ -264,28 +269,46 @@ class FaceRecogniser(object):
             logger.info(fname + " file is empty")
             embeddings = np.zeros((2,150)) #creating an empty array since csv is empty
         labels = list(labels)
+        #Get vectors  from database
+        
         #Store vectors in database
-        rep_str = [None] * len(embeddings)
+        rep_str = [""] * len(embeddings)
         for i,row in enumerate(embeddings):
             rep_str[i] = ""
             for j,column in enumerate(row):
                 if j == 0:
                     rep_str[i] = rep_str[i] + str(column)
                 else:
-                    rep_str[i] = rep_str[i] + "," + str(column)
+                    rep_str[i] = rep_str[i] + ":" + str(column)
         
-        prevName = ""
-        for i in range(0,len(labels)):
-            if labels[i] == prevName:
+        prevId, vector = "", ""
+        for i in range(0,len(embeddings)):
+            if labels[i] == prevId:
                 vector = vector +";"+ rep_str[i] 
-            else:
-                #Store in db
-                print(prevName, 'recog_data='+vector)
-                #database.employee('update')(labels[i], 'recog_data='+vector)
-                #Reinitialise vector
+            elif i==0:
                 vector = rep_str[i]        
-                prevName = labels[i]
+                prevId = labels[i]
+            else:
+                database.employee('update')(int(prevId), recog_data=str(vector))
+                vector = rep_str[i]        
+                prevId = labels[i]
+        # Storing last label
+        database.employee('update')(int(prevId), recog_data=str(vector))
+        
         #Delete files - aligned-images, training-images, label, reps
+        if os.path.isdir(fileDir+"/training-images"):
+            print('asdas')
+            shutil.rmtree(fileDir+"/training-images")    
+        if os.path.isdir(fileDir+"/aligned-images/"):
+            print('asdas')
+            shutil.rmtree(fileDir+"/aligned-images")
+        os.mkdir(fileDir+"/training-images")
+        os.mkdir(fileDir+"/aligned-images")
+        if os.path.isfile(fileDir+"/generated-embeddings/labels.csv"):
+            os.remove(fileDir+"/generated-embeddings/labels.csv")
+        if os.path.isfile(fileDir+"/generated-embeddings/reps.csv"):
+            os.remove(fileDir+"/generated-embeddings/reps.csv")            
+        
         self.le = LabelEncoder().fit(labels) # LabelEncoder is a utility class to help normalize labels such that they contain only values between 0 and n_classes-1
         self.le2 = LabelEncoder().fit(labels)
         # Fits labels to model
@@ -327,9 +350,11 @@ class FaceRecogniser(object):
         return o_fName, n_fName, o_fName2, n_fName2
     
     def switchClassifiers(self, o_fname, n_fname, o_fname2, n_fname2):
-        os.remove(o_fname)
+        if os.path.isfile(o_fname):
+            os.remove(o_fname)
+        if os.path.isfile(o_fname2):
+            os.remove(o_fname2)    
         os.rename(n_fname, o_fname)
-        os.remove(o_fname2)
         os.rename(n_fname2, o_fname2)
         self.reloadClassifier()
 

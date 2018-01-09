@@ -41,7 +41,7 @@ class EventsHelper:
 
         projection = ''
         for arg in args:
-            projection = projection.join(arg + ' ,')
+            projection = str(projection)+str(arg)+" ,"
         projection = projection[:-2]  # Remove trailing comma and space
         print('{} get_event projection => {}'.format(self.LOG_TAG, projection))
         sql = "SELECT %s FROM events JOIN type_master ON events.type_id = type_master.type_id JOIN cam_master ON events.cam_id = cam_master.cam_id WHERE event_id = %d " % (projection, event_id)
@@ -114,7 +114,7 @@ class EmployeeHelper:
         projection = '*'
         if len(args) > 0:
             for arg in args:
-                projection = projection.join(arg + ' ,')
+                projection = str(projection)+str(arg)+" ,"
                 projection = projection[:-2]  # Remove trailing comma and space
 
         print('{} get_employee projection = {}'.format(self.LOG_TAG, projection))
@@ -188,7 +188,7 @@ class AdminHelper:
         cursor = self.db.cursor()
         projection = ''
         for arg in args:
-            projection = projection.join(arg + ' ,')
+            projection = str(projection)+str(arg)+" ,"
         projection = projection[:-2]  # Remove trailing comma and space
 
         print('{} get_event projection = {}'.format(self.LOG_TAG, projection))
@@ -268,15 +268,16 @@ class RoomHelper:
             cursor.execute(sql)
             self.db.commit()
             print('{} removal Successful!'.format(self.LOG_TAG))
+            return True
         except:
             self.db.rollback()
             print('{} Error: removal Unsuccessful!'.format(self.LOG_TAG))
-
+            return False
     def get_room_ids(self):
         cursor = self.db.cursor()
         # projection = ''
         # for arg in args:
-        #     projection = projection.join(arg + ' ,')
+        #     projection = str(projection)+str(arg)+" ,"
         # projection = projection[:-2]  # Remove trailing comma and space
 
         # print('{} get_event projection = {}'.format(self.LOG_TAG, projection))
@@ -294,20 +295,25 @@ class RoomHelper:
             print('{} Error fetching data'.format(self.LOG_TAG))
             return list()
 
-    def get_room_details(self, room_id, *args):
+    def get_room_details(self, room_id=None, *args):
         cursor = self.db.cursor()
-        projection = ''
+        projection = ""
         for arg in args:
-            projection = projection.join(arg + ' ,')
+            projection = str(projection)+str(arg)+" ,"
         projection = projection[:-2]  # Remove trailing comma and space
-
+        type_of_fetch = 1
         print('{} get_event projection = {}'.format(self.LOG_TAG, projection))
-
-        sql = "SELECT %s FROM room JOIN clearance_level_master clm ON room.accessiblity = clm.level WHERE room_id = %d" % (projection, room_id)
+        sql = "SELECT %s FROM room JOIN clearance_level_master clm ON room.accessiblity = clm.level" % (projection)
+        if room_id != None:
+            type_of_fetch = 2
+            sql = "SELECT %s FROM room JOIN clearance_level_master clm ON room.accessiblity = clm.level WHERE room_id = %d" % (projection, room_id)
         try:
             cursor.execute(sql)
-            results = cursor.fetchone()
+            results = cursor.fetchall()
+            print(results)
             print('{} fetching Successful!'.format(self.LOG_TAG))
+            if type_of_fetch == 1:
+                return dict((x,y) for x,y in results)
             return results
         except:
             print('{} Error fetching data'.format(self.LOG_TAG))

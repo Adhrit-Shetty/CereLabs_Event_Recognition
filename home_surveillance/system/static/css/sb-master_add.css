@@ -16,7 +16,7 @@
     
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1400px) {
     .card-columns {
         column-count: 2;
     }

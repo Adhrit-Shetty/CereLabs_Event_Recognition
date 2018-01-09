@@ -130,6 +130,20 @@ class EmployeeHelper:
             print('{} Error fetching data'.format(self.LOG_TAG))
             return list()
 
+    def get_all_vectors(self):
+        cursor = self.db.cursor()
+        sql = "SELECT emp_id, recog_data FROM employee"
+        try:
+            cursor.execute(sql)
+            results = cursor.fetchall()
+            print('{} fetching Successful!'.format(self.LOG_TAG))
+            if results == None:
+                results = list()
+            return results
+        except:
+            print('{} Error fetching data'.format(self.LOG_TAG))
+            return list()
+
 
 class AdminHelper:
     LOG_TAG = '[ADMIN_HELPER]'
@@ -695,7 +709,8 @@ class DatabaseHelper:
             'insert': e.add_employee,
             'update': e.update_employee_details,
             'delete': e.fire_employee,
-            'get': e.get_employee_details
+            'get': e.get_employee_details,
+            'getV': e.get_all_vectors
         }.get(intent, None)
 
     def admin(self, intent):

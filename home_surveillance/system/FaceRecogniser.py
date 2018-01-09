@@ -253,54 +253,81 @@ class FaceRecogniser(object):
             logger.info(labels)
         else:
             logger.info(fname + " file is empty")
-            labels = "1:aligned-images/dummy/1.png"  #creating a dummy string to start the process
-        logger.debug(map(os.path.dirname, labels))
-        logger.debug(map(os.path.split,map(os.path.dirname, labels)))
-        logger.debug(map(itemgetter(1),map(os.path.split,map(os.path.dirname, labels))))
-        labels = map(itemgetter(1),map(os.path.split,map(os.path.dirname, labels)))
-
+            labels = None  #creating a dummy string to start the process
+        
+        if labels != None:
+            logger.debug(map(os.path.dirname, labels))
+            logger.debug(map(os.path.split,map(os.path.dirname, labels)))
+            logger.debug(map(itemgetter(1),map(os.path.split,map(os.path.dirname, labels))))
+            labels = map(itemgetter(1),map(os.path.split,map(os.path.dirname, labels)))
+            labels = list(labels)
+        
         fname = "{}reps.csv".format(workDir) # Representations of faces
         fnametest = format(workDir) + "reps.csv"
         logger.info("Loading embedding " + fname + " csv size: " + str(os.path.getsize(fname)))
         if os.path.getsize(fname) > 0:
             logger.info(fname + " file is not empty")
             embeddings = pd.read_csv(fname, header=None).as_matrix() # Get embeddings as a matrix from reps.csv
+            fileStatus=True
         else:
+            fileStatus=False
             logger.info(fname + " file is empty")
-            embeddings = np.zeros((2,150)) #creating an empty array since csv is empty
-        labels = list(labels)
-        #Get vectors  from database
+            embeddings = None #creating an empty array since csv is empty
         
-        #Store vectors in database
-        rep_str = [""] * len(embeddings)
-        for i,row in enumerate(embeddings):
-            rep_str[i] = ""
-            for j,column in enumerate(row):
-                if j == 0:
-                    rep_str[i] = rep_str[i] + str(column)
-                else:
-                    rep_str[i] = rep_str[i] + ":" + str(column)
-        
-        prevId, vector = "", ""
-        for i in range(0,len(embeddings)):
-            if labels[i] == prevId:
-                vector = vector +";"+ rep_str[i] 
-            elif i==0:
-                vector = rep_str[i]        
-                prevId = labels[i]
+        #Get vectors from database
+        data = database.employee('getV')()
+        db_labels = list()
+        db_embeddings = list()
+        for i,row in enumerate(data):
+            addition = row[1].decode("utf-8")
+            addition = addition.split(sep=';')
+            db_labels = db_labels + list(str(row[0]) * len(addition))
+            if i==0:
+                db_embeddings = addition
             else:
-                database.employee('update')(int(prevId), recog_data=str(vector))
-                vector = rep_str[i]        
-                prevId = labels[i]
-        # Storing last label
-        database.employee('update')(int(prevId), recog_data=str(vector))
+                db_embeddings = db_embeddings + addition    
+        for i in range(0,len(db_embeddings)):
+            db_embeddings[i] = [float(v) for v in db_embeddings[i].split(sep=":")]
+        if labels == None:
+            labels = db_labels
+        else:
+            labels.extend(db_labels)
+        if embeddings == None:
+            embeddings = np.array(db_embeddings)
+        else:    
+            embeddings = embeddings + np.array(db_embeddings)
+        # print(np.shape(embeddings))
+        # print(np.shape(labels))
+        # print(embeddings[1])
+        if fileStatus:
+            #Store vectors in database
+            rep_str = [""] * len(embeddings)
+            for i,row in enumerate(embeddings):
+                rep_str[i] = ""
+                for j,column in enumerate(row):
+                    if j == 0:
+                        rep_str[i] = rep_str[i] + str(column)
+                    else:
+                        rep_str[i] = rep_str[i] + ":" + str(column)
+
+            prevId, vector = "", ""
+            for i in range(0,len(embeddings)):
+                if labels[i] == prevId:
+                    vector = vector +";"+ rep_str[i] 
+                elif i==0:
+                    vector = rep_str[i]        
+                    prevId = labels[i]
+                else:
+                    database.employee('update')(int(prevId), recog_data=str(vector))
+                    vector = rep_str[i]        
+                    prevId = labels[i]
+            # Storing last label
+            database.employee('update')(int(prevId), recog_data=str(vector))
         
         #Delete files - aligned-images, training-images, label, reps
         if os.path.isdir(fileDir+"/training-images"):
-            print('asdas')
             shutil.rmtree(fileDir+"/training-images")    
         if os.path.isdir(fileDir+"/aligned-images/"):
-            print('asdas')
             shutil.rmtree(fileDir+"/aligned-images")
         os.mkdir(fileDir+"/training-images")
         os.mkdir(fileDir+"/aligned-images")

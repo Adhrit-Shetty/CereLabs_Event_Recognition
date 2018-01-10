@@ -467,7 +467,10 @@ class CamMasterHelper:
         cursor = self.db.cursor()
         type_of_fetch = 1
         sql = "SELECT cam_id, room_id, rtsp_link FROM cam_master"
-        if cam_id != None:
+        if cam_id == 'NULL':
+            type_of_fetch = 3
+            sql = "SELECT cam_id, rtsp_link FROM cam_master"
+        elif cam_id != None:
             type_of_fetch = 2
             sql = "SELECT * FROM cam_master JOIN room ON cam_master.room_id = room.room_id WHERE cam_id = %d" % (cam_id)
         try:
@@ -475,8 +478,8 @@ class CamMasterHelper:
             results = cursor.fetchall()
             print(results)
             print('{} fetching Successful!'.format(self.LOG_TAG))
-            # if type_of_fetch == 1:
-            #     return dict((x,y) for x,y in results)
+            if type_of_fetch == 3:
+                return dict((x,y) for x,y in results)
             return results
         except:
             print('{} Error fetching data'.format(self.LOG_TAG))

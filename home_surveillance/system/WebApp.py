@@ -731,7 +731,7 @@ def connect():
     #         #print alertData
     #         app.logger.info(alertData)
     #         alerts.append(alertData)
-    allCameras = DataBase.cam_master('get')()
+    allCameras = DataBase.cam_master('get')('NULL')
     with HomeSurveillance.camerasLock :
         for key, value in allCameras.items():
             cameraData = {'camNum': key, 'url': value}

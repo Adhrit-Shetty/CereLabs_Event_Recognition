@@ -289,7 +289,7 @@ def register_employee():
     data = DataBase.clearance_master('get')()
     emp_name =  dict((i[1],i[0]) for i in DataBase.employee('get')())
     print(emp_name)
-    emp_id = None
+    fname = None
     g.user = 'admin' # Hack
     if request.method == 'POST' and g.user:
         clearance_level = request.form['clearance_level']
@@ -336,8 +336,7 @@ def register_employee():
                         #     image_data = imageFile.read()
                         #     recog_data.append(image_data)
             # TODO: Add module which converts recog_data to vector and returns it
-                # emp_id = DataBase.employee('insert')(name, clearance_level, recog_data)
-    return render_template('register_employee.html', error = error, data = data, emp_id = emp_id)
+    return render_template('register_employee.html', error = error, data = data, emp_id = fname)
 
 @app.route('/register_admin', methods=['GET', 'POST'])
 def register_admin():
@@ -431,6 +430,22 @@ def video_streamer(camNum):
     return Response(gen(HomeSurveillance.cameras[int(camNum)]),
                     mimetype='multipart/x-mixed-replace; boundary=frame') # A stream where each part replaces the previous part the multipart/x-mixed-replace content type must be used.
 
+
+@app.route('/events', methods=['GET', 'POST'])
+def events():
+    error = None
+    if request.method == 'POST':
+        pass
+    return render_template('events.html', error=None)
+
+
+@app.route('/events_streamer/<eventNum>')
+def events_streamer(eventNum):
+    """Used to stream frames to client, eventNum represents the event_id"""
+    print(eventNum)
+    # A stream where each part replaces the previous part the multipart/x-mixed-replace content type must be used.
+    return Response('something', mimetype='multipart/x-mixed-replace; boundary=frame')
+
 def system_monitoring():
     """Pushes system monitoring data to client"""
     while True:
@@ -477,19 +492,17 @@ def add_camera():
 @app.route('/remove_camera', methods = ['GET','POST'])
 def remove_camera():
     if request.method == 'POST':
+        print('In remove camera!')
         camID = request.form.get('camID')
-        print('In remove camera!', camID)
         sd, camNum = camID.split('_')
         app.logger.info("Removing camera: ")
         app.logger.info(camID)
-        with HomeSurveillance.camerasLock:
-            print('Rem Camera Lock', sd, camNum)
-            HomeSurveillance.remove_camera(int(camNum))
+        # with HomeSurveillance.camerasLock:
+        #     HomeSurveillance.remove_camera(int(camNum))
+        DataBase.cam_master('delete')(int(camNum))
         app.logger.info("Removing camera number : " + camNum)
         data = {"alert_status": "removed"}
-        print("Returning")
         return jsonify(data)
-    print('heloo world')
     return render_template('index.html')
 
 # @app.route('/create_alert', methods = ['GET','POST'])

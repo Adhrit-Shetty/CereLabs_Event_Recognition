@@ -19,14 +19,14 @@
 <body class="fixed-nav sticky-footer bg-dark" id="page-top">
   <!-- Navigation-->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" id="mainNav">
-    <a class="navbar-brand" href="/home">Surveillance System</a>
+    <a class="navbar-brand" href="{{ url_for('home') }}">Surveillance System</a>
     <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarResponsive">
       <ul class="navbar-nav navbar-sidenav" id="exampleAccordion">
         <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Dashboard">
-          <a class="nav-link" href="/home">
+          <a class="nav-link" href="{{url_for('home')}}"
             <i class="fa fa-fw fa-dashboard"></i>
             <span class="nav-link-text">Dashboard</span>
           </a>
@@ -38,27 +38,13 @@
           </a>
           <ul class="sidenav-second-level collapse" id="collapseMulti">
             <li>
-              <a href="/master">Master</a>
+              <a href="{{ url_for('master_add') }}">Add Master Records</a>
             </li>
             <li>
-              <a href="#">Second Level Item</a>
+              <a href="{{ url_for('master_remove') }}">Remove Master Records</a>
             </li>
             <li>
-              <a href="#">Second Level Item</a>
-            </li>
-            <li>
-              <a class="nav-link-collapse collapsed" data-toggle="collapse" href="#collapseMulti2">Third Level</a>
-              <ul class="sidenav-third-level collapse" id="collapseMulti2">
-                <li>
-                  <a href="#">Third Level Item</a>
-                </li>
-                <li>
-                  <a href="#">Third Level Item</a>
-                </li>
-                <li>
-                  <a href="#">Third Level Item</a>
-                </li>
-              </ul>
+              <a href="{{ url_for('events') }}">Events</a>
             </li>
           </ul>
         </li>
@@ -123,7 +109,8 @@
           </a>
           <div class="dropdown-menu" aria-labelledby="alertsDropdown">
             <h6 class="dropdown-header">New Alerts:</h6>
-            <div class="dropdown-divider"></div>
+            <div id="alertsList"></div>
+            <!-- <div class="dropdown-divider"></div>
             <a class="dropdown-item" href="#">
               <span class="text-success">
                 <strong>
@@ -140,16 +127,7 @@
               </span>
               <span class="small float-right text-muted">11:21 AM</span>
               <div class="dropdown-message small">This is an automated server response message. All systems are online.</div>
-            </a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#">
-              <span class="text-success">
-                <strong>
-                  <i class="fa fa-long-arrow-up fa-fw"></i>Status Update</strong>
-              </span>
-              <span class="small float-right text-muted">11:21 AM</span>
-              <div class="dropdown-message small">This is an automated server response message. All systems are online.</div>
-            </a>
+            </a> -->
             <div class="dropdown-divider"></div>
             <a class="dropdown-item small" href="#">View all alerts</a>
           </div>
@@ -176,11 +154,6 @@
   </nav>
   <div class="content-wrapper">
     <div class="container-fluid">
-      <!-- Breadcrumbs-->
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item active">Dashboard
-        </li>
-      </ol>
       <div class="row">
         <div class="col-12">
 
@@ -219,7 +192,7 @@
                 </div>
                 <!-- /.card-header -->
                 <div class="card-body collapse show" id="detected-faces-card">
-                  <div id="detected-faces" class="row">
+                  <div id="detected-faces" class="row justify-content-start">
                     <!-- /.info-box-content -->
                   </div>
                   <!-- /.users-list -->
@@ -349,6 +322,7 @@
         success: function (cam) {
           console.log(cam);
           console.log("camera removed");
+          location.reload(true);
           $('#removeCamModal').modal('hide');
         },
         error: function (error) {
@@ -526,6 +500,22 @@
       //   socket.emit('my broadcast event', { data: $('#broadcast_data').val() });
       //   return false;
       // });
+      
+      socket.on('new_alert', function(json) {
+        console.log('New alert data: ', json);
+        $('#alertsList').append(`
+        <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="#">
+            <span class="text-danger">
+              <strong>
+                <i class="fa fa-long-arrow-up fa-fw"></i>${json.event_type}
+              </strong>
+            </span>
+            <span class="small float-right text-muted">${json.time}</span>
+            <div class="dropdown-message small">${json.message}</div>
+          </a>
+        `);
+      });
 
       socket.on('people_detected', function (json) {
 
@@ -570,7 +560,7 @@
             btndiv.setAttribute("class", "btn-group");
             var btn = document.createElement("button");
             btn.setAttribute("type", "button");
-            btn.setAttribute("class", "btn btn-light dropdown-toggle");
+            btn.setAttribute("class", "btn btn-sm btn-light dropdown-toggle");
             btn.setAttribute("data-toggle", "dropdown");
 
             var spn = document.createElement("span");

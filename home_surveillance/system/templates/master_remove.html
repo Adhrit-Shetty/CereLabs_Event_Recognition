@@ -189,7 +189,7 @@
             <div class="row">
                 <div class="col-12">
                     <div class="row my-2">
-                        <div class="col-6">
+                        <div class="col-5">
                             <div class="card">
                                 <div class="card-header">
                                     <i class="fa fa-id-badge pull-left" style="font-size:32px" aria-hidden="true"></i>
@@ -218,31 +218,35 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-6">
+                        <div class="col-7">
                             <div class="card">
                                 <div class="card-header">
-                                    <i class="fa fa-id-badge pull-left" style="font-size:32px" aria-hidden="true"></i>
-                                    <h4 class="text-center">Remove Risk Level</h4>
+                                    <i class="fa fa-user pull-left" style="font-size:32px" aria-hidden="true"></i>
+                                    <h4 class="text-center">Remove Employee</h4>
                                 </div>
                                 <div class="card-body">
                                     <li class=" mt-1 list-group-item list-group-item-warning">
                                         <div class="row">
-                                            <div class="col-3 right">Risk Level</div>
-                                            <div class="col-8">Description</div>
+                                            <div class="col-3 right">Employee Id</div>
+                                            <div class="col-5 right">Name</div>
+                                            <div class="col-4">Clearance Level</div>
                                         </div>
                                     </li>
-                                    <ul class="list-group flow">
-                                        {% for key,value in risk_data.items() %}
-                                        <li class=" mt-1 list-group-item list-group-item-light">
-                                            <div class="row">
-                                                <div class="col-3 right">{{ key }}</div>
-                                                <div class="col-7">{{ value }}</div>
-                                                <div class="col-1">
-                                                    <button class="btn btn-outline-danger" onclick='load_modal(5,{{ key }})'>x</button>
+                                    <ul class="list-group">
+                                        <div class="flow">
+                                            {% for value in employee_data %}
+                                            <li class="list-group-item list-group-item-light">
+                                                <div class="row">
+                                                    <div class="col-3 right">{{ value[0] }}</div>
+                                                    <div class="col-5 right">{{ value[1] }}</div>
+                                                    <div class="col-3">{{ value[2] }}</div>
+                                                    <div class="col-1">
+                                                        <button class="btn btn-outline-danger" onclick='load_modal(7,{{ value[0] }})'>x</button>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </li>
-                                        {% endfor %}
+                                            </li>
+                                            {% endfor %}
+                                        </div>
                                     </ul>
                                 </div>
                             </div>
@@ -252,7 +256,7 @@
                         <div class="col-12">
                             <div class="card">
                                 <div class="card-header">
-                                    <i class="fa fa-home pull-left" style="font-size:32px" aria-hidden="true"></i>
+                                    <i class="fa fa-camera pull-left" style="font-size:32px" aria-hidden="true"></i>
                                     <h4 class="text-center">Remove Camera</h4>
                                 </div>
                                 <div class="card-body">
@@ -347,7 +351,7 @@
                         <div class="col-12">
                             <div class="card">
                                 <div class="card-header">
-                                    <i class="fa fa-home pull-left" style="font-size:32px" aria-hidden="true"></i>
+                                    <i class="fa fa-flash pull-left" style="font-size:32px" aria-hidden="true"></i>
                                     <h4 class="text-center">Remove Event Type</h4>
                                 </div>
                                 <div class="card-body">
@@ -379,30 +383,32 @@
                         </div>
                     </div>
                     <div class="row my-2">
-                        <div class="col-6">
+                        <div class="col-7">
                             <div class="card">
                                 <div class="card-header">
-                                    <i class="fa fa-id-badge pull-left" style="font-size:32px" aria-hidden="true"></i>
-                                    <h4 class="text-center">Remove Employee</h4>
+                                    <i class="fa fa-user pull-left" style="font-size:32px" aria-hidden="true"></i>
+                                    <h4 class="text-center">Remove Admin</h4>
                                 </div>
                                 <div class="card-body">
                                     <li class=" mt-1 list-group-item list-group-item-warning">
                                         <div class="row">
+                                            <div class="col-2 right">Admin Id</div>
                                             <div class="col-3 right">Employee Id</div>
-                                            <div class="col-5 right">Name</div>
-                                            <div class="col-4">Clearance Level</div>
+                                            <div class="col-3 right">Privilege Level</div>
+                                            <div class="col-4">Username</div>
                                         </div>
                                     </li>
                                     <ul class="list-group">
                                         <div class="flow">
-                                            {% for value in employee_data %}
+                                            {% for value in admin_data %}
                                             <li class="list-group-item list-group-item-light">
                                                 <div class="row">
-                                                    <div class="col-3 right">{{ value[0] }}</div>
-                                                    <div class="col-5 right">{{ value[1] }}</div>
-                                                    <div class="col-3">{{ value[2] }}</div>
+                                                    <div class="col-2 right">{{ value[0] }}</div>
+                                                    <div class="col-3 right">{{ value[1] }}</div>
+                                                    <div class="col-3 right">{{ value[2] }}</div>
+                                                    <div class="col-3">{{ value[3] }}</div>
                                                     <div class="col-1">
-                                                        <button class="btn btn-outline-danger" onclick='load_modal(7,{{ value[0] }})'>x</button>
+                                                        <button class="btn btn-outline-danger" onclick='load_modal(8,{{ value[0] }})'>x</button>
                                                     </div>
                                                 </div>
                                             </li>
@@ -412,39 +418,33 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-6">
+                        <div class="col-5">
                             <div class="card">
                                 <div class="card-header">
                                     <i class="fa fa-id-badge pull-left" style="font-size:32px" aria-hidden="true"></i>
-                                    <h4 class="text-center">Remove Admin</h4>
+                                    <h4 class="text-center">Remove Risk Level</h4>
                                 </div>
                                 <div class="card-body">
-                                        <li class=" mt-1 list-group-item list-group-item-warning">
+                                    <li class=" mt-1 list-group-item list-group-item-warning">
+                                        <div class="row">
+                                            <div class="col-3 right">Risk Level</div>
+                                            <div class="col-8">Description</div>
+                                        </div>
+                                    </li>
+                                    <ul class="list-group flow">
+                                        {% for key,value in risk_data.items() %}
+                                        <li class=" mt-1 list-group-item list-group-item-light">
                                             <div class="row">
-                                                <div class="col-2 right">Admin Id</div>
-                                                <div class="col-3 right">Employee Id</div>
-                                                <div class="col-3 right">Privilege Level</div>
-                                                <div class="col-4">Username</div>
+                                                <div class="col-3 right">{{ key }}</div>
+                                                <div class="col-7">{{ value }}</div>
+                                                <div class="col-1">
+                                                    <button class="btn btn-outline-danger" onclick='load_modal(5,{{ key }})'>x</button>
+                                                </div>
                                             </div>
                                         </li>
-                                        <ul class="list-group">
-                                            <div class="flow">
-                                                {% for value in admin_data %}
-                                                <li class="list-group-item list-group-item-light">
-                                                    <div class="row">
-                                                        <div class="col-2 right">{{ value[0] }}</div>
-                                                        <div class="col-3 right">{{ value[1] }}</div>
-                                                        <div class="col-3 right">{{ value[2] }}</div>
-                                                        <div class="col-3">{{ value[3] }}</div>
-                                                        <div class="col-1">
-                                                            <button class="btn btn-outline-danger" onclick='load_modal(8,{{ value[0] }})'>x</button>
-                                                        </div>
-                                                    </div>
-                                                </li>
-                                                {% endfor %}
-                                            </div>
-                                        </ul>
-                                    </div>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>

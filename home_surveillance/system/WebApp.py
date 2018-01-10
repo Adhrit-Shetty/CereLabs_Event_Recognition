@@ -22,6 +22,7 @@ import Camera
 from flask_socketio import SocketIO, send, emit 
 import SurveillanceSystem
 import json
+import shutil
 import logging
 from logging.handlers import RotatingFileHandler
 import threading
@@ -52,7 +53,8 @@ app = Flask('SurveillanceWebServer')
 app.config['SECRET_KEY'] = os.urandom(24) # Used for session management
 socketio = SocketIO(app)
 photos = UploadSet('photos', IMAGES)
-app.config['UPLOADED_PHOTOS_DEST'] = 'uploads/imgs'
+base_dir = 'uploads/imgs/'
+app.config['UPLOADED_PHOTOS_DEST'] = base_dir 
 configure_uploads(app, photos)
 
 LOG_TAG = '[WEB_APP.PY]'
@@ -285,6 +287,8 @@ def register_employee():
     """Register an Employee"""
     error = None
     data = DataBase.clearance_master('get')()
+    emp_name =  dict((i[1],i[0]) for i in DataBase.employee('get')())
+    print(emp_name)
     emp_id = None
     g.user = 'admin' # Hack
     if request.method == 'POST' and g.user:
@@ -295,24 +299,43 @@ def register_employee():
             print('{} Clearance Level Data is incorrect'.format(LOG_TAG))
             error = "Please select a clearance level from the dropdown"
         if not error:
-            files = request.files.getlist('recog_data')
-            recog_data = list()
-            if len(files) > 0:
-                for file in files:
-                    filename = photos.save(file)
-                    name = request.form.get('name')
-                    image = 'uploads/imgs/' + filename
-                    with open(image, "rb") as imageFile:
-                        image_data = imageFile.read()
-                        recog_data.append(image_data)
-                        os.remove(image)
-            regex_to_match = re.compile('^[A-Za-z ]+$')
             name = request.form['fullname'].strip()
+            regex_to_match = re.compile('^[A-Za-z ]+$')
+            fname=""
             if not (len(name) > 0 and regex_to_match.match(name) != None):
                 error = "Name is invalid"
             if not error:
                 print('{} Valid data Posted'.format(LOG_TAG))
-                # TODO: Add module which converts recog_data to vector and returns it
+                try:
+                    if emp_name[name]:
+                        print('present!')
+                        fname = str(emp_name[name])
+                except KeyError:
+                    print('Not already registered!!')
+                    fname = str(DataBase.employee('insert')(name,int(clearance_level)))
+                    print(fname)
+                files = request.files.getlist('recog_data')
+                print(files)
+                recog_data = list()
+                if len(files) > 0:
+                    print(os.getcwd())
+                    if(os.path.isdir(os.getcwd()+'/uploads/imgs/' +fname) == True):
+                        print('deleted old folder!')
+                        shutil.rmtree(os.getcwd()+'/uploads/imgs/' +fname)
+                    os.mkdir(os.getcwd()+'/uploads/imgs/' +fname)
+                    app.config['UPLOADED_PHOTOS_DEST'] = base_dir+fname
+                    configure_uploads(app, photos)
+                    print(app.config['UPLOADED_PHOTOS_DEST'])    
+                    print('made dir')
+                    for file in files:
+                        filename = photos.save(file)
+                        print(filename)
+                        name = request.form.get('name')
+                        # image = 'uploads/imgs/' +fname+"/" +filename
+                        # with open(image, "rb") as imageFile:
+                        #     image_data = imageFile.read()
+                        #     recog_data.append(image_data)
+            # TODO: Add module which converts recog_data to vector and returns it
                 # emp_id = DataBase.employee('insert')(name, clearance_level, recog_data)
     return render_template('register_employee.html', error = error, data = data, emp_id = emp_id)
 

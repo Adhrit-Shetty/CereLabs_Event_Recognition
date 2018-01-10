@@ -251,11 +251,13 @@ class FaceRecogniser(object):
             logger.info(fname + " file is not empty")
             labels = pd.read_csv(fname, header=None).as_matrix()[:, 1]
             logger.info(labels)
+            fileStatus=True
         else:
             logger.info(fname + " file is empty")
-            labels = None  #creating a dummy string to start the process
+            labels = []  #creating a dummy string to start the process
+            fileStatus=False
         
-        if labels != None:
+        if fileStatus:
             logger.debug(map(os.path.dirname, labels))
             logger.debug(map(os.path.split,map(os.path.dirname, labels)))
             logger.debug(map(itemgetter(1),map(os.path.split,map(os.path.dirname, labels))))
@@ -272,35 +274,40 @@ class FaceRecogniser(object):
         else:
             fileStatus=False
             logger.info(fname + " file is empty")
-            embeddings = None #creating an empty array since csv is empty
+            embeddings = [] #creating an empty array since csv is empty
         
-        #Get vectors from database
+        # Vectors from database
         data = database.employee('getV')()
-        db_labels = list()
-        db_embeddings = list()
-        for i,row in enumerate(data):
-            addition = row[1].decode("utf-8")
-            addition = addition.split(sep=';')
-            db_labels = db_labels + list(str(row[0]) * len(addition))
-            if i==0:
-                db_embeddings = addition
-            else:
-                db_embeddings = db_embeddings + addition    
-        for i in range(0,len(db_embeddings)):
-            db_embeddings[i] = [float(v) for v in db_embeddings[i].split(sep=":")]
-        if labels == None:
-            labels = db_labels
-        else:
-            labels.extend(db_labels)
-        if embeddings == None:
-            embeddings = np.array(db_embeddings)
-        else:    
-            embeddings = embeddings + np.array(db_embeddings)
-        # print(np.shape(embeddings))
-        # print(np.shape(labels))
-        # print(embeddings[1])
+        if len(data) > 0:
+            print('Here-',data)
+            db_labels = list()
+            db_embeddings = list()
+            for i,row in enumerate(data):
+                if row[1] == None or row[1].decode("utf-8") == 'NULL':
+                    continue
+                addition = row[1].decode("utf-8")
+                addition = addition.split(sep=';')
+                db_labels = db_labels + list(str(row[0]) * len(addition))
+                if i==0:
+                    db_embeddings = addition
+                else:
+                    db_embeddings = db_embeddings + addition    
+            #Check if any vectors present in db
+            if len(db_embeddings) > 0:
+                for i in range(0,len(db_embeddings)):
+                    db_embeddings[i] = [float(v) for v in db_embeddings[i].split(sep=":")]
+                if not fileStatus:
+                    labels = db_labels
+                    embeddings = np.array(db_embeddings)
+                else:
+                    labels.extend(db_labels)
+                    embeddings = embeddings + np.array(db_embeddings)    
+            # print(np.shape(embeddings))
+            # print(np.shape(labels))
+            # print(embeddings[1])
+        
+        # Vectors into database
         if fileStatus:
-            #Store vectors in database
             rep_str = [""] * len(embeddings)
             for i,row in enumerate(embeddings):
                 rep_str[i] = ""

@@ -170,10 +170,15 @@ class SurveillanceSystem(object):
 
     def remove_camera(self, camNum):
         """remove a camera to the System and kill its processing thread"""
+        print('inside 1')
         self.cameras[camNum].captureThread.stop = False
+        print('inside 2')
         self.cameras[camNum].video.release()
+        print('inside 3')
         self.cameras.pop(camNum)
+        print('inside 4')
         self.cameraProcessingThreads.pop(camNum)
+        print('inside 5')
 
     def process_frame(self,camera):
         """This function performs all the frame proccessing.

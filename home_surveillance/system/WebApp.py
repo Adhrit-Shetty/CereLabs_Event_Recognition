@@ -351,7 +351,6 @@ def gen(camera):
 @app.route('/video_streamer/<camNum>')
 def video_streamer(camNum):
     """Used to stream frames to client, camNum represents the camera index in the cameras array"""
-    print('\n================\nsun zara\n================\n')
     print(HomeSurveillance.cameras[int(camNum)])
     return Response(gen(HomeSurveillance.cameras[int(camNum)]),
                     mimetype='multipart/x-mixed-replace; boundary=frame') # A stream where each part replaces the previous part the multipart/x-mixed-replace content type must be used.
@@ -402,16 +401,19 @@ def add_camera():
 @app.route('/remove_camera', methods = ['GET','POST'])
 def remove_camera():
     if request.method == 'POST':
-        print('In remove camera!')
         camID = request.form.get('camID')
+        print('In remove camera!', camID)
         sd, camNum = camID.split('_')
         app.logger.info("Removing camera: ")
         app.logger.info(camID)
         with HomeSurveillance.camerasLock:
+            print('Rem Camera Lock', sd, camNum)
             HomeSurveillance.remove_camera(int(camNum))
         app.logger.info("Removing camera number : " + camNum)
         data = {"alert_status": "removed"}
+        print("Returning")
         return jsonify(data)
+    print('heloo world')
     return render_template('index.html')
 
 # @app.route('/create_alert', methods = ['GET','POST'])
@@ -640,7 +642,6 @@ def connect():
     #         #print alertData
     #         app.logger.info(alertData)
     #         alerts.append(alertData)
-    '''
     allCameras = DataBase.cam_master('get')()
     with HomeSurveillance.camerasLock :
         for key, value in allCameras.items():
@@ -648,7 +649,6 @@ def connect():
             app.logger.info(cameraData)
             cameras.append(cameraData)
             HomeSurveillance.add_camera(SurveillanceSystem.Camera.IPCamera(value))
-    '''
     systemData = {'camNum': len(HomeSurveillance.cameras) ,
      'people': HomeSurveillance.peopleDB, 
      'cameras': cameras, 

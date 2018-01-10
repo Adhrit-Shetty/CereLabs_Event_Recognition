@@ -82,7 +82,13 @@ def master_remove():
     alert=None
     room_data = DataBase.room('get')(None,'room_id','description')
     clear_data = DataBase.clearance_master('get')()
-    print(clear_data)
+    privilege_data = DataBase.privilege_master('get')()
+    cam_data = DataBase.cam_master('get')()
+    risk_data = DataBase.risk_level_master('get')()
+    type_data = DataBase.type_master('get')()
+    employee_data = DataBase.employee('get')(None)
+    admin_data = DataBase.admin('get')(None)
+    print(admin_data)
     if request.method == 'POST':
         data = dict(request.form)
         id = data.get('id')[0]
@@ -92,7 +98,6 @@ def master_remove():
             output = DataBase.room('delete')(int(content[0]))
             print(output)
             if output == True:
-                # room_data = DataBase.room('get')(None,'room_id','description')
                 return Response(json.dumps({'url': output,'message':'Room is successfully removed'}), mimetype='text/json')
             else:
                 return Response(json.dumps({'url': output,'message':'Failed to remove room'}), mimetype='text/json')
@@ -101,11 +106,59 @@ def master_remove():
             output = DataBase.clearance_master('delete')(int(content[0]))
             print(output)
             if output == True:
-                # room_data = DataBase.room('get')(None,'room_id','description')
                 return Response(json.dumps({'url': output,'message':'Clearance level is successfully removed'}), mimetype='text/json')
             else:
                 return Response(json.dumps({'url': output,'message':'Failed to remove clearance level'}), mimetype='text/json')
-    return render_template('master_remove.html', room_data = room_data, clear_data = clear_data)
+        elif str(id) == '3':
+            print(id,content)
+            output = DataBase.cam_master('delete')(int(content[0]))
+            print(output)
+            if output == True:
+                return Response(json.dumps({'url': output,'message':'Camera is successfully removed'}), mimetype='text/json')
+            else:
+                return Response(json.dumps({'url': output,'message':'Failed to remove camera'}), mimetype='text/json')
+        elif str(id) == '4':
+            print(id,content)
+            output = DataBase.privilege_master('delete')(int(content[0]))
+            print(output)
+            if output == True:
+                return Response(json.dumps({'url': output,'message':'Privilege level is successfully removed'}), mimetype='text/json')
+            else:
+                return Response(json.dumps({'url': output,'message':'Failed to remove privilege level'}), mimetype='text/json')
+        elif str(id) == '5':
+            print(id,content)
+            output = DataBase.risk_level_master('delete')(int(content[0]))
+            print(output)
+            if output == True:
+                return Response(json.dumps({'url': output,'message':'Risk level is successfully removed'}), mimetype='text/json')
+            else:
+                return Response(json.dumps({'url': output,'message':'Failed to remove risk level'}), mimetype='text/json')
+        elif str(id) == '6':
+            print(id,content)
+            output = DataBase.type_master('delete')(int(content[0]))
+            print(output)
+            if output == True:
+                return Response(json.dumps({'url': output,'message':'Event type is successfully removed'}), mimetype='text/json')
+            else:
+                return Response(json.dumps({'url': output,'message':'Failed to remove event type'}), mimetype='text/json')
+        elif str(id) == '7':
+            print(id,content)
+            output = DataBase.employee('delete')(int(content[0]))
+            print(output)
+            if output == True:
+                return Response(json.dumps({'url': output,'message':'Employee is successfully removed'}), mimetype='text/json')
+            else:
+                return Response(json.dumps({'url': output,'message':'Failed to remove employee'}), mimetype='text/json')
+        elif str(id) == '8':
+            print(id,content)
+            output = DataBase.admin('delete')(int(content[0]))
+            print(output)
+            if output == True:
+                return Response(json.dumps({'url': output,'message':'Administrator is successfully removed'}), mimetype='text/json')
+            else:
+                return Response(json.dumps({'url': output,'message':'Failed to remove administrator'}), mimetype='text/json')
+    return render_template('master_remove.html', room_data = room_data, clear_data = clear_data, cam_data = cam_data, \
+     privilege_data = privilege_data, risk_data = risk_data, type_data = type_data,employee_data = employee_data, admin_data = admin_data)
      
    
 

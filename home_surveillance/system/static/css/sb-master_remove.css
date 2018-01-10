@@ -42,10 +42,11 @@
     /* max-width: 30vw; */
 }
 
-/* .list-group{
+.list-group{
     overflow-y: scroll;
     height: 20vh;
-} */
+    overflow-x: hidden
+}
 
 .right{
     border-right: rgb(105, 100, 100) 1px solid;

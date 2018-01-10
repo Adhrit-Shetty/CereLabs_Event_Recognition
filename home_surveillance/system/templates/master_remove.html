@@ -188,8 +188,103 @@
             </ol>
             <div class="row">
                 <div class="col-12">
-                    <div class="card-columns">
+                    <div class="row my-2">
+                        <div class="col-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <i class="fa fa-id-badge pull-left" style="font-size:32px" aria-hidden="true"></i>
+                                    <h4 class="text-center">Remove Privilege Level</h4>
+                                </div>
+                                <div class="card-body">
+                                    <li class=" mt-1 list-group-item list-group-item-warning">
+                                        <div class="row">
+                                            <div class="col-3 right">Privilege Level</div>
+                                            <div class="col-8">Description</div>
+                                        </div>
+                                    </li>
+                                    <ul class="list-group flow">
+                                        {% for key,value in privilege_data.items() %}
+                                        <li class=" mt-1 list-group-item list-group-item-light">
+                                            <div class="row">
+                                                <div class="col-3 right">{{ key }}</div>
+                                                <div class="col-7">{{ value }}</div>
+                                                <div class="col-1">
+                                                    <button class="btn btn-outline-danger" onclick='load_modal(4,{{ key }})'>x</button>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <i class="fa fa-id-badge pull-left" style="font-size:32px" aria-hidden="true"></i>
+                                    <h4 class="text-center">Remove Risk Level</h4>
+                                </div>
+                                <div class="card-body">
+                                    <li class=" mt-1 list-group-item list-group-item-warning">
+                                        <div class="row">
+                                            <div class="col-3 right">Risk Level</div>
+                                            <div class="col-8">Description</div>
+                                        </div>
+                                    </li>
+                                    <ul class="list-group flow">
+                                        {% for key,value in risk_data.items() %}
+                                        <li class=" mt-1 list-group-item list-group-item-light">
+                                            <div class="row">
+                                                <div class="col-3 right">{{ key }}</div>
+                                                <div class="col-7">{{ value }}</div>
+                                                <div class="col-1">
+                                                    <button class="btn btn-outline-danger" onclick='load_modal(5,{{ key }})'>x</button>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row my-2">
                         <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <i class="fa fa-home pull-left" style="font-size:32px" aria-hidden="true"></i>
+                                    <h4 class="text-center">Remove Camera</h4>
+                                </div>
+                                <div class="card-body">
+                                    <li class=" mt-1 list-group-item list-group-item-warning">
+                                        <div class="row">
+                                            <div class="col-2 right">Camera Id</div>
+                                            <div class="col-2 right">Room Id</div>
+                                            <div class="col-8">RTSP Link</div>
+                                        </div>
+                                    </li>
+                                    <ul class="list-group">
+                                        <div class="flow">
+                                            {% for value in cam_data %}
+                                            <li class="list-group-item list-group-item-light">
+                                                <div class="row">
+                                                    <div class="col-2 right">{{ value[0] }}</div>
+                                                    <div class="col-2 right">{{ value[1] }}</div>
+                                                    <div class="col-7">{{ value[2] }}</div>
+                                                    <div class="col-1">
+                                                        <button class="btn btn-outline-danger" onclick='load_modal(3,{{ value[0] }})'>x</button>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            {% endfor %}
+                                        </div>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row my-2">
+                        <div class="col-6">
                             <div class="card">
                                 <div class="card-header">
                                     <i class="fa fa-id-badge pull-left" style="font-size:32px" aria-hidden="true"></i>
@@ -218,7 +313,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-12">
+                        <div class="col-6">
                             <div class="card">
                                 <div class="card-header">
                                     <i class="fa fa-home pull-left" style="font-size:32px" aria-hidden="true"></i>
@@ -232,18 +327,12 @@
                                         </div>
                                     </li>
                                     <ul class="list-group">
-                                        <!-- <li class=" mt-1 list-group-item list-group-item-warning">
-                                                <div class="row">
-                                                    <div class="col-4 right">Room Id</div>
-                                                    <div class="col-8">Accessiblity</div>
-                                                </div>
-                                            </li> -->
                                         {% for key,value in room_data.items() %}
                                         <li class="list-group-item list-group-item-light">
                                             <div class="row">
                                                 <div class="col-3 right">{{ key }}</div>
                                                 <div class="col-7">{{ value }}</div>
-                                                <div class="col-1">
+                                                <div class="col-1 justify-content-end">
                                                     <button class="btn btn-outline-danger" onclick='load_modal(1,{{ key }})'>x</button>
                                                 </div>
                                             </div>
@@ -252,34 +341,103 @@
                                     </ul>
                                 </div>
                             </div>
-                            <div class="col-12">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <i class="fa fa-home pull-left" style="font-size:32px" aria-hidden="true"></i>
-                                        <h4 class="text-center">Remove Room</h4>
-                                    </div>
-                                    <div class="card-body">
+                        </div>
+                    </div>
+                    <div class="row my-2">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <i class="fa fa-home pull-left" style="font-size:32px" aria-hidden="true"></i>
+                                    <h4 class="text-center">Remove Event Type</h4>
+                                </div>
+                                <div class="card-body">
+                                    <li class=" mt-1 list-group-item list-group-item-warning">
+                                        <div class="row">
+                                            <div class="col-2 right">Event Type Id</div>
+                                            <div class="col-2 right">Risk Level</div>
+                                            <div class="col-8">Description</div>
+                                        </div>
+                                    </li>
+                                    <ul class="list-group">
+                                        <div class="flow">
+                                            {% for value in type_data %}
+                                            <li class="list-group-item list-group-item-light">
+                                                <div class="row">
+                                                    <div class="col-2 right">{{ value[0] }}</div>
+                                                    <div class="col-2 right">{{ value[1] }}</div>
+                                                    <div class="col-7">{{ value[2] }}</div>
+                                                    <div class="col-1">
+                                                        <button class="btn btn-outline-danger" onclick='load_modal(6,{{ value[0] }})'>x</button>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            {% endfor %}
+                                        </div>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row my-2">
+                        <div class="col-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <i class="fa fa-id-badge pull-left" style="font-size:32px" aria-hidden="true"></i>
+                                    <h4 class="text-center">Remove Employee</h4>
+                                </div>
+                                <div class="card-body">
+                                    <li class=" mt-1 list-group-item list-group-item-warning">
+                                        <div class="row">
+                                            <div class="col-3 right">Employee Id</div>
+                                            <div class="col-5 right">Name</div>
+                                            <div class="col-4">Clearance Level</div>
+                                        </div>
+                                    </li>
+                                    <ul class="list-group">
+                                        <div class="flow">
+                                            {% for value in employee_data %}
+                                            <li class="list-group-item list-group-item-light">
+                                                <div class="row">
+                                                    <div class="col-3 right">{{ value[0] }}</div>
+                                                    <div class="col-5 right">{{ value[1] }}</div>
+                                                    <div class="col-3">{{ value[2] }}</div>
+                                                    <div class="col-1">
+                                                        <button class="btn btn-outline-danger" onclick='load_modal(7,{{ value[0] }})'>x</button>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            {% endfor %}
+                                        </div>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <i class="fa fa-id-badge pull-left" style="font-size:32px" aria-hidden="true"></i>
+                                    <h4 class="text-center">Remove Admin</h4>
+                                </div>
+                                <div class="card-body">
                                         <li class=" mt-1 list-group-item list-group-item-warning">
                                             <div class="row">
-                                                <div class="col-3 right">Room Id</div>
-                                                <div class="col-8">Accessiblity</div>
+                                                <div class="col-2 right">Admin Id</div>
+                                                <div class="col-3 right">Employee Id</div>
+                                                <div class="col-3 right">Privilege Level</div>
+                                                <div class="col-4">Username</div>
                                             </div>
                                         </li>
                                         <ul class="list-group">
-                                            <!-- <li class=" mt-1 list-group-item list-group-item-warning">
-                                                        <div class="row">
-                                                            <div class="col-4 right">Room Id</div>
-                                                            <div class="col-8">Accessiblity</div>
-                                                        </div>
-                                                    </li> -->
                                             <div class="flow">
-                                                {% for key,value in room_data.items() %}
+                                                {% for value in admin_data %}
                                                 <li class="list-group-item list-group-item-light">
                                                     <div class="row">
-                                                        <div class="col-3 right">{{ key }}</div>
-                                                        <div class="col-7">{{ value }}</div>
+                                                        <div class="col-2 right">{{ value[0] }}</div>
+                                                        <div class="col-3 right">{{ value[1] }}</div>
+                                                        <div class="col-3 right">{{ value[2] }}</div>
+                                                        <div class="col-3">{{ value[3] }}</div>
                                                         <div class="col-1">
-                                                            <button class="btn btn-outline-danger" onclick='load_modal(1,{{ key }})'>x</button>
+                                                            <button class="btn btn-outline-danger" onclick='load_modal(8,{{ value[0] }})'>x</button>
                                                         </div>
                                                     </div>
                                                 </li>
@@ -287,55 +445,55 @@
                                             </div>
                                         </ul>
                                     </div>
-                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- /.container-fluid-->
-        <!-- /.content-wrapper-->
-        <footer class="sticky-footer">
-            <div class="container">
-                <div class="text-center">
-                    <small>Copyright &copy; Surveillance System</small>
-                </div>
+    </div>
+    <!-- /.container-fluid-->
+    <!-- /.content-wrapper-->
+    <footer class="sticky-footer">
+        <div class="container">
+            <div class="text-center">
+                <small>Copyright &copy; Surveillance System</small>
             </div>
-        </footer>
-        <!-- Scroll to Top Button-->
-        <a class="scroll-to-top rounded" href="#page-top">
-            <i class="fa fa-angle-up"></i>
-        </a>
-        <!-- Logout Modal-->
-        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
-                        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">×</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                        <a class="btn btn-primary" href="/logout">Logout</a>
-                    </div>
+        </div>
+    </footer>
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fa fa-angle-up"></i>
+    </a>
+    <!-- Logout Modal-->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                    <a class="btn btn-primary" href="/logout">Logout</a>
                 </div>
             </div>
         </div>
-        <div id="snackbar">Some text some message..</div>
-        <!-- All Modals are loaded here! -->
-        <div id="genMyModal"></div>
-        <!-- Bootstrap core JavaScript-->
-        <script src="../static/jquery/jquery.min.js"></script>
-        <script src="../static/popper/popper.min.js"></script>
-        <script src="../static/bootstrap/js/bootstrap.min.js"></script>
-        <!-- Core plugin JavaScript-->
-        <script src="../static/jquery-easing/jquery.easing.min.js"></script>
-        <!-- Custom scripts for all pages-->
-        <script src="../static/js/sb-admin.min.js"></script>
+    </div>
+    <div id="snackbar">Some text some message..</div>
+    <!-- All Modals are loaded here! -->
+    <div id="genMyModal"></div>
+    <!-- Bootstrap core JavaScript-->
+    <script src="../static/jquery/jquery.min.js"></script>
+    <script src="../static/popper/popper.min.js"></script>
+    <script src="../static/bootstrap/js/bootstrap.min.js"></script>
+    <!-- Core plugin JavaScript-->
+    <script src="../static/jquery-easing/jquery.easing.min.js"></script>
+    <!-- Custom scripts for all pages-->
+    <script src="../static/js/sb-admin.min.js"></script>
     </div>
     <script>
         function load_modal(id, data) {
@@ -352,6 +510,36 @@
                 case 2:
                     modalId1 = 'removeClearanceModal';
                     message = 'Are you sure you want to remove the clearance level?';
+                    post_data = data;
+                    break;
+                case 3:
+                    modalId1 = 'removeCameraModal';
+                    message = 'Are you sure you want to remove the camera?';
+                    post_data = data;
+                    break;
+                case 4:
+                    modalId1 = 'removePrivilegeModal';
+                    message = 'Are you sure you want to remove the privilege level?';
+                    post_data = data;
+                    break;
+                case 5:
+                    modalId1 = 'removeRiskModal';
+                    message = 'Are you sure you want to remove the risk level?';
+                    post_data = data;
+                    break;
+                case 6:
+                    modalId1 = 'removeEventTypeModal';
+                    message = 'Are you sure you want to remove the event type?';
+                    post_data = data;
+                    break;
+                case 7:
+                    modalId1 = 'removeEmployeeModal';
+                    message = 'Are you sure you want to remove the employee?';
+                    post_data = data;
+                    break;
+                case 8:
+                    modalId1 = 'removeAdminModal';
+                    message = 'Are you sure you want to remove the administrator?';
                     post_data = data;
                     break;
 
@@ -394,12 +582,12 @@
                     console.log('form was submitted');
                     if (data['url'] == true) {
                     }
-                    else{
+                    else {
                         var x = document.getElementById("snackbar");
-                        x.style.setProperty('background-color','#ffa300');
+                        x.style.setProperty('background-color', '#ffa300');
                     }
                     show_snackbar(data['message']);
-                    
+
                 },
                 error: function () {
                     console.log('faiure to submit form')
@@ -408,7 +596,8 @@
         }
         function show_snackbar(data) {
             var x = document.getElementById("snackbar")
-            x.innerHTML = data
+            x.innerHTML = `<div class="container"><div class="row"><h4>${data}</h4></div>
+                           <div class="row"><p>Please wait for the page to reload...</p></div></div>`
             x.className = "show";
             setTimeout(function () {
                 x.className = x.className.replace("show", "");

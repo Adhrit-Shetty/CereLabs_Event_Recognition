@@ -779,9 +779,10 @@ class SurveillanceSystem(object):
             output_file = output_dir+'/Alert-'+str(alert.alert_count)+'.avi'
             if not os.path.isdir(output_dir):
                 os.mkdir(output_dir)
+            print('alert is: ', alert.my_alert)
             alert.socket.emit('new_alert', json.dumps(alert.my_alert), namespace="/surveillance")
             alert.action_taken = True
-            '''
+            
             # Store Clip
             fourcc = cv2.VideoWriter_fourcc(*'XVID')
             out = cv2.VideoWriter(output_file, fourcc, 20.0, (1280,720))
@@ -795,7 +796,7 @@ class SurveillanceSystem(object):
                 if cv2.waitKey(1) & int(duration) >= 30:
                     break
             out.release()
-            '''
+            
     def add_face(self, db, name, image, upload):
         """Adds face to directory used for training the classifier"""
         #security clearance left

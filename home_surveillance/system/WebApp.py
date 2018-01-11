@@ -75,6 +75,15 @@ def login():
             elif auth[0] == True:
                 print('{} {} has logged in successfully'.format(LOG_TAG, request.form['username']))
                 session['user'] = request.form['username']
+                if HomeSurveillance.recogniser.classifierFlag:
+                    print("retrain through login page")
+                    app.logger.info("retrain through login page")
+                    o_fname, n_fname, o_fname2, n_fname2, retrained = HomeSurveillance.recogniser.trainClassifier(DataBase)#calling the module in FaceRecogniser to start training
+                    #print(o_fname, n_fname, o_fname2, n_fname2)
+                    HomeSurveillance.trainingEvent.clear() # Block processing threads
+                    HomeSurveillance.recogniser.switchClassifiers(o_fname, n_fname, o_fname2, n_fname2)
+                    HomeSurveillance.trainingEvent.set() # Release processing threads       
+                    app.logger.info("Finished re-training")
                 return redirect(url_for('home'))
     
     return render_template('login.html', error = error)
@@ -732,15 +741,14 @@ def connect():
     #         #print alertData
     #         app.logger.info(alertData)
     #         alerts.append(alertData)
-    if not HomeSurveillance.recogniser.classifierFlag:
-        return
+    # if HomeSurveillance.recogniser.classifierFlag:
     allCameras = DataBase.cam_master('get')('NULL')
     # print(allCameras)
-    db_url_list = [val[1] for val in allCameras.items()]
-    url_list = [c.url for c in HomeSurveillance.cameras]
-    print("DB: {}".format(db_url_list))
-    print("System: {}".format(url_list))
     with HomeSurveillance.camerasLock :
+        db_url_list = [val[1] for val in allCameras.items()]
+        url_list = [c.url for c in HomeSurveillance.cameras]
+        print("DB: {}".format(db_url_list))
+        print("System: {}".format(url_list))
         for key, value in allCameras.items():
             if not value in url_list:
                 cameraData = {'camNum': key, 'url': value}
@@ -757,7 +765,7 @@ def connect():
         'onConnect': True}
     #Create default alert 
     with HomeSurveillance.alertsLock:
-        HomeSurveillance.alerts.append(SurveillanceSystem.Alert(socketio, '', 'all', 'Recognition', '2', '', '', 0, 1))
+        HomeSurveillance.alerts.append(SurveillanceSystem.Alert(socketio, '', 'all', 'Recognition', 'unknown', '', '', 0, 1))
     socketio.emit('system_data', json.dumps(systemData) ,namespace='/surveillance')
 
 @socketio.on('disconnect', namespace='/surveillance')

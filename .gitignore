@@ -1,3 +1,7 @@
+
+# Stored video files
+*.avi
+
 # Pickle
 *.pkl
 

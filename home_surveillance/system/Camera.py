@@ -103,7 +103,7 @@ class IPCamera(object):
 		self.captureThread.daemon = True
 		self.captureThread.start()
 		self.captureThread.stop = False
-
+	
 	def __del__(self):
 		self.video.release()
 
@@ -164,7 +164,7 @@ class IPCamera(object):
 		frame = ImageUtils.resize_mjpeg(frame)
 		ret, jpeg = cv2.imencode('.jpg', frame)
 		return jpeg.tostring()
-	
+			
 	def dump_video_info(self):
 		logger.info("---------Dumping video feed info---------------------")
 		logger.info("Position of the video file in milliseconds or video capture timestamp: ")

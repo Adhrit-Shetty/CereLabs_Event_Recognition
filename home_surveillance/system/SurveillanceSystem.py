@@ -199,7 +199,7 @@ class SurveillanceSystem(object):
              frame = camera.read_frame()
              if np.array_equal(frame, camera.tempFrame):  # Checks to see if the new frame is the same as the previous frame
                  continue
-             frame = ImageUtils.resize(frame)
+             #frame = ImageUtils.resize(frame)
              height, width, channels = frame.shape
 
             # Frame rate calculation 
@@ -528,7 +528,7 @@ class SurveillanceSystem(object):
                                 else:
                                     logger.info( "==> More Than One Face Detected <==")
                                     # if tracker is already tracking the identified face make an update 
-                                    if self.recogniser.getSquaredl2Distance(camera.trackers[i].person.rep ,predictions['rep']) < 0.6 and camera.trackers[i].person.identity == predictions['name']: 
+                                    if self.recogniser.getSquaredl2Distance(camera.trackers[i].person.rep ,predictions['rep']) < 0.8 and camera.trackers[i].person.identity == predictions['name']: 
                                         if camera.trackers[i].person.confidence < predictions['confidence']:
                                             camera.trackers[i].person.confidence = predictions['confidence']
                                             if camera.trackers[i].person.confidence > self.confidenceThreshold:
@@ -691,18 +691,11 @@ class SurveillanceSystem(object):
               for alert in self.alerts:
                 logger.debug('checking alert')
                 if alert.action_taken == False: # If action hasn't been taken for event 
-                    if alert.alarmState != 'All':  # Check states
-                        if  alert.alarmState == self.alarmState: 
-                            logger.debug('checking alarm state')
-                            alert.event_occurred = self.check_camera_events(alert)
-                        else:
-                          continue # Alarm not in correct state check next alert
-    
-                    else:
-                        alert.event_occurred = self.check_camera_events(alert)
+                   self.check_camera_events(alert)
                 else:
-                    if (time.time() - alert.eventTime) > 300: # Reinitialize event 5 min after event accured
+                    if (time.time() - alert.eventTime) > 30: # Reinitialize event 5 min after event accured
                         logger.info( "reinitiallising alert: " + alert.id)
+                        print('Alert reinitialised!')
                         alert.reinitialise()
                     continue 
 
@@ -712,14 +705,13 @@ class SurveillanceSystem(object):
         """Used to check state of cameras
         to determine whether an event has occurred"""
 
-        if alert.camera != 'All':  # Check cameras   
+        if alert.camera != 'All' and alert.camera != 'all':  # Check cameras   
             logger.info( "alertTest" + alert.camera)
             if alert.event == 'Recognition': #Check events
                 logger.info(  "checkingalertconf "+ str(alert.confidence) + " : " + alert.person)
                 for person in self.cameras[int(alert.camera)].people.values():
                     logger.info( "checkingalertconf "+ str(alert.confidence )+ " : " + alert.person + " : " + person.identity)
                     if alert.person == person.identity: # Has person been detected
-                       
                         if alert.person == "unknown" and (100 - person.confidence) >= alert.confidence:
                             logger.info( "alertTest2" + alert.camera)
                             cv2.imwrite("notification/image.png", self.cameras[int(alert.camera)].processing_frame)#
@@ -745,78 +737,67 @@ class SurveillanceSystem(object):
             if alert.event == 'Recognition': # Check events
                 with self.camerasLock :
                     cameras = self.cameras
-                for camera in cameras: # Look through all cameras
+                for i,camera in enumerate(cameras): # Look through all cameras
                     for person in camera.people.values():
                         if alert.person == person.identity: # Has person been detected
-                            if alert.person == "unknown" and (100 - person.confidence) >= alert.confidence:
-                                cv2.imwrite("notification/image.png", camera.processing_frame)#
-                                self.take_action(alert)
-                                return True
-                            elif person.confidence >= alert.confidence:
-                                cv2.imwrite("notification/image.png", camera.processing_frame)#
-                                self.take_action(alert)
-                                return True
-               
+                            print(person.identity)
+                            alert.my_alert = { 
+                                'message': alert.alertString, 
+                                'camera': i,
+                                'time': time.strftime('%H:%M:%S', time.localtime()), 
+                                'event_type': alert.event,
+                                'risk_level': alert.riskLevel}
+                            cv2.imwrite("notification/image.png", camera.processing_frame)#
+                            alert.event_occurred = True
+                            self.take_action(alert, camera, i)
+                            return True
                 return False # Person has not been detected check next alert   
 
             else:
                 with  self.camerasLock :
-                    for camera in self.cameras: # Look through all cameras
+                    cameras = self.cameras
+                for i,camera in enumerate(cameras): # Look through all cameras
                         if camera.motion == True: # Has motion been detected
+                            alert.my_alert = { 
+                                'message': alert.alertString, 
+                                'camera': i,
+                                'time': time.strftime('%H:%M:%S', time.localtime()), 
+                                'event_type': alert.event,
+                                'risk_level': alert.riskLevel }
                             cv2.imwrite("notification/image.png", camera.processing_frame)#
-                            self.take_action(alert)
+                            alert.event_occurred = True
+                            self.take_action(alert, camera, i)
                             return True
 
                 return False # Motion was not detected check next camera
 
-    def take_action(self,alert): 
-        """Sends email alert and/or triggers the alarm"""
-        #print(alert.actions)
+    def take_action(self, alert, camera, camNum): 
+        """Emits message via socket"""
         # logger.info( "Taking action: ==" + alert.actions)
         if alert.action_taken == False: # Only take action if alert hasn't accured - Alerts reinitialise every 5 min for now
             alert.eventTime = time.time()  
-            if alert.actions['email_alert'] == 'true':
-                logger.info( "email notification being sent")
-                self.send_email_notification_alert(alert)
-            if alert.actions['trigger_alarm'] == 'true':
-                logger.info( "triggering alarm1")
-                self.trigger_alarm()
-                logger.info( "alarm1 triggered")
+            print(alert.my_alert)
+            output_dir = fileDir+'/Output/Camera'+str(camNum)+'/'
+            output_file = output_dir+'/Alert-'+str(alert.alert_count)+'.avi'
+            if not os.path.isdir(output_dir):
+                os.mkdir(output_dir)
+            alert.socket.emit('new_alert', json.dumps(alert.my_alert), namespace="/surveillance")
             alert.action_taken = True
-
-    def send_email_notification_alert(self,alert):
-      """ Code produced in this tutorial - http://naelshiab.com/tutorial-send-email-python/"""
-      print(alert.alertString)  
-      '''
-      fromaddr = "home.face.surveillance@gmail.com"
-      toaddr = alert.emailAddress
-
-      msg = MIMEMultipart()
-       
-      msg['From'] = fromaddr
-      msg['To'] = toaddr
-      msg['Subject'] = "HOME SURVEILLANCE"
-       
-      body = "NOTIFICATION ALERT:" +  alert.alertString + ""
-       
-      msg.attach(MIMEText(body, 'plain'))
-       
-      filename = "image.png"
-      attachment = open("notification/image.jpeg", "rb")    
-      part = MIMEBase('application', 'octet-stream')
-      part.set_payload((attachment).read())
-      encoders.encode_base64(part)
-      part.add_header('Content-Disposition', "attachment; filename= %s" % filename)
-       
-      msg.attach(part)
-       
-      server = smtplib.SMTP('smtp.gmail.com', 587)
-      server.starttls()
-      server.login(fromaddr, "facialrecognition")
-      text = msg.as_string()
-      server.sendmail(fromaddr, toaddr, text)
-      server.quit()
-    '''
+            '''
+            # Store Clip
+            fourcc = cv2.VideoWriter_fourcc(*'XVID')
+            out = cv2.VideoWriter(output_file, fourcc, 20.0, (1280,720))
+            while True:
+                frame = camera.read_frame()
+                #frame = cv2.flip(frame,0)
+                #print(np.shape(frame))
+                out.write(frame)
+                #cv2.imshow('',frame)
+                duration = time.time() - alert.eventTime
+                if cv2.waitKey(1) & int(duration) >= 30:
+                    break
+            out.release()
+            '''
     def add_face(self, db, name, image, upload):
         """Adds face to directory used for training the classifier"""
         #security clearance left
@@ -976,15 +957,15 @@ class Alert(object):
 
     alert_count = 1
 
-    def __init__(self,alarmState,camera, event, person, actions, emailAddress, confidence):   
+    def __init__(self, socket, alarmState,camera, event, person, actions, emailAddress, confidence, riskLevel):   
         logger.info( "alert_"+str(Alert.alert_count)+ " created")
        
 
         if  event == 'Motion':
             self.alertString = "Motion detected in camera " + camera 
         else:
-            self.alertString = person + " was recognised in camera " + camera + " with a confidence greater than " + str(confidence)
-
+            self.alertString = person + " was detected!"
+        self.socket =socket
         self.id = "alert_" + str(Alert.alert_count)
         self.event_occurred = False
         self.action_taken = False
@@ -994,13 +975,10 @@ class Alert(object):
         self.person = person
         self.confidence = confidence
         self.actions = actions
-        if emailAddress == None:
-            self.emailAddress = "bjjoffe@gmail.com"
-        else:
-            self.emailAddress = emailAddress
-
+        self.emailAddress = emailAddress
         self.eventTime = 0
-
+        self.my_alert = None
+        self.riskLevel = riskLevel
         Alert.alert_count += 1
 
     def reinitialise(self):

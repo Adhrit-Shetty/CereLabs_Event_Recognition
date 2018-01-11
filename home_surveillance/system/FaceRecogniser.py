@@ -89,15 +89,18 @@ class FaceRecogniser(object):
         self.neuralNetLock = threading.Lock()
         self.predictor = dlib.shape_predictor(args.dlibFacePredictor)
         self.clf, self.le, self.clf2, self.le2 = [None] * 4
+        self.classifierFlag = False
         if os.path.isfile("generated-embeddings/lgbm_classifier.pkl"):
             logger.info("Opening classifier.pkl to load existing known faces db")
             if os.path.getsize("generated-embeddings/lgbm_classifier.pkl") > 0:
                 with open("generated-embeddings/lgbm_classifier.pkl", 'rb') as f: # le = labels, clf = classifier
                     (self.le, self.clf) = pickle.load(f, encoding='latin1')# Loads labels and classifier SVM or GMM
+                self.classifierFlag = True
         if os.path.isfile("generated-embeddings/knc_classifier.pkl"):
             if os.path.getsize("generated-embeddings/knc_classifier.pkl") > 0:
                 with open("generated-embeddings/knc_classifier.pkl", 'rb') as f: # le = labels, clf = classifier
                     (self.le2, self.clf2) = pickle.load(f, encoding='latin1')# Loads labels and classifier SVM or GMM
+                self.classifierFlag = True
 
     def make_prediction(self,rgbFrame,bb):
         """The function uses the location of a face
@@ -108,15 +111,12 @@ class FaceRecogniser(object):
         These measurements are known as an embedding, and are used
         by the classifier to predict the identity of the person"""
 
-        if self.clf == None or self.clf2 == None:
-            print('No classifier!')
-            return None
-
         landmarks = self.align.findLandmarks(rgbFrame, bb)
         if landmarks == None:
             logger.info("///  FACE LANDMARKS COULD NOT BE FOUND  ///")
             return None
-        alignedFace = self.align.align(args.imgDim, 
+        alignedFace = self.align.align(
+            args.imgDim, 
             rgbFrame, 
             bb,
             landmarks=landmarks,
@@ -138,24 +138,34 @@ class FaceRecogniser(object):
             return persondict, alignedFace
 
     def recognize_face(self,img):
+        threshold = 0.75
+        distanceThreshold = 0.75
+        variance = 0.0
+        factor = 1.6
+
         if self.getRep(img) is None:
             return None
         rep1 = self.getRep(img) # Gets embedding representation of image
         logger.info("Embedding returned. Reshaping the image and flatting it out in a 1 dimension array.")
         rep = rep1.reshape(1, -1)   #take the image and  reshape the image array to a single line instead of 2 dimensionals
         start = time.time()
+        
         logger.info("Submitting array for prediction.")
         predictions = self.clf.predict_proba(rep).ravel() # Computes probabilities of possible outcomes for samples in classifier(clf).
         neigh_dist, neigh_ind = self.clf2.kneighbors(rep, n_neighbors=1, return_distance=True)
         #logger.info("We need to dig here to know why the probability are not right.")
         maxI = np.argmax(predictions)
         person1 = self.le.inverse_transform(maxI)
-        print(person1, neigh_dist[0][0])
-        if neigh_dist[0][0] >= 0.75:
-            person1 = "unknown"
+        print("D-",neigh_ind, neigh_dist)
+        
+        if neigh_dist[0][0] >= distanceThreshold:
+            variance = neigh_dist[0][0] - distanceThreshold
+            threshold = threshold + variance * factor
+        print("Threshold-",threshold)
+        if predictions[maxI] <= threshold and person1 != "possible_intuder":
+            person1 = "possible_intruder"
         
         confidence1 = int(math.ceil(predictions[maxI]*100))
-
         logger.info("Recognition took {} seconds.".format(time.time() - start))
         logger.info("Recognized {} with {:.2f} confidence.".format(person1, confidence1))
 
@@ -279,7 +289,6 @@ class FaceRecogniser(object):
         # Vectors from database
         data = database.employee('getV')()
         if len(data) > 0:
-            print('Here-',data)
             db_labels = list()
             db_embeddings = list()
             for i,row in enumerate(data):

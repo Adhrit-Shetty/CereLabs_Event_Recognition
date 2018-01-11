@@ -342,9 +342,9 @@ def gen(camera):
     class, you can see all detection bounding boxes. This
     however slows down streaming and therefore read_jpg()
     is recommended"""
-    print('Entered gen')
+    #print('Entered gen')
     while True:
-        frame = camera.read_jpg()    # read_jpg()  # read_processed()    
+        frame = camera.read_processed()    # read_jpg()  # read_processed()    
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')  # Builds 'jpeg' data with header and payload
 
@@ -642,18 +642,22 @@ def connect():
     #         #print alertData
     #         app.logger.info(alertData)
     #         alerts.append(alertData)
-    allCameras = DataBase.cam_master('get')()
-    with HomeSurveillance.camerasLock :
-        for key, value in allCameras.items():
-            cameraData = {'camNum': key, 'url': value}
-            app.logger.info(cameraData)
-            cameras.append(cameraData)
-            HomeSurveillance.add_camera(SurveillanceSystem.Camera.IPCamera(value))
-    systemData = {'camNum': len(HomeSurveillance.cameras) ,
-     'people': HomeSurveillance.peopleDB, 
-     'cameras': cameras, 
-    #  'alerts': alerts, 
-     'onConnect': True}
+    if HomeSurveillance.recogniser.classifierFlag:
+        allCameras = DataBase.cam_master('get')()
+        with HomeSurveillance.camerasLock :
+            for key, value in allCameras.items():
+                cameraData = {'camNum': key, 'url': value}
+                app.logger.info(cameraData)
+                cameras.append(cameraData)
+                HomeSurveillance.add_camera(SurveillanceSystem.Camera.IPCamera(value))
+        systemData = {'camNum': len(HomeSurveillance.cameras) ,
+         'people': HomeSurveillance.peopleDB, 
+         'cameras': cameras, 
+        #  'alerts': alerts, 
+         'onConnect': True}
+        #Create default alert 
+        with HomeSurveillance.alertsLock:
+            HomeSurveillance.alerts.append(SurveillanceSystem.Alert(socketio, '', 'all', 'Recognition', '2', '', '', 0, 1))
     socketio.emit('system_data', json.dumps(systemData) ,namespace='/surveillance')
 
 @socketio.on('disconnect', namespace='/surveillance')

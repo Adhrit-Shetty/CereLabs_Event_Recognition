@@ -649,12 +649,13 @@ def update_faces():
         thumbnail = None
         with HomeSurveillance.camerasLock :
             for i, camera in enumerate(HomeSurveillance.cameras):
+                print("{}---{}".format(i,HomeSurveillance.cameras[i].url))
                 with HomeSurveillance.cameras[i].peopleDictLock:
                     for key, person in camera.people.items():  
                         persondict = {'identity': key , 'confidence': person.confidence, 'camera': i, 'timeD':person.time, 'prediction': person.identity,'thumbnailNum': len(person.thumbnails)}
                         app.logger.info(persondict)
                         peopledata.append(persondict)
-
+        # print(peopledata)
         socketio.emit('people_detected', json.dumps(peopledata) ,namespace='/surveillance')
         time.sleep(4)
 
@@ -731,13 +732,22 @@ def connect():
     #         #print alertData
     #         app.logger.info(alertData)
     #         alerts.append(alertData)
+    
     allCameras = DataBase.cam_master('get')('NULL')
+    # print(allCameras)
+    db_url_list = [val[1] for val in allCameras.items()]
+    url_list = [c.url for c in HomeSurveillance.cameras]
+    print("DB: {}".format(db_url_list))
+    print("System: {}".format(url_list))
     with HomeSurveillance.camerasLock :
         for key, value in allCameras.items():
-            cameraData = {'camNum': key, 'url': value}
-            app.logger.info(cameraData)
-            cameras.append(cameraData)
-            HomeSurveillance.add_camera(SurveillanceSystem.Camera.IPCamera(value))
+            if not value in url_list:
+                cameraData = {'camNum': key, 'url': value}
+                app.logger.info(cameraData)
+                cameras.append(cameraData)
+                HomeSurveillance.add_camera(SurveillanceSystem.Camera.IPCamera(value))
+            else:
+                print('cam already present')
     systemData = {'camNum': len(HomeSurveillance.cameras) ,
      'people': HomeSurveillance.peopleDB, 
      'cameras': cameras, 

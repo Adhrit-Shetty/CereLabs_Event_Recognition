@@ -14,6 +14,7 @@
   <link href="static/font-awesome/css/font-awesome.css" rel="stylesheet" type="text/css">
   <!-- Custom styles for this template-->
   <link href="static/css/sb-admin.css" rel="stylesheet">
+  <link href="static/css/main.css" rel="stylesheet">
 </head>
 
 <body class="fixed-nav sticky-footer bg-dark" id="page-top">
@@ -354,39 +355,39 @@
     $('#removeCamModal').modal('show');
     }
 
-    function addCamera() {
-      //getting selected option from dropdowns
+    // function addCamera() {
+    //   //getting selected option from dropdowns
 
-      var camURL = document.getElementById("camURL").value;
+    //   var camURL = document.getElementById("camURL").value;
 
-      var icon = '<i class="fa fa-video-camera fa-3x" aria-hidden="true"></i>'
-      var icondiv = '<div class="product-info">' + icon + '</div>'
+    //   var icon = '<i class="fa fa-video-camera fa-3x" aria-hidden="true"></i>'
+    //   var icondiv = '<div class="product-info">' + icon + '</div>'
 
-      $('#addcam').html('<div><i class="fa fa-spin fa-cog fa-3x fa-fw" style="font-size:12px;"></i> Adding Camera</div>');
+    //   $('#addcam').html('<div><i class="fa fa-spin fa-cog fa-3x fa-fw" style="font-size:12px;"></i> Adding Camera</div>');
 
-      console.log("Front end logging:" + camURL);
-      $.ajax({
-        type: "POST",
-        url: "{{ url_for('add_camera') }}",
-        data: { 'camURL': camURL },
-        success: function (cam) {
-          console.log(cam);
+    //   console.log("Front end logging:" + camURL);
+    //   $.ajax({
+    //     type: "POST",
+    //     url: "{{ url_for('add_camera') }}",
+    //     data: { 'camURL': camURL },
+    //     success: function (cam) {
+    //       console.log(cam);
 
-          loadingText = `<div class="text-center">${icon}<div><strong>Camera ${cam.camNum} FPS: </strong><strong id="camera_${cam.camNum}_fps">Loading... </strong></div><div>${camURL}</div></div>`;
-          $('#system-cameras').append(`<div class="alert alert-success alert-dismissable fade show">
-          <button type="button" class="close" data-dismiss="alert" aria-hidden="false" onclick="removeCameraHelper(this.id)" id="camera_${cam.camNum}"
-          >&times;</button>${loadingText}</div>`);
+    //       loadingText = `<div class="text-center">${icon}<div><strong>Camera ${cam.camNum} FPS: </strong><strong id="camera_${cam.camNum}_fps">Loading... </strong></div><div>${camURL}</div></div>`;
+    //       $('#system-cameras').append(`<div class="alert alert-success alert-dismissable fade show">
+    //       <button type="button" class="close" data-dismiss="alert" aria-hidden="false" onclick="removeCameraHelper(this.id)" id="camera_${cam.camNum}"
+    //       >&times;</button>${loadingText}</div>`);
 
-          $('#surveillance_panel').append(`<div class="col-12 col-sm-6 col-md-4"><div class="card"><img class="card-img" id="${cam.camNum}" src="/video_streamer/${cam.camNum}"/><div class="card-img-overlay"><h7 class="card-title" style="color: #fff">${cam.camNum}</h7></div></div></div>`);
+    //       $('#surveillance_panel').append(`<div class="col-12 col-sm-6 col-md-4"><div class="card"><img class="card-img" id="${cam.camNum}" src="/video_streamer/${cam.camNum}"/><div class="card-img-overlay"><h7 class="card-title" style="color: #fff">${cam.camNum}</h7></div></div></div>`);
 
-          $('#addcam').html('Add Camera');
+    //       $('#addcam').html('Add Camera');
 
-        },
-        error: function (error) {
-          console.log(error);
-        }
-      });
-    }
+    //     },
+    //     error: function (error) {
+    //       console.log(error);
+    //     }
+    //   });
+    // }
 
     function retrainClassifier() {
 

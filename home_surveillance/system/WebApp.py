@@ -742,21 +742,23 @@ def connect():
     #         app.logger.info(alertData)
     #         alerts.append(alertData)
     # if HomeSurveillance.recogniser.classifierFlag:
+      # print(allCameras)
     allCameras = DataBase.cam_master('get')('NULL')
-    # print(allCameras)
+    db_url_list = [val[1] for val in allCameras.items()]
+    url_list = [c.url for c in HomeSurveillance.cameras]
+    print("DB: {}".format(db_url_list))
+    print("System: {}".format(url_list))
+    print(cameraData)
     with HomeSurveillance.camerasLock :
-        db_url_list = [val[1] for val in allCameras.items()]
-        url_list = [c.url for c in HomeSurveillance.cameras]
-        print("DB: {}".format(db_url_list))
-        print("System: {}".format(url_list))
         for key, value in allCameras.items():
+            cameraData = {'camNum': key, 'url': value}
+            app.logger.info(cameraData)
+            cameras.append(cameraData)    
             if not value in url_list:
-                cameraData = {'camNum': key, 'url': value}
-                app.logger.info(cameraData)
-                cameras.append(cameraData)
                 HomeSurveillance.add_camera(SurveillanceSystem.Camera.IPCamera(value))
             else:
                 print('cam already present')
+    print(cameraData)
     systemData = {
         'camNum': len(HomeSurveillance.cameras) ,
         'people': HomeSurveillance.peopleDB, 

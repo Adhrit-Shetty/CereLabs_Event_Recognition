@@ -273,6 +273,7 @@
     <!-- Core plugin JavaScript-->
     <script src="static/jquery-easing/jquery.easing.js"></script>
     <script src="static/js/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/async/2.6.0/async.js"></script>
     <!-- <script src="static/plugins/knob/jquery.knob.js"></script> -->
     <script src="static/plugins/knob/jquery.knob.js"></script>
     <!-- Custom scripts for all pages-->
@@ -729,28 +730,33 @@
         }
         camera_string = camera_string + '<option value="All">All</option>';
         $('#cameras').html(camera_string);
-
+        console.log('------------------------------OUT---------------------------------------------------');
         if (system_data.onConnect == true) {
 
           var icon = '<i class="fa fa-video-camera fa-3x" aria-hidden="true"></i>'
           var icondiv = '<div class="product-info">' + icon + '</div>'
-
+          console.log('------------------------------IN---------------------------------------------------');
+          console.log(system_data.cameras);
           var i = 0;
-          for (; i < system_data.cameras.length; i++) {
-
-            var elementExists = document.getElementById("camera_" + system_data.cameras[i].camNum)
+          // for (; i < system_data.cameras.length; i++) {
+          async.each(system_data.cameras, function(value, next) {
+            console.log(value);
+            var elementExists = document.getElementById("camera_" + value.camNum)
             if (elementExists != null) {
-              break;
+              // break;
+              next("Wrong!")
             }
 
-            loadingText = `<div class="text-center">${icon}<div><strong>Camera ${system_data.cameras[i].camNum} FPS: </strong><strong id="camera_${system_data.cameras[i].camNum}_fps">Loading... </strong></div><div>${system_data.cameras[i].url}</div></div>`;
+            loadingText = `<div class="text-center">${icon}<div><strong>Camera ${value.camNum} FPS: </strong><strong id="camera_${value.camNum}_fps">Loading... </strong></div><div>${value.url}</div></div>`;
             $('#system-cameras').append(`<div class="alert alert-success alert-dismissable fade show">
-            <button type="button" class="close" data-dismiss="alert" aria-hidden="false" onclick="removeCameraHelper(this.id)" id="camera_${system_data.cameras[i].camNum}"
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="false" onclick="removeCameraHelper(this.id)" id="camera_${value.camNum}"
             >&times;</button>${loadingText}</div>`);
-
-            $('#surveillance_panel').append(`<div class="col-12 col-sm-6 col-md-4"><div class="card"><img class="card-img" id="${system_data.cameras[i].camNum}" src="/video_streamer/${system_data.cameras[i].camNum}" width="33%" height="20%"><div class="card-img-overlay"><h7 class="card-title" style="color: #fff;">${system_data.cameras[i].camNum}</h7></div></div></div>`);
-
-          }
+            setTimeout(function(){
+              $('#surveillance_panel').append(`<div class="col-12 col-sm-6 col-md-4"><div class="card"><img class="card-img" id="${ value.camNum }" src="/video_streamer/${ value.camNum }" width="33%" height="20%"><div class="card-img-overlay"><h7 class="card-title" style="color: #fff;">${ value.camNum }</h7></div></div></div>`);
+            }, 100);
+          }, function(err) {
+            console.log("ERRRPR HERE!!");
+          });
         }
 
       });

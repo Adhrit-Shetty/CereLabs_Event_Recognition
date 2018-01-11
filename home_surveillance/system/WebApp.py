@@ -22,6 +22,7 @@ import Camera
 from flask_socketio import SocketIO, send, emit 
 import SurveillanceSystem
 import json
+import shutil
 import logging
 from logging.handlers import RotatingFileHandler
 import threading
@@ -52,7 +53,8 @@ app = Flask('SurveillanceWebServer')
 app.config['SECRET_KEY'] = os.urandom(24) # Used for session management
 socketio = SocketIO(app)
 photos = UploadSet('photos', IMAGES)
-app.config['UPLOADED_PHOTOS_DEST'] = 'uploads/imgs'
+base_dir = 'uploads/imgs/'
+app.config['UPLOADED_PHOTOS_DEST'] = base_dir 
 configure_uploads(app, photos)
 
 LOG_TAG = '[WEB_APP.PY]'
@@ -82,7 +84,13 @@ def master_remove():
     alert=None
     room_data = DataBase.room('get')(None,'room_id','description')
     clear_data = DataBase.clearance_master('get')()
-    print(clear_data)
+    privilege_data = DataBase.privilege_master('get')()
+    cam_data = DataBase.cam_master('get')()
+    risk_data = DataBase.risk_level_master('get')()
+    type_data = DataBase.type_master('get')()
+    employee_data = DataBase.employee('get')(None)
+    admin_data = DataBase.admin('get')(None)
+    print(admin_data)
     if request.method == 'POST':
         data = dict(request.form)
         id = data.get('id')[0]
@@ -92,7 +100,6 @@ def master_remove():
             output = DataBase.room('delete')(int(content[0]))
             print(output)
             if output == True:
-                # room_data = DataBase.room('get')(None,'room_id','description')
                 return Response(json.dumps({'url': output,'message':'Room is successfully removed'}), mimetype='text/json')
             else:
                 return Response(json.dumps({'url': output,'message':'Failed to remove room'}), mimetype='text/json')
@@ -101,11 +108,59 @@ def master_remove():
             output = DataBase.clearance_master('delete')(int(content[0]))
             print(output)
             if output == True:
-                # room_data = DataBase.room('get')(None,'room_id','description')
                 return Response(json.dumps({'url': output,'message':'Clearance level is successfully removed'}), mimetype='text/json')
             else:
                 return Response(json.dumps({'url': output,'message':'Failed to remove clearance level'}), mimetype='text/json')
-    return render_template('master_remove.html', room_data = room_data, clear_data = clear_data)
+        elif str(id) == '3':
+            print(id,content)
+            output = DataBase.cam_master('delete')(int(content[0]))
+            print(output)
+            if output == True:
+                return Response(json.dumps({'url': output,'message':'Camera is successfully removed'}), mimetype='text/json')
+            else:
+                return Response(json.dumps({'url': output,'message':'Failed to remove camera'}), mimetype='text/json')
+        elif str(id) == '4':
+            print(id,content)
+            output = DataBase.privilege_master('delete')(int(content[0]))
+            print(output)
+            if output == True:
+                return Response(json.dumps({'url': output,'message':'Privilege level is successfully removed'}), mimetype='text/json')
+            else:
+                return Response(json.dumps({'url': output,'message':'Failed to remove privilege level'}), mimetype='text/json')
+        elif str(id) == '5':
+            print(id,content)
+            output = DataBase.risk_level_master('delete')(int(content[0]))
+            print(output)
+            if output == True:
+                return Response(json.dumps({'url': output,'message':'Risk level is successfully removed'}), mimetype='text/json')
+            else:
+                return Response(json.dumps({'url': output,'message':'Failed to remove risk level'}), mimetype='text/json')
+        elif str(id) == '6':
+            print(id,content)
+            output = DataBase.type_master('delete')(int(content[0]))
+            print(output)
+            if output == True:
+                return Response(json.dumps({'url': output,'message':'Event type is successfully removed'}), mimetype='text/json')
+            else:
+                return Response(json.dumps({'url': output,'message':'Failed to remove event type'}), mimetype='text/json')
+        elif str(id) == '7':
+            print(id,content)
+            output = DataBase.employee('delete')(int(content[0]))
+            print(output)
+            if output == True:
+                return Response(json.dumps({'url': output,'message':'Employee is successfully removed'}), mimetype='text/json')
+            else:
+                return Response(json.dumps({'url': output,'message':'Failed to remove employee'}), mimetype='text/json')
+        elif str(id) == '8':
+            print(id,content)
+            output = DataBase.admin('delete')(int(content[0]))
+            print(output)
+            if output == True:
+                return Response(json.dumps({'url': output,'message':'Administrator is successfully removed'}), mimetype='text/json')
+            else:
+                return Response(json.dumps({'url': output,'message':'Failed to remove administrator'}), mimetype='text/json')
+    return render_template('master_remove.html', room_data = room_data, clear_data = clear_data, cam_data = cam_data, \
+     privilege_data = privilege_data, risk_data = risk_data, type_data = type_data,employee_data = employee_data, admin_data = admin_data)
      
    
 
@@ -232,7 +287,9 @@ def register_employee():
     """Register an Employee"""
     error = None
     data = DataBase.clearance_master('get')()
-    emp_id = None
+    emp_name =  dict((i[1],i[0]) for i in DataBase.employee('get')())
+    print(emp_name)
+    fname = None
     g.user = 'admin' # Hack
     if request.method == 'POST' and g.user:
         clearance_level = request.form['clearance_level']
@@ -242,26 +299,44 @@ def register_employee():
             print('{} Clearance Level Data is incorrect'.format(LOG_TAG))
             error = "Please select a clearance level from the dropdown"
         if not error:
-            files = request.files.getlist('recog_data')
-            recog_data = list()
-            if len(files) > 0:
-                for file in files:
-                    filename = photos.save(file)
-                    name = request.form.get('name')
-                    image = 'uploads/imgs/' + filename
-                    with open(image, "rb") as imageFile:
-                        image_data = imageFile.read()
-                        recog_data.append(image_data)
-                        os.remove(image)
-            regex_to_match = re.compile('^[A-Za-z ]+$')
             name = request.form['fullname'].strip()
+            regex_to_match = re.compile('^[A-Za-z ]+$')
+            fname=""
             if not (len(name) > 0 and regex_to_match.match(name) != None):
                 error = "Name is invalid"
             if not error:
                 print('{} Valid data Posted'.format(LOG_TAG))
-                # TODO: Add module which converts recog_data to vector and returns it
-                # emp_id = DataBase.employee('insert')(name, clearance_level, recog_data)
-    return render_template('register_employee.html', error = error, data = data, emp_id = emp_id)
+                try:
+                    if emp_name[name]:
+                        print('present!')
+                        fname = str(emp_name[name])
+                except KeyError:
+                    print('Not already registered!!')
+                    fname = str(DataBase.employee('insert')(name,int(clearance_level)))
+                    print(fname)
+                files = request.files.getlist('recog_data')
+                print(files)
+                recog_data = list()
+                if len(files) > 0:
+                    print(os.getcwd())
+                    if(os.path.isdir(os.getcwd()+'/uploads/imgs/' +fname) == True):
+                        print('deleted old folder!')
+                        shutil.rmtree(os.getcwd()+'/uploads/imgs/' +fname)
+                    os.mkdir(os.getcwd()+'/uploads/imgs/' +fname)
+                    app.config['UPLOADED_PHOTOS_DEST'] = base_dir+fname
+                    configure_uploads(app, photos)
+                    print(app.config['UPLOADED_PHOTOS_DEST'])    
+                    print('made dir')
+                    for file in files:
+                        filename = photos.save(file)
+                        print(filename)
+                        name = request.form.get('name')
+                        # image = 'uploads/imgs/' +fname+"/" +filename
+                        # with open(image, "rb") as imageFile:
+                        #     image_data = imageFile.read()
+                        #     recog_data.append(image_data)
+            # TODO: Add module which converts recog_data to vector and returns it
+    return render_template('register_employee.html', error = error, data = data, emp_id = fname)
 
 @app.route('/register_admin', methods=['GET', 'POST'])
 def register_admin():
@@ -355,6 +430,22 @@ def video_streamer(camNum):
     return Response(gen(HomeSurveillance.cameras[int(camNum)]),
                     mimetype='multipart/x-mixed-replace; boundary=frame') # A stream where each part replaces the previous part the multipart/x-mixed-replace content type must be used.
 
+
+@app.route('/events', methods=['GET', 'POST'])
+def events():
+    error = None
+    if request.method == 'POST':
+        pass
+    return render_template('events.html', error=None)
+
+
+@app.route('/events_streamer/<eventNum>')
+def events_streamer(eventNum):
+    """Used to stream frames to client, eventNum represents the event_id"""
+    print(eventNum)
+    # A stream where each part replaces the previous part the multipart/x-mixed-replace content type must be used.
+    return Response('something', mimetype='multipart/x-mixed-replace; boundary=frame')
+
 def system_monitoring():
     """Pushes system monitoring data to client"""
     while True:
@@ -401,19 +492,17 @@ def add_camera():
 @app.route('/remove_camera', methods = ['GET','POST'])
 def remove_camera():
     if request.method == 'POST':
+        print('In remove camera!')
         camID = request.form.get('camID')
-        print('In remove camera!', camID)
         sd, camNum = camID.split('_')
         app.logger.info("Removing camera: ")
         app.logger.info(camID)
-        with HomeSurveillance.camerasLock:
-            print('Rem Camera Lock', sd, camNum)
-            HomeSurveillance.remove_camera(int(camNum))
+        # with HomeSurveillance.camerasLock:
+        #     HomeSurveillance.remove_camera(int(camNum))
+        DataBase.cam_master('delete')(int(camNum))
         app.logger.info("Removing camera number : " + camNum)
         data = {"alert_status": "removed"}
-        print("Returning")
         return jsonify(data)
-    print('heloo world')
     return render_template('index.html')
 
 # @app.route('/create_alert', methods = ['GET','POST'])
@@ -560,12 +649,13 @@ def update_faces():
         thumbnail = None
         with HomeSurveillance.camerasLock :
             for i, camera in enumerate(HomeSurveillance.cameras):
+                print("{}---{}".format(i,HomeSurveillance.cameras[i].url))
                 with HomeSurveillance.cameras[i].peopleDictLock:
                     for key, person in camera.people.items():  
                         persondict = {'identity': key , 'confidence': person.confidence, 'camera': i, 'timeD':person.time, 'prediction': person.identity,'thumbnailNum': len(person.thumbnails)}
                         app.logger.info(persondict)
                         peopledata.append(persondict)
-
+        # print(peopledata)
         socketio.emit('people_detected', json.dumps(peopledata) ,namespace='/surveillance')
         time.sleep(4)
 
@@ -643,18 +733,27 @@ def connect():
     #         app.logger.info(alertData)
     #         alerts.append(alertData)
     if HomeSurveillance.recogniser.classifierFlag:
-        allCameras = DataBase.cam_master('get')()
+        allCameras = DataBase.cam_master('get')('NULL')
+        # print(allCameras)
+        db_url_list = [val[1] for val in allCameras.items()]
+        url_list = [c.url for c in HomeSurveillance.cameras]
+        print("DB: {}".format(db_url_list))
+        print("System: {}".format(url_list))
         with HomeSurveillance.camerasLock :
             for key, value in allCameras.items():
-                cameraData = {'camNum': key, 'url': value}
-                app.logger.info(cameraData)
-                cameras.append(cameraData)
-                HomeSurveillance.add_camera(SurveillanceSystem.Camera.IPCamera(value))
-        systemData = {'camNum': len(HomeSurveillance.cameras) ,
-         'people': HomeSurveillance.peopleDB, 
-         'cameras': cameras, 
-        #  'alerts': alerts, 
-         'onConnect': True}
+                if not value in url_list:
+                    cameraData = {'camNum': key, 'url': value}
+                    app.logger.info(cameraData)
+                    cameras.append(cameraData)
+                    HomeSurveillance.add_camera(SurveillanceSystem.Camera.IPCamera(value))
+                else:
+                    print('cam already present')
+        systemData = {
+            'camNum': len(HomeSurveillance.cameras) ,
+            'people': HomeSurveillance.peopleDB, 
+            'cameras': cameras, 
+            #'alerts': alerts, 
+            'onConnect': True}
         #Create default alert 
         with HomeSurveillance.alertsLock:
             HomeSurveillance.alerts.append(SurveillanceSystem.Alert(socketio, '', 'all', 'Recognition', '2', '', '', 0, 1))

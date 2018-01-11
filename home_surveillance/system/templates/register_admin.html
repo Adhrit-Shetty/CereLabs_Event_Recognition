@@ -24,14 +24,19 @@
       appearance: none;
       margin: 0;
     }
+
+    .h1:hover {
+      text-decoration: none;
+    }
   </style>
 </head>
 
 <body class="bg-dark" style="height:90vh;">
   <div class="container-fluid h-100">
     <div class="row justify-content-center align-items-center" style="height:15% !important;">
-      <h1 style="color:whitesmoke;">Surveillance</h1>&nbsp;
-      <h1 style="color:lightslategray;">System</h1>
+        <a href="{{url_for('home')}}" class="h1">
+          <span style="color:whitesmoke;">Surveillance</span>&nbsp;<span style="color:lightslategray;">System</span>
+        </a>
     </div>
     <div class="row h-75 justify-content-center">
       <div class="col-4 justify-content-center">

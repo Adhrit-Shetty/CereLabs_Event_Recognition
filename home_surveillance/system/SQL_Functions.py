@@ -104,24 +104,31 @@ class EmployeeHelper:
             cursor.execute(sql)
             self.db.commit()
             print('{} firing Successful!'.format(self.LOG_TAG))
+            return True
         except:
             self.db.rollback()
             print('{} Error: firing Unsuccessful!'.format(self.LOG_TAG))
+            return False
 
-    def get_employee_details(self, emp_id, *args):
+    def get_employee_details(self, emp_id=None, *args):
         cursor = self.db.cursor()
         projection = '*'
+        type_of_fetch = 1
         if len(args) > 0:
             for arg in args:
                 projection = str(projection)+str(arg)+" ,"
                 projection = projection[:-2]  # Remove trailing comma and space
+        if emp_id == None:
+            type_of_fetch=2
+            sql = "SELECT emp_id, name, clearance_level FROM employee"
+        else:
+            sql = "SELECT %s FROM employee JOIN clearance_level_master ON employee.clearance_level = clearance_level_master.level WHERE emp_id = %d" % (projection, emp_id)
 
         print('{} get_employee projection = {}'.format(self.LOG_TAG, projection))
 
-        sql = "SELECT %s FROM employee JOIN clearance_level_master ON employee.clearance_level = clearance_level_master.level WHERE emp_id = %d" % (projection, emp_id)
         try:
             cursor.execute(sql)
-            results = cursor.fetchone()
+            results = cursor.fetchall()
             print('{} fetching Successful!'.format(self.LOG_TAG))
             if results == None:
                 results = list()
@@ -193,9 +200,11 @@ class AdminHelper:
             cursor.execute(sql)
             self.db.commit()
             print('{} removing Successful!'.format(self.LOG_TAG))
+            return True
         except:
             self.db.rollback()
             print('{} Error: removing Unsuccessful!'.format(self.LOG_TAG))
+            return False
 
     def get_admin_details(self, admin_id, *args):
         cursor = self.db.cursor()
@@ -204,12 +213,16 @@ class AdminHelper:
             projection = str(projection)+str(arg)+" ,"
         projection = projection[:-2]  # Remove trailing comma and space
 
-        print('{} get_event projection = {}'.format(self.LOG_TAG, projection))
+        if admin_id == None:
+            type_of_fetch=2
+            sql = "SELECT admin_id,emp_id, privilege_level, username FROM admin"
+        else:
+            sql = "SELECT %s FROM admin JOIN employee ON admin.emp_id = employee.emp_id JOIN privilege_master ON admin.privilege_level = privilege_master.plvl WHERE admin_id = %d" % (projection, admin_id)
 
-        sql = "SELECT %s FROM admin JOIN employee ON admin.emp_id = employee.emp_id JOIN privilege_master ON admin.privilege_level = privilege_master.plvl WHERE admin_id = %d" % (projection, admin_id)
+        print('{} get_event projection = {}'.format(self.LOG_TAG, projection))
         try:
             cursor.execute(sql)
-            results = cursor.fetchone()
+            results = cursor.fetchall()
             print('{} fetching Successful!'.format(self.LOG_TAG))
             return results
         except:
@@ -444,22 +457,28 @@ class CamMasterHelper:
             cursor.execute(sql)
             self.db.commit()
             print('{} removal Successful!'.format(self.LOG_TAG))
+            return True
         except:
             self.db.rollback()
             print('{} Error: removal Unsuccessful!'.format(self.LOG_TAG))
+            return False
 
     def get_cam_details(self, cam_id=None):
         cursor = self.db.cursor()
         type_of_fetch = 1
-        sql = "SELECT cam_id, rtsp_link FROM cam_master"
-        if cam_id != None:
+        sql = "SELECT cam_id, room_id, rtsp_link FROM cam_master"
+        if cam_id == 'NULL':
+            type_of_fetch = 3
+            sql = "SELECT cam_id, rtsp_link FROM cam_master"
+        elif cam_id != None:
             type_of_fetch = 2
             sql = "SELECT * FROM cam_master JOIN room ON cam_master.room_id = room.room_id WHERE cam_id = %d" % (cam_id)
         try:
             cursor.execute(sql)
             results = cursor.fetchall()
+            print(results)
             print('{} fetching Successful!'.format(self.LOG_TAG))
-            if type_of_fetch == 1:
+            if type_of_fetch == 3:
                 return dict((x,y) for x,y in results)
             return results
         except:
@@ -514,23 +533,24 @@ class TypeMasterHelper:
             cursor.execute(sql)
             self.db.commit()
             print('{} removal Successful!'.format(self.LOG_TAG))
+            return True
         except:
             self.db.rollback()
             print('{} Error: removal Unsuccessful!'.format(self.LOG_TAG))
+            return False
 
     def get_type_details(self, type_id=None):
         cursor = self.db.cursor()
         type_of_fetch = 1
-        sql = "SELECT type_id, description FROM type_master"
+        sql = "SELECT type_id, risk_level, description FROM type_master"
         if type_id != None:
             type_of_fetch = 2
             sql = "SELECT * FROM type_master JOIN risk_level_master rlm ON type_master.risk_level = rlm.risk_level WHERE type_id = %d" % (type_id)
         try:
             cursor.execute(sql)
-            results = cursor.fetchone()
+            results = cursor.fetchall()
+            print(results)
             print('{} fetching Successful!'.format(self.LOG_TAG))
-            if type_of_fetch == 1:
-                return dict((x,y) for x,y in results)
             return results
 
         except:
@@ -574,10 +594,12 @@ class RiskLevelMasterHelper:
             cursor.execute(sql)
             self.db.commit()
             print('{} removal Successful!'.format(self.LOG_TAG))
+            return True
         except:
             self.db.rollback()
             print('{} Error: removal Unsuccessful!'.format(self.LOG_TAG))
-
+            return False
+        
     def get_risk_level(self, risk_level=None):
             cursor = self.db.cursor()
             type_of_fetch = 1
@@ -633,9 +655,11 @@ class PrivilegeMasterHelper:
             cursor.execute(sql)
             self.db.commit()
             print('{} removal Successful!'.format(self.LOG_TAG))
+            return True
         except:
             self.db.rollback()
             print('{} Error: removal Unsuccessful!'.format(self.LOG_TAG))
+            return False
 
     def get_privileges(self, plvl=None):
         cursor = self.db.cursor()
@@ -647,6 +671,7 @@ class PrivilegeMasterHelper:
         try:
             cursor.execute(sql)
             results = cursor.fetchall()
+            print(results)
             print('{} fetching Successful!'.format(self.LOG_TAG))
             if type_of_fetch == 1:
                 return dict((x,y) for x,y in results)

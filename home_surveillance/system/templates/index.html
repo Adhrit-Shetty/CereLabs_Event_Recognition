@@ -65,40 +65,6 @@
       </ul>
       <ul class="navbar-nav ml-auto">
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle mr-lg-2" id="messagesDropdown" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fa fa-fw fa-envelope"></i>
-            <span class="d-lg-none">Messages
-              <span class="badge badge-pill badge-primary">12 New</span>
-            </span>
-            <span class="indicator text-primary d-none d-lg-block">
-              <i class="fa fa-fw fa-circle"></i>
-            </span>
-          </a>
-          <div class="dropdown-menu" aria-labelledby="messagesDropdown">
-            <h6 class="dropdown-header">New Messages:</h6>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#">
-              <strong>David Miller</strong>
-              <span class="small float-right text-muted">11:21 AM</span>
-              <div class="dropdown-message small">Hey there! This new version of SB Admin is pretty awesome! These messages clip off when they reach the end of the box so they don't overflow over to the sides!</div>
-            </a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#">
-              <strong>Jane Smith</strong>
-              <span class="small float-right text-muted">11:21 AM</span>
-              <div class="dropdown-message small">I was wondering if you could meet for an appointment at 3:00 instead of 4:00. Thanks!</div>
-            </a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#">
-              <strong>John Doe</strong>
-              <span class="small float-right text-muted">11:21 AM</span>
-              <div class="dropdown-message small">I've sent the final files over to you for review. When you're able to sign off of them let me know and we can discuss distribution.</div>
-            </a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item small" href="#">View all messages</a>
-          </div>
-        </li>
-        <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle mr-lg-2" id="alertsDropdown" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="fa fa-fw fa-bell"></i>
             <span class="d-lg-none">Alerts
@@ -108,7 +74,7 @@
               <i class="fa fa-fw fa-circle"></i>
             </span>
           </a>
-          <div class="dropdown-menu" aria-labelledby="alertsDropdown">
+          <div class="dropdown-menu dropdown-alert" aria-labelledby="alertsDropdown">
             <h6 class="dropdown-header">New Alerts:</h6>
             <div id="alertsList"></div>
             <!-- <div class="dropdown-divider"></div>
@@ -307,6 +273,7 @@
     <!-- Core plugin JavaScript-->
     <script src="static/jquery-easing/jquery.easing.js"></script>
     <script src="static/js/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/async/2.6.0/async.js"></script>
     <!-- <script src="static/plugins/knob/jquery.knob.js"></script> -->
     <script src="static/plugins/knob/jquery.knob.js"></script>
     <!-- Custom scripts for all pages-->
@@ -504,16 +471,15 @@
       
       socket.on('new_alert', function(json) {
         console.log('New alert data: ', json);
+        json = JSON.parse(json)
         $('#alertsList').append(`
         <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#">
             <span class="text-danger">
-              <strong>
-                <i class="fa fa-long-arrow-up fa-fw"></i>${json.event_type}
-              </strong>
+              <strong><i class="fa fa-long-arrow-up fa-fw"></i>${json.event_type}</strong>
             </span>
             <span class="small float-right text-muted">${json.time}</span>
-            <div class="dropdown-message small">${json.message}</div>
+            <div class="dropdown-message small text-capitalise">${json.message}</div>
           </a>
         `);
       });
@@ -764,28 +730,33 @@
         }
         camera_string = camera_string + '<option value="All">All</option>';
         $('#cameras').html(camera_string);
-
+        console.log('------------------------------OUT---------------------------------------------------');
         if (system_data.onConnect == true) {
 
           var icon = '<i class="fa fa-video-camera fa-3x" aria-hidden="true"></i>'
           var icondiv = '<div class="product-info">' + icon + '</div>'
-
+          console.log('------------------------------IN---------------------------------------------------');
+          console.log(system_data.cameras);
           var i = 0;
-          for (; i < system_data.cameras.length; i++) {
-
-            var elementExists = document.getElementById("camera_" + system_data.cameras[i].camNum)
+          // for (; i < system_data.cameras.length; i++) {
+          async.each(system_data.cameras, function(value, next) {
+            console.log(value);
+            var elementExists = document.getElementById("camera_" + value.camNum)
             if (elementExists != null) {
-              break;
+              // break;
+              next("Wrong!")
             }
 
-            loadingText = `<div class="text-center">${icon}<div><strong>Camera ${system_data.cameras[i].camNum} FPS: </strong><strong id="camera_${system_data.cameras[i].camNum}_fps">Loading... </strong></div><div>${system_data.cameras[i].url}</div></div>`;
+            loadingText = `<div class="text-center">${icon}<div><strong>Camera ${value.camNum} FPS: </strong><strong id="camera_${value.camNum}_fps">Loading... </strong></div><div>${value.url}</div></div>`;
             $('#system-cameras').append(`<div class="alert alert-success alert-dismissable fade show">
-            <button type="button" class="close" data-dismiss="alert" aria-hidden="false" onclick="removeCameraHelper(this.id)" id="camera_${system_data.cameras[i].camNum}"
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="false" onclick="removeCameraHelper(this.id)" id="camera_${value.camNum}"
             >&times;</button>${loadingText}</div>`);
-
-            $('#surveillance_panel').append(`<div class="col-12 col-sm-6 col-md-4"><div class="card"><img class="card-img" id="${system_data.cameras[i].camNum}" src="/video_streamer/${system_data.cameras[i].camNum}" width="33%" height="20%"><div class="card-img-overlay"><h7 class="card-title" style="color: #fff;">${system_data.cameras[i].camNum}</h7></div></div></div>`);
-
-          }
+            setTimeout(function(){
+              $('#surveillance_panel').append(`<div class="col-12 col-sm-6 col-md-4"><div class="card"><img class="card-img" id="${ value.camNum }" src="/video_streamer/${ value.camNum }" width="33%" height="20%"><div class="card-img-overlay"><h7 class="card-title" style="color: #fff;">${ value.camNum }</h7></div></div></div>`);
+            }, 100);
+          }, function(err) {
+            console.log("ERRRPR HERE!!");
+          });
         }
 
       });

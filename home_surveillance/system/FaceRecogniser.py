@@ -328,6 +328,7 @@ class FaceRecogniser(object):
 
         # Vectors from database
         data = database.employee('getV')()
+        print(np.shape(data))
         if len(data) > 0:
             db_labels = list()
             db_embeddings = list()
@@ -341,13 +342,16 @@ class FaceRecogniser(object):
                     db_embeddings = addition
                 else:
                     db_embeddings = db_embeddings + addition    
+            print('3',np.shape(db_embeddings))
+            print('4',np.shape(db_labels))
             #Check if any vectors present in db
             if len(db_embeddings) > 0:
                 for i in range(0,len(db_embeddings)):
                     db_embeddings[i] = [float(v) for v in db_embeddings[i].split(sep=":")]
                 labels = db_labels
                 embeddings = np.array(db_embeddings)    
-        
+        print(np.shape(embeddings))
+        print(np.shape(labels))
         self.le = LabelEncoder().fit(labels) # LabelEncoder is a utility class to help normalize labels such that they contain only values between 0 and n_classes-1
         self.le2 = LabelEncoder().fit(labels)
         # Fits labels to model

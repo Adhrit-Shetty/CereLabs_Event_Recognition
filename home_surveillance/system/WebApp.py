@@ -757,7 +757,7 @@ def connect():
         'onConnect': True}
     #Create default alert 
     with HomeSurveillance.alertsLock:
-        HomeSurveillance.alerts.append(SurveillanceSystem.Alert(socketio, '', 'all', 'Recognition', '2', '', '', 0, 1))
+        HomeSurveillance.alerts.append(SurveillanceSystem.Alert(socketio, '', 'all', 'Recognition', 'unknown', '', '', 0, 1))
     socketio.emit('system_data', json.dumps(systemData) ,namespace='/surveillance')
 
 @socketio.on('disconnect', namespace='/surveillance')

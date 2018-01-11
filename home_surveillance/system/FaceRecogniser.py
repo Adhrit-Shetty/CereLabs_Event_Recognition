@@ -336,7 +336,7 @@ class FaceRecogniser(object):
                     continue
                 addition = row[1].decode("utf-8")
                 addition = addition.split(sep=';')
-                db_labels = db_labels + list(str(row[0]) * len(addition))
+                db_labels = db_labels + [str(row[0])] * len(addition)
                 if i==0:
                     db_embeddings = addition
                 else:

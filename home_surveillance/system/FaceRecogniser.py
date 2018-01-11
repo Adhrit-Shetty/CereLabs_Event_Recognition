@@ -156,14 +156,14 @@ class FaceRecogniser(object):
         #logger.info("We need to dig here to know why the probability are not right.")
         maxI = np.argmax(predictions)
         person1 = self.le.inverse_transform(maxI)
-        print("D-",neigh_ind, neigh_dist)
+        #print("D-",neigh_ind, neigh_dist)
         
         if neigh_dist[0][0] >= distanceThreshold:
             variance = neigh_dist[0][0] - distanceThreshold
             threshold = threshold + variance * factor
-        print("Threshold-",threshold)
-        if predictions[maxI] <= threshold and person1 != "possible_intuder":
-            person1 = "possible_intruder"
+        #print("Threshold-",threshold)
+        if predictions[maxI] <= threshold and person1 != "unknown":
+            person1 = "unknown"
         
         confidence1 = int(math.ceil(predictions[maxI]*100))
         logger.info("Recognition took {} seconds.".format(time.time() - start))
@@ -255,6 +255,7 @@ class FaceRecogniser(object):
 
 
     def train(self,workDir,ldaDim, database):
+        # Get vectors from files 
         fname = "{}labels.csv".format(workDir) #labels of faces
         logger.info("Loading labels " + fname + " csv size: ")#+  str(os.path.getsize("/root/home_surveillance/system/generated-embeddings/reps.csv")))
         if os.path.getsize(fname) > 0:
@@ -285,36 +286,6 @@ class FaceRecogniser(object):
             fileStatus=False
             logger.info(fname + " file is empty")
             embeddings = [] #creating an empty array since csv is empty
-        
-        # Vectors from database
-        data = database.employee('getV')()
-        if len(data) > 0:
-            db_labels = list()
-            db_embeddings = list()
-            for i,row in enumerate(data):
-                if row[1] == None or row[1].decode("utf-8") == 'NULL':
-                    continue
-                addition = row[1].decode("utf-8")
-                addition = addition.split(sep=';')
-                db_labels = db_labels + list(str(row[0]) * len(addition))
-                if i==0:
-                    db_embeddings = addition
-                else:
-                    db_embeddings = db_embeddings + addition    
-            #Check if any vectors present in db
-            if len(db_embeddings) > 0:
-                for i in range(0,len(db_embeddings)):
-                    db_embeddings[i] = [float(v) for v in db_embeddings[i].split(sep=":")]
-                if not fileStatus:
-                    labels = db_labels
-                    embeddings = np.array(db_embeddings)
-                else:
-                    labels.extend(db_labels)
-                    embeddings = embeddings + np.array(db_embeddings)    
-            # print(np.shape(embeddings))
-            # print(np.shape(labels))
-            # print(embeddings[1])
-        
         # Vectors into database
         if fileStatus:
             rep_str = [""] * len(embeddings)
@@ -339,7 +310,7 @@ class FaceRecogniser(object):
                     prevId = labels[i]
             # Storing last label
             database.employee('update')(int(prevId), recog_data=str(vector))
-        
+
         #Delete files - aligned-images, training-images, label, reps
         if os.path.isdir(fileDir+"/training-images"):
             shutil.rmtree(fileDir+"/training-images")    
@@ -351,6 +322,31 @@ class FaceRecogniser(object):
             os.remove(fileDir+"/generated-embeddings/labels.csv")
         if os.path.isfile(fileDir+"/generated-embeddings/reps.csv"):
             os.remove(fileDir+"/generated-embeddings/reps.csv")            
+
+        # Reinitialise embeddings and labels
+        labels, embeddings = [], []
+
+        # Vectors from database
+        data = database.employee('getV')()
+        if len(data) > 0:
+            db_labels = list()
+            db_embeddings = list()
+            for i,row in enumerate(data):
+                if row[1] == None or row[1].decode("utf-8") == 'NULL':
+                    continue
+                addition = row[1].decode("utf-8")
+                addition = addition.split(sep=';')
+                db_labels = db_labels + list(str(row[0]) * len(addition))
+                if i==0:
+                    db_embeddings = addition
+                else:
+                    db_embeddings = db_embeddings + addition    
+            #Check if any vectors present in db
+            if len(db_embeddings) > 0:
+                for i in range(0,len(db_embeddings)):
+                    db_embeddings[i] = [float(v) for v in db_embeddings[i].split(sep=":")]
+                labels = db_labels
+                embeddings = np.array(db_embeddings)    
         
         self.le = LabelEncoder().fit(labels) # LabelEncoder is a utility class to help normalize labels such that they contain only values between 0 and n_classes-1
         self.le2 = LabelEncoder().fit(labels)

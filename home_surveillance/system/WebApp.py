@@ -732,31 +732,32 @@ def connect():
     #         #print alertData
     #         app.logger.info(alertData)
     #         alerts.append(alertData)
-    if HomeSurveillance.recogniser.classifierFlag:
-        allCameras = DataBase.cam_master('get')('NULL')
-        # print(allCameras)
-        db_url_list = [val[1] for val in allCameras.items()]
-        url_list = [c.url for c in HomeSurveillance.cameras]
-        print("DB: {}".format(db_url_list))
-        print("System: {}".format(url_list))
-        with HomeSurveillance.camerasLock :
-            for key, value in allCameras.items():
-                if not value in url_list:
-                    cameraData = {'camNum': key, 'url': value}
-                    app.logger.info(cameraData)
-                    cameras.append(cameraData)
-                    HomeSurveillance.add_camera(SurveillanceSystem.Camera.IPCamera(value))
-                else:
-                    print('cam already present')
-        systemData = {
-            'camNum': len(HomeSurveillance.cameras) ,
-            'people': HomeSurveillance.peopleDB, 
-            'cameras': cameras, 
-            #'alerts': alerts, 
-            'onConnect': True}
-        #Create default alert 
-        with HomeSurveillance.alertsLock:
-            HomeSurveillance.alerts.append(SurveillanceSystem.Alert(socketio, '', 'all', 'Recognition', '2', '', '', 0, 1))
+    if not HomeSurveillance.recogniser.classifierFlag:
+        return
+    allCameras = DataBase.cam_master('get')('NULL')
+    # print(allCameras)
+    db_url_list = [val[1] for val in allCameras.items()]
+    url_list = [c.url for c in HomeSurveillance.cameras]
+    print("DB: {}".format(db_url_list))
+    print("System: {}".format(url_list))
+    with HomeSurveillance.camerasLock :
+        for key, value in allCameras.items():
+            if not value in url_list:
+                cameraData = {'camNum': key, 'url': value}
+                app.logger.info(cameraData)
+                cameras.append(cameraData)
+                HomeSurveillance.add_camera(SurveillanceSystem.Camera.IPCamera(value))
+            else:
+                print('cam already present')
+    systemData = {
+        'camNum': len(HomeSurveillance.cameras) ,
+        'people': HomeSurveillance.peopleDB, 
+        'cameras': cameras, 
+        #'alerts': alerts, 
+        'onConnect': True}
+    #Create default alert 
+    with HomeSurveillance.alertsLock:
+        HomeSurveillance.alerts.append(SurveillanceSystem.Alert(socketio, '', 'all', 'Recognition', '2', '', '', 0, 1))
     socketio.emit('system_data', json.dumps(systemData) ,namespace='/surveillance')
 
 @socketio.on('disconnect', namespace='/surveillance')

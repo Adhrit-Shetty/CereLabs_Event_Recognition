@@ -223,9 +223,6 @@ class SurveillanceSystem(object):
                     continue
                  else:
                     logger.debug('/// MOTION DETECTED ///')
-
-
-
              ##################################################################################################################################################
              #<#####################################################> FACE DETECTION AND RECOGNTIION <#########################################################>
              ##################################################################################################################################################
@@ -712,23 +709,28 @@ class SurveillanceSystem(object):
                 for person in self.cameras[int(alert.camera)].people.values():
                     logger.info( "checkingalertconf "+ str(alert.confidence )+ " : " + alert.person + " : " + person.identity)
                     if alert.person == person.identity: # Has person been detected
-                        if alert.person == "unknown" and (100 - person.confidence) >= alert.confidence:
-                            logger.info( "alertTest2" + alert.camera)
-                            cv2.imwrite("notification/image.png", self.cameras[int(alert.camera)].processing_frame)#
-                            self.take_action(alert)
-                            return True
-                        elif person.confidence >= alert.confidence:
-                            logger.info( "alertTest3" + alert.camera)
-                            cv2.imwrite("notification/image.png", self.cameras[int(alert.camera)].processing_frame)#
-                            self.take_action(alert)
-                            return True     
+                        print(person.identity)
+                        alert.my_alert = { 
+                            'message': alert.alertString, 
+                            'camera': alert.camera,
+                            'time': time.strftime('%H:%M:%S', time.localtime()), 
+                            'event_type': alert.event,
+                            'risk_level': alert.riskLevel}
+                        alert.event_occurred = True
+                        self.take_action(alert)
+                        return True
                 return False # Person has not been detected check next alert       
-
             else:
                 logger.info( "alertTest4" + alert.camera)
                 if self.cameras[int(alert.camera)].motion == True: # Has motion been detected
+                       alert.my_alert = { 
+                                'message': alert.alertString, 
+                                'camera': alert.camera,
+                                'time': time.strftime('%H:%M:%S', time.localtime()), 
+                                'event_type': alert.event,
+                                'risk_level': alert.riskLevel}
                        logger.info( "alertTest5" + alert.camera)
-                       cv2.imwrite("notification/image.png", self.cameras[int(alert.camera)].processing_frame)#
+                       alert.event_occurred = True
                        self.take_action(alert)
                        return True
                 else:
@@ -747,7 +749,6 @@ class SurveillanceSystem(object):
                                 'time': time.strftime('%H:%M:%S', time.localtime()), 
                                 'event_type': alert.event,
                                 'risk_level': alert.riskLevel}
-                            cv2.imwrite("notification/image.png", camera.processing_frame)#
                             alert.event_occurred = True
                             self.take_action(alert, camera, i)
                             return True
@@ -764,11 +765,9 @@ class SurveillanceSystem(object):
                                 'time': time.strftime('%H:%M:%S', time.localtime()), 
                                 'event_type': alert.event,
                                 'risk_level': alert.riskLevel }
-                            cv2.imwrite("notification/image.png", camera.processing_frame)#
                             alert.event_occurred = True
                             self.take_action(alert, camera, i)
                             return True
-
                 return False # Motion was not detected check next camera
 
     def take_action(self, alert, camera, camNum): 
@@ -776,7 +775,6 @@ class SurveillanceSystem(object):
         # logger.info( "Taking action: ==" + alert.actions)
         if alert.action_taken == False: # Only take action if alert hasn't accured - Alerts reinitialise every 5 min for now
             alert.eventTime = time.time()  
-            print(alert.my_alert)
             output_dir = fileDir+'/Output/Camera'+str(camNum)+'/'
             output_file = output_dir+'/Alert-'+str(alert.alert_count)+'.avi'
             if not os.path.isdir(output_dir):
@@ -839,39 +837,6 @@ class SurveillanceSystem(object):
         self.peopleDB.append(name)
         logger.info("Known faces in our db for: " + name + " ")
       self.peopleDB.append('unknown')
-
-    def change_alarm_state(self):
-      """Sends Raspberry PI a resquest to change the alarm state.
-      192.168.1.35 is the RPI's static IP address port 5000 is used 
-      to access the flask application."""
-
-      r = requests.post('http://192.168.1.35:5000/change_state', data={"password": "admin"})
-      alarm_states = json.loads(r.text)
-
-      logger.info(alarm_states)
-      if alarm_states['state'] == 1:
-          self.alarmState = 'Armed' 
-      else:
-          self.alarmState = 'Disarmed'       
-      self.alarmTriggerd = alarm_states['triggered']
-
-    def trigger_alarm(self):
-       """Sends Raspberry PI a resquest to change to trigger the alarm.
-      192.168.1.35 is the RPI's static IP address port 5000 is used 
-      to access the flask application."""
-
-       r = requests.post('http://192.168.1.35:5000/trigger', data={"password": "admin"})
-       alarm_states = json.loads(r.text) 
-    
-       logger.info(alarm_states)
-
-       if alarm_states['state'] == 1:
-           self.alarmState = 'Armed' 
-       else:
-           self.alarmState = 'Disarmed' 
-       
-       self.alarmTriggerd = alarm_states['triggered']
-       logger.info(self.alarmTriggerd )
 
 #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 class Person(object):

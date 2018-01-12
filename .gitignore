@@ -1,6 +1,8 @@
 
 # Stored video files
 *.avi
+*.mp4
+*.mov
 
 # Pickle
 *.pkl

@@ -14,14 +14,16 @@ class EventsHelper:
     def insert_event(self, ts_start, ts_stop, type_id, cam_id, tags, data):
         cursor = self.db.cursor()
         # Timestamp in mysql is of format 'YYYY-MM-DD hh:mm:ss'
-        myts_start = datetime.datetime.fromtimestamp(ts_start).strftime('%Y-%m-%d %H:%M:%S')
-        myts_stop = datetime.datetime.fromtimestamp(ts_stop).strftime('%Y-%m-%d %H:%M:%S')
-        sql = "INSERT INTO events(ts_start, ts_stop, type_id, cam_id, tags, data) values(%s, %s, %d, %d, '%s', '%s')" % (myts_start, myts_stop, type_id, cam_id, tags, data)
+        myts_start = datetime.datetime.strptime(ts_start, '%Y-%m-%d %H:%M:%S')
+        myts_stop = datetime.datetime.strptime(ts_stop, '%Y-%m-%d %H:%M:%S')
+        sql = "INSERT INTO events(ts_start, ts_stop, type_id, cam_id, tags, data) values('%s', '%s', %d, %d, '%s', '%s')" % (myts_start, myts_stop, type_id, cam_id, tags, data)
+        print(sql)
         try:
             cursor.execute(sql)
             self.db.commit()
             print('{} Insert Successful!'.format(self.LOG_TAG))
-        except:
+        except Exception as err:
+            print(err)
             self.db.rollback()
             print('{} Error: Insert Unsuccessful!'.format(self.LOG_TAG))
 

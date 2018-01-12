@@ -151,7 +151,13 @@ class IPCamera(object):
 		capture_blocker = self.captureEvent.wait()  
 		frame = self.captureFrame 	
 		return frame
-
+	
+	def read_bframe(self):
+		frame = None
+		with self.captureLock:
+			frame = self.processing_frame
+		return frame
+	
 	def read_processed(self):
 		frame = None
 		with self.captureLock:

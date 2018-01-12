@@ -75,7 +75,7 @@ def login():
             elif auth[0] == True:
                 print('{} {} has logged in successfully'.format(LOG_TAG, request.form['username']))
                 session['user'] = request.form['username']
-                if HomeSurveillance.recogniser.classifierFlag:
+                if not HomeSurveillance.recogniser.classifierFlag:
                     print("retrain through login page")
                     app.logger.info("retrain through login page")
                     o_fname, n_fname, o_fname2, n_fname2, retrained = HomeSurveillance.recogniser.trainClassifier(DataBase)#calling the module in FaceRecogniser to start training
@@ -767,7 +767,7 @@ def connect():
         'onConnect': True}
     #Create default alert 
     with HomeSurveillance.alertsLock:
-        HomeSurveillance.alerts.append(SurveillanceSystem.Alert(socketio, '', 'all', 'Recognition', 'unknown', '', '', 0, 1))
+        HomeSurveillance.alerts.append(SurveillanceSystem.Alert(DataBase, socketio, '', 'all', 'Recognition', 'unknown', '', '', 0, 1))
     socketio.emit('system_data', json.dumps(systemData) ,namespace='/surveillance')
 
 @socketio.on('disconnect', namespace='/surveillance')

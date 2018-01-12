@@ -425,15 +425,32 @@ class CamMasterHelper:
 
     def add_cam(self, room_id, resolution, model, rtsp_link):
         cursor = self.db.cursor()
-        auto = "select max(cam_id) from cam_master"
+        change=0
+        auto = "select count(cam_id),max(cam_id) from cam_master"
         sql = "INSERT INTO cam_master(room_id, resolution, model, rtsp_link) values(%d, '%s', '%s', '%s')" % (room_id, resolution, model, rtsp_link)
         try:
             cursor.execute(auto)
             results = cursor.fetchone()
-            set_auto = "alter table cam_master auto_increment=%d" %(results[0])
-            print(set_auto)
-            cursor.execute(set_auto)
-            cursor.execute(sql)
+            print("res:",results)
+            if results[0] == 0:
+                print('0,none')
+                change=1
+            elif results[1] != None:
+                set_auto = "alter table cam_master auto_increment=%d" %(results[0])
+                print(set_auto)
+                cursor.execute(set_auto)
+            r = cursor.fetchall()
+            print(r)
+            cursor.execute(sql)  
+            if change == 1:
+                X = sql1 = "update cam_master set cam_id=0"
+                Y = set_auto = "alter table cam_master auto_increment=1"
+                cursor.execute(sql1)
+                results = cursor.fetchone()
+                print(X,results)
+                cursor.execute(sql1)
+                results = cursor.fetchone()
+                print(Y,results)
             self.db.commit()
             print('{} Add Successful!'.format(self.LOG_TAG))
             return json.dumps({"status":1, "message":'Add Successful'})
@@ -466,12 +483,21 @@ class CamMasterHelper:
     def remove_camera(self, cam_id):
         cursor = self.db.cursor()
         sql = "DELETE FROM cam_master WHERE cam_id = %d" % (cam_id)
+        sql1 = "select count(cam_id) from cam_master"
         try:
             cursor.execute(sql)
             self.db.commit()
             print('{} removal Successful!'.format(self.LOG_TAG))
             sql = "UPDATE cam_master set cam_id = cam_id - 1 WHERE cam_id > %d" % (cam_id)
             cursor.execute(sql)
+            cursor.execute(sql1)
+            r = cursor.fetchone()
+            print(r)
+            if r[0] == 0:
+                print('reset!')
+                set_auto = "alter table cam_master auto_increment=0"
+                x = cursor.execute(set_auto)
+                print(x)
             self.db.commit()
             print('{} cam number decrease Successful!'.format(self.LOG_TAG))
             return True

@@ -124,12 +124,13 @@ class EmployeeHelper:
         if len(args) > 0:
             for arg in args:
                 projection = str(projection)+str(arg)+" ,"
-                projection = projection[:-2]  # Remove trailing comma and space
+            projection = projection[:-2]  # Remove trailing comma and space
         if emp_id == None:
             type_of_fetch=2
             sql = "SELECT emp_id, name, clearance_level FROM employee"
         else:
             sql = "SELECT %s FROM employee JOIN clearance_level_master ON employee.clearance_level = clearance_level_master.level WHERE emp_id = %d" % (projection, emp_id)
+
 
         print('{} get_employee projection = {}'.format(self.LOG_TAG, projection))
 
@@ -138,7 +139,7 @@ class EmployeeHelper:
             results = cursor.fetchall()
             print('{} fetching Successful!'.format(self.LOG_TAG))
             if results == None:
-                results = list()
+                return list()
             return results
         except:
             print('{} Error fetching data'.format(self.LOG_TAG))

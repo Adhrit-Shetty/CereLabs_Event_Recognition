@@ -443,11 +443,14 @@ class CamMasterHelper:
             print(r)
             cursor.execute(sql)  
             if change == 1:
-                print('here!!')
-                sql1 = "update cam_master set cam_id=0 where cam_id=1"    
+                X = sql1 = "update cam_master set cam_id=0"
+                Y = set_auto = "alter table cam_master auto_increment=1"
                 cursor.execute(sql1)
                 results = cursor.fetchone()
-                print(results)
+                print(X,results)
+                cursor.execute(sql1)
+                results = cursor.fetchone()
+                print(Y,results)
             self.db.commit()
             print('{} Add Successful!'.format(self.LOG_TAG))
             return json.dumps({"status":1, "message":'Add Successful'})

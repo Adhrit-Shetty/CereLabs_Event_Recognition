@@ -50,9 +50,10 @@ class FaceDetector(object):
 
     def pre_processing(self,image):
          """Performs CLAHE on a greyscale image"""
-         grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-         clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-         cl1 = clahe.apply(grey)
+         #grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+         #clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+         #cl1 = clahe.apply(grey)
+         cl1 = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
          # cv2.imwrite('clahe_2.jpg',cl1)
          return cl1
 

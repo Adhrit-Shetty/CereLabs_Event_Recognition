@@ -424,7 +424,6 @@ class SurveillanceSystem(object):
                 # for some time the Tracker is deleted. 
 
                 training_blocker = self.trainingEvent.wait()  # Wait if classifier is being trained 
-
                 logger.debug('//// detect_recognise_track 1 ////')
                 peopleFound = False
                 camera.motion, peopleRects  = camera.motionDetector.detect_movement(frame, get_rects = True)   
@@ -445,9 +444,7 @@ class SurveillanceSystem(object):
 
                     peopleFound = True
                     person_bb = dlib.rectangle(int(x), int(y), int(x+w), int(y+h)) 
-                    personimg = ImageUtils.crop(frame, person_bb, dlibRect = True)   # Crop regions of interest 
-
-                    personimg = cv2.flip(personimg, 1) 
+                    personimg = ImageUtils.crop(frame, person_bb, dlibRect = True)   # Crop regions of interest  
 
                     tracked = False
                     # Iterate through each tracker and compare there current psotiion
@@ -710,10 +707,12 @@ class SurveillanceSystem(object):
                     logger.info( "checkingalertconf "+ str(alert.confidence )+ " : " + alert.person + " : " + person.identity)
                     if alert.person == person.identity: # Has person been detected
                         print(person.identity)
+                        alert.eventTime = time.time()
+                        alert.eventTimePretty = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
                         alert.my_alert = { 
                             'message': alert.alertString, 
                             'camera': alert.camera,
-                            'time': time.strftime('%H:%M:%S', time.localtime()), 
+                            'time': alert.eventTimePretty, 
                             'event_type': alert.event,
                             'risk_level': alert.riskLevel}
                         alert.event_occurred = True
@@ -723,10 +722,12 @@ class SurveillanceSystem(object):
             else:
                 logger.info( "alertTest4" + alert.camera)
                 if self.cameras[int(alert.camera)].motion == True: # Has motion been detected
+                       alert.eventTime = time.time()
+                       alert.eventTimePretty = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
                        alert.my_alert = { 
                                 'message': alert.alertString, 
                                 'camera': alert.camera,
-                                'time': time.strftime('%H:%M:%S', time.localtime()), 
+                                'time': alert.eventTimePretty, 
                                 'event_type': alert.event,
                                 'risk_level': alert.riskLevel}
                        logger.info( "alertTest5" + alert.camera)
@@ -742,11 +743,12 @@ class SurveillanceSystem(object):
                 for i,camera in enumerate(cameras): # Look through all cameras
                     for person in camera.people.values():
                         if alert.person == person.identity: # Has person been detected
-                            print(person.identity)
+                            alert.eventTime = time.time()
+                            alert.eventTimePretty = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
                             alert.my_alert = { 
                                 'message': alert.alertString, 
                                 'camera': i,
-                                'time': time.strftime('%H:%M:%S', time.localtime()), 
+                                'time': alert.eventTimePretty, 
                                 'event_type': alert.event,
                                 'risk_level': alert.riskLevel}
                             alert.event_occurred = True
@@ -759,10 +761,12 @@ class SurveillanceSystem(object):
                     cameras = self.cameras
                 for i,camera in enumerate(cameras): # Look through all cameras
                         if camera.motion == True: # Has motion been detected
+                            alert.eventTime = time.time()
+                            alert.eventTimePretty = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
                             alert.my_alert = { 
                                 'message': alert.alertString, 
                                 'camera': i,
-                                'time': time.strftime('%H:%M:%S', time.localtime()), 
+                                'time': alert.eventTimePretty, 
                                 'event_type': alert.event,
                                 'risk_level': alert.riskLevel }
                             alert.event_occurred = True
@@ -774,9 +778,8 @@ class SurveillanceSystem(object):
         """Emits message via socket"""
         # logger.info( "Taking action: ==" + alert.actions)
         if alert.action_taken == False: # Only take action if alert hasn't accured - Alerts reinitialise every 5 min for now
-            alert.eventTime = time.time()  
             output_dir = fileDir+'/Output/Camera'+str(camNum)+'/'
-            output_file = output_dir+'/Alert-'+str(alert.alert_count)+'.avi'
+            output_file = output_dir+'/Alert-'+str(alert.alert_count)+'_Time-'+str(alert.eventTimePretty)+'.avi'
             if not os.path.isdir(output_dir):
                 os.mkdir(output_dir)
             print('alert is: ', alert.my_alert)
@@ -787,7 +790,7 @@ class SurveillanceSystem(object):
             fourcc = cv2.VideoWriter_fourcc(*'XVID')
             out = cv2.VideoWriter(output_file, fourcc, 20.0, (1280,720))
             while True:
-                frame = camera.read_frame()
+                frame = camera.read_bframe()
                 #frame = cv2.flip(frame,0)
                 #print(np.shape(frame))
                 out.write(frame)
@@ -796,7 +799,15 @@ class SurveillanceSystem(object):
                 if cv2.waitKey(1) & int(duration) >= 30:
                     break
             out.release()
-            
+            #Store in db
+            alert.database.events('insert')(
+                alert.eventTimePretty,
+                time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()),  
+                1,
+                camNum,
+                'Shiz',
+                output_file)
+
     def add_face(self, db, name, image, upload):
         """Adds face to directory used for training the classifier"""
         #security clearance left
@@ -923,7 +934,7 @@ class Alert(object):
 
     alert_count = 1
 
-    def __init__(self, socket, alarmState,camera, event, person, actions, emailAddress, confidence, riskLevel):   
+    def __init__(self, database, socket, alarmState,camera, event, person, actions, emailAddress, confidence, riskLevel):   
         logger.info( "alert_"+str(Alert.alert_count)+ " created")
        
 
@@ -931,6 +942,7 @@ class Alert(object):
             self.alertString = "Motion detected in camera " + camera 
         else:
             self.alertString = person + " was detected!"
+        self.database = database
         self.socket =socket
         self.id = "alert_" + str(Alert.alert_count)
         self.event_occurred = False
@@ -943,6 +955,7 @@ class Alert(object):
         self.actions = actions
         self.emailAddress = emailAddress
         self.eventTime = 0
+        self.eventTimePretty = None
         self.my_alert = None
         self.riskLevel = riskLevel
         Alert.alert_count += 1

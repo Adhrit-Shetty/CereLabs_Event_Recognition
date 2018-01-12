@@ -687,7 +687,7 @@ class SurveillanceSystem(object):
                 if alert.action_taken == False: # If action hasn't been taken for event 
                    self.check_camera_events(alert)
                 else:
-                    if (time.time() - alert.eventTime) > 30: # Reinitialize event 5 min after event accured
+                    if (time.time() - alert.eventTime) > 10: # Reinitialize event 5 min after event accured
                         logger.info( "reinitiallising alert: " + alert.id)
                         print('Alert reinitialised!')
                         alert.reinitialise()
@@ -805,6 +805,7 @@ class SurveillanceSystem(object):
                 time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()),  
                 1,
                 camNum,
+                0,
                 'Shiz',
                 output_file)
 

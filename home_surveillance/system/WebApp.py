@@ -421,7 +421,6 @@ def video_streamer(camNum):
     return Response(gen(HomeSurveillance.cameras[int(camNum)]),
                     mimetype='multipart/x-mixed-replace; boundary=frame') # A stream where each part replaces the previous part the multipart/x-mixed-replace content type must be used.
 
-
 @app.route('/events', methods=['GET', 'POST'])
 def events():
     error = None
@@ -440,13 +439,23 @@ def get_events():
         print(allEvents)
     return allEvents
 
+def getClip(eventNum):
+    url = DataBase.events('get')(event_id = eventNum, 'data')
+    print(url)
+    video_capture = cv2.VideoCapture(url)  
+    while True:
+        ret, frame = video_capture.read()
+        if not ret:
+            continue
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')  # Builds 'jpeg' data with header and payload
 
 @app.route('/events_streamer/<eventNum>')
 def events_streamer(eventNum):
     """Used to stream frames to client, eventNum represents the event_id"""
     print(eventNum)
-    # A stream where each part replaces the previous part the multipart/x-mixed-replace content type must be used.
-    return Response('something', mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(getClip(eventNum), 
+        mimetype='multipart/x-mixed-replace; boundary=frame')# A stream where each part replaces the previous part the multipart/x-mixed-replace content type must be used.
 
 def system_monitoring():
     """Pushes system monitoring data to client"""

@@ -36,19 +36,24 @@ class EventsHelper:
             self.db.rollback()
             print('{} Error: Delete Unsuccessful!'.format(self.LOG_TAG))
 
-    def get_event(self, event_id, *args):
+    def get_event(self, event_id=None, *args):
         cursor = self.db.cursor()
-
-        projection = ''
-        for arg in args:
-            projection = str(projection)+str(arg)+" ,"
-        projection = projection[:-2]  # Remove trailing comma and space
-        print('{} get_event projection => {}'.format(self.LOG_TAG, projection))
-        sql = "SELECT %s FROM events JOIN type_master ON events.type_id = type_master.type_id JOIN cam_master ON events.cam_id = cam_master.cam_id WHERE event_id = %d " % (projection, event_id)
+        sql = 'SELECT * FROM events;'
+        type_of_fetch = 1
+        if event_id != None:
+            type_of_fetch = 2
+            projection = ''
+            for arg in args:
+                projection = str(projection)+str(arg)+" ,"
+            projection = projection[:-2]  # Remove trailing comma and space
+            print('{} get_event projection => {}'.format(self.LOG_TAG, projection))
+            sql = "SELECT %s FROM events JOIN type_master ON events.type_id = type_master.type_id JOIN cam_master ON events.cam_id = cam_master.cam_id WHERE event_id = %d " % (projection, event_id)
         try:
             cursor.execute(sql)
-            results = cursor.fetchone()
+            results = cursor.fetchall()
             print('{} fetch data successfull! {}'.format(self.LOG_TAG, results))
+            # if type_of_fetch == 1:
+            #     return results
             return results
         except:
             print('{} Error fetching data!'.format(self.LOG_TAG))
@@ -457,6 +462,10 @@ class CamMasterHelper:
             cursor.execute(sql)
             self.db.commit()
             print('{} removal Successful!'.format(self.LOG_TAG))
+            sql = "UPDATE cam_master set cam_id = cam_id - 1 WHERE cam_id > %d" % (cam_id)
+            cursor.execute(sql)
+            self.db.commit()
+            print('{} cam number decrease Successful!'.format(self.LOG_TAG))
             return True
         except:
             self.db.rollback()

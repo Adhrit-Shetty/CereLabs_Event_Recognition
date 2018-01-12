@@ -1,21 +1,3 @@
-# WebApp
-# Brandon Joffe
-# 2016
-#
-# Copyright 2016, Brandon Joffe, All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 from flask import Flask, render_template, Response, redirect, url_for, request, jsonify, send_file, session, g
 from flask_uploads import UploadSet, configure_uploads, IMAGES
 import Camera
@@ -48,6 +30,7 @@ monitoringThread = threading.Thread()
 alarmStateThread.daemon = False
 facesUpdateThread.daemon = False
 monitoringThread.daemon = False
+
 # Flask setup
 app = Flask('SurveillanceWebServer')
 app.config['SECRET_KEY'] = os.urandom(24) # Used for session management
@@ -447,6 +430,17 @@ def events():
         pass
     return render_template('events.html', error=None)
 
+@app.route('/get_events', methods=['GET', 'POST'])
+def get_events():
+    error = None
+    if request.method == 'POST':
+        pass
+        return redirect(url_for('/events'))
+    else:
+        allEvents = DataBase.events('get')()
+        print(allEvents)
+    return allEvents
+
 
 @app.route('/events_streamer/<eventNum>')
 def events_streamer(eventNum):
@@ -487,9 +481,6 @@ def add_camera():
     """Adds camera new camera to SurveillanceSystem's cameras array"""
     if request.method == 'POST':  
         camURL = request.form.get('camURL')
-        # application = request.form.get('application')
-        # detectionMethod = request.form.get('detectionMethod')
-        # fpsTweak = request.form.get('fpstweak')
         with HomeSurveillance.camerasLock :
             HomeSurveillance.add_camera(SurveillanceSystem.Camera.IPCamera(camURL))
         data = {"camNum": len(HomeSurveillance.cameras) -1}
@@ -513,45 +504,6 @@ def remove_camera():
         data = {"alert_status": "removed"}
         return jsonify(data)
     return render_template('index.html')
-
-# @app.route('/create_alert', methods = ['GET','POST'])
-# def create_alert():
-#     if request.method == 'POST':
-#         camera = request.form.get('camera')
-#         emailAddress = request.form.get('emailAddress')
-#         event = request.form.get('eventdetail')
-#         alarmstate = request.form.get('alarmstate')
-#         person = request.form.get('person')
-#         push_alert = request.form.get('push_alert')
-#         email_alert = request.form.get('email_alert')
-#         trigger_alarm = request.form.get('trigger_alarm')
-#         notify_police = request.form.get('notify_police')
-#         confidence = request.form.get('confidence')
-
-#         #print "unknownconfidence: " + confidence
-#         app.logger.info("unknownconfidence: " + confidence)
-
-#         actions = {'push_alert': push_alert , 'email_alert':email_alert , 'trigger_alarm':trigger_alarm , 'notify_police':notify_police}
-#         with HomeSurveillance.alertsLock:
-#             HomeSurveillance.alerts.append(SurveillanceSystem.Alert(alarmstate,camera, event, person, actions, emailAddress, int(confidence))) 
-#         HomeSurveillance.alerts[-1].id 
-#         data = {"alert_id": HomeSurveillance.alerts[-1].id, "alert_message": "Alert if " + HomeSurveillance.alerts[-1].alertString}
-#         return jsonify(data)
-#     return render_template('index.html')
-
-# @app.route('/remove_alert', methods = ['GET','POST'])
-# def remove_alert():
-#     if request.method == 'POST':
-#         alertID = request.form.get('alert_id')
-#         with HomeSurveillance.alertsLock:
-#             for i, alert in enumerate(HomeSurveillance.alerts):
-#                 if alert.id == alertID:
-#                     del HomeSurveillance.alerts[i]
-#                     break
-           
-#         data = {"alert_status": "removed"}
-#         return jsonify(data)
-#     return render_template('index.html')
 
 @app.route('/remove_face', methods = ['GET','POST'])
 def remove_face():
@@ -667,32 +619,6 @@ def update_faces():
         # print(peopledata)
         socketio.emit('people_detected', json.dumps(peopledata) ,namespace='/surveillance')
         time.sleep(4)
-
-# def alarm_state():
-#      """Used to push alarm state to client"""
-#      while True:
-#             alarmstatus = {'state': HomeSurveillance.alarmState , 'triggered': HomeSurveillance.alarmTriggerd }
-#             socketio.emit('alarm_status', json.dumps(alarmstatus) ,namespace='/surveillance')
-#             time.sleep(3)
-
-
-# @socketio.on('alarm_state_change', namespace='/surveillance') 
-# def alarm_state_change():   
-#     HomeSurveillance.change_alarm_state()
-
-# @socketio.on('panic', namespace='/surveillance') 
-# def panic(): 
-#     HomeSurveillance.trigger_alarm()
-   
-
-# @socketio.on('my event', namespace='/surveillance') # socketio used to receive websocket messages, Namespaces allow a cliet to open multiple connections to the server that are multiplexed on a single socket
-# def test_message(message):   # Custom events deliver JSON payload
-#     emit('my response', {'data': message['data']}) # emit() sends a message under a custom event name
-
-# @socketio.on('my broadcast event', namespace='/surveillance')
-# def test_message(message):
-#     emit('my response', {'data': message['data']}, broadcast=True) # broadcast=True optional argument all clients connected to the namespace receive the message
-
                    
 @socketio.on('connect', namespace='/surveillance') 
 def connect(): 
@@ -704,12 +630,6 @@ def connect():
 
     #print "\n\nclient connected\n\n"
     app.logger.info("client connected")
-
-    # if not alarmStateThread.isAlive():
-    #     #print "Starting alarmStateThread"
-    #     app.logger.info("Starting alarmStateThread")
-    #     alarmStateThread = threading.Thread(name='alarmstate_process_thread_',target= alarm_state, args=())
-    #     alarmStateThread.start()
    
     if not facesUpdateThread.isAlive():
         #print "Starting facesUpdateThread"
@@ -726,23 +646,6 @@ def connect():
     cameraData = {}
     cameras = []
 
-    # with HomeSurveillance.camerasLock :
-    #     for i, camera in enumerate(HomeSurveillance.cameras):
-    #         with HomeSurveillance.cameras[i].peopleDictLock:
-    #             cameraData = {'camNum': i , 'url': camera.url}
-    #             #print cameraData
-    #             app.logger.info(cameraData)
-    #             cameras.append(cameraData)
-    # alertData = {}
-    # alerts = []
-    # for i, alert in enumerate(HomeSurveillance.alerts):
-    #     with HomeSurveillance.alertsLock:
-    #         alertData = {'alert_id': alert.id , 'alert_message':  "Alert if " + alert.alertString}
-    #         #print alertData
-    #         app.logger.info(alertData)
-    #         alerts.append(alertData)
-    # if HomeSurveillance.recogniser.classifierFlag:
-      # print(allCameras)
     allCameras = DataBase.cam_master('get')('NULL')
     db_url_list = [val[1] for val in allCameras.items()]
     url_list = [c.url for c in HomeSurveillance.cameras]
@@ -763,8 +666,8 @@ def connect():
         'camNum': len(HomeSurveillance.cameras) ,
         'people': HomeSurveillance.peopleDB, 
         'cameras': cameras, 
-        #'alerts': alerts, 
         'onConnect': True}
+
     #Create default alert 
     with HomeSurveillance.alertsLock:
         HomeSurveillance.alerts.append(SurveillanceSystem.Alert(socketio, '', 'all', 'Recognition', 'unknown', '', '', 0, 1))

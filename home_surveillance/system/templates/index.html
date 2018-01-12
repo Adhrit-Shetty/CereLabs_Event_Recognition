@@ -322,40 +322,6 @@
     $('#removeCamModal').modal('show');
     }
 
-    // function addCamera() {
-    //   //getting selected option from dropdowns
-
-    //   var camURL = document.getElementById("camURL").value;
-
-    //   var icon = '<i class="fa fa-video-camera fa-3x" aria-hidden="true"></i>'
-    //   var icondiv = '<div class="product-info">' + icon + '</div>'
-
-    //   $('#addcam').html('<div><i class="fa fa-spin fa-cog fa-3x fa-fw" style="font-size:12px;"></i> Adding Camera</div>');
-
-    //   console.log("Front end logging:" + camURL);
-    //   $.ajax({
-    //     type: "POST",
-    //     url: "{{ url_for('add_camera') }}",
-    //     data: { 'camURL': camURL },
-    //     success: function (cam) {
-    //       console.log(cam);
-
-    //       loadingText = `<div class="text-center">${icon}<div><strong>Camera ${cam.camNum} FPS: </strong><strong id="camera_${cam.camNum}_fps">Loading... </strong></div><div>${camURL}</div></div>`;
-    //       $('#system-cameras').append(`<div class="alert alert-success alert-dismissable fade show">
-    //       <button type="button" class="close" data-dismiss="alert" aria-hidden="false" onclick="removeCameraHelper(this.id)" id="camera_${cam.camNum}"
-    //       >&times;</button>${loadingText}</div>`);
-
-    //       $('#surveillance_panel').append(`<div class="col-12 col-sm-6 col-md-4"><div class="card"><img class="card-img" id="${cam.camNum}" src="/video_streamer/${cam.camNum}"/><div class="card-img-overlay"><h7 class="card-title" style="color: #fff">${cam.camNum}</h7></div></div></div>`);
-
-    //       $('#addcam').html('Add Camera');
-
-    //     },
-    //     error: function (error) {
-    //       console.log(error);
-    //     }
-    //   });
-    // }
-
     function retrainClassifier() {
 
       $('#retrain').html('<i class="fa fa-refresh fa-spin fa-3x fa-fw" style="font-size:12px;"></i> Retraining Database');
@@ -528,7 +494,7 @@
             var btn = document.createElement("button");
             btn.setAttribute("type", "button");
             btn.setAttribute('style','padding:5px;margin-left:2px')
-            btn.setAttribute("class", "btn btn-outline-danger");
+            btn.setAttribute("class", "btn btn-danger");
             btn.setAttribute("id", people[i].identity + "_" + people[i].camera + "_remove");
             btn.setAttribute("onclick", "removeFace(this.id)");
             btn.innerHTML = "x";

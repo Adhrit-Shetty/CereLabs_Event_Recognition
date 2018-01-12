@@ -421,10 +421,16 @@ class CamMasterHelper:
     def __init__(self, db):
         self.db = db
 
-    def add_cam(self, cam_id, room_id, resolution, model, rtsp_link):
+    def add_cam(self, room_id, resolution, model, rtsp_link):
         cursor = self.db.cursor()
-        sql = "INSERT INTO cam_master(cam_id, room_id, resolution, model, rtsp_link) values(%d, %d, '%s', '%s', '%s')" % (cam_id, room_id, resolution, model, rtsp_link)
+        auto = "select max(cam_id) from cam_master"
+        sql = "INSERT INTO cam_master(room_id, resolution, model, rtsp_link) values(%d, '%s', '%s', '%s')" % (room_id, resolution, model, rtsp_link)
         try:
+            cursor.execute(auto)
+            results = cursor.fetchone()
+            set_auto = "alter table cam_master auto_increment=%d" %(results[0])
+            print(set_auto)
+            cursor.execute(set_auto)
             cursor.execute(sql)
             self.db.commit()
             print('{} Add Successful!'.format(self.LOG_TAG))

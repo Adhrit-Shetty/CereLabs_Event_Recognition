@@ -290,6 +290,7 @@
         success: function (cam) {
           console.log(cam);
           console.log("camera removed");
+          $('#'+camID+'_cambox').alert('close');
           location.reload(true);
           $('#removeCamModal').modal('hide');
         },
@@ -423,18 +424,6 @@
       var numbers_received = [];
       var people_received = [];
 
-      // socket.on('my response', function (msg) {           //socket.on used to define event handeler
-      //   $('#log').append('<p>' + msg.data + '</p>');
-      // });
-
-      // $('form#emit').submit(function (event) {
-      // });
-
-      // $('form#broadcast').submit(function (event) {
-      //   socket.emit('my broadcast event', { data: $('#broadcast_data').val() });
-      //   return false;
-      // });
-      
       socket.on('new_alert', function(json) {
         console.log('New alert data: ', json);
         json = JSON.parse(json)
@@ -675,8 +664,8 @@
             }
 
             loadingText = `<div class="text-center">${icon}<div><strong>Camera ${value.camNum} FPS: </strong><strong id="camera_${value.camNum}_fps">Loading... </strong></div><div>${value.url}</div></div>`;
-            $('#system-cameras').append(`<div class="alert alert-success alert-dismissable fade show">
-            <button type="button" class="close" data-dismiss="alert" aria-hidden="false" onclick="removeCameraHelper(this.id)" id="camera_${value.camNum}"
+            $('#system-cameras').append(`<div class="alert alert-success alert-dismissable fade show" id="${value.camNum}_cambox">
+            <button type="button" class="close" aria-hidden="false" onclick="removeCameraHelper(this.id)" id="camera_${value.camNum}"
             >&times;</button>${loadingText}</div>`);
             setTimeout(function(){
               $('#surveillance_panel').append(`<div class="col-12 col-sm-6 col-md-4"><div class="card"><img class="card-img" id="camera_${ value.camNum }" src="/video_streamer/${ value.camNum }" width="33%" height="20%"><div class="card-img-overlay"><h7 class="card-title" style="color: #fff;">${ value.camNum }</h7></div></div></div>`);

@@ -187,11 +187,10 @@ def master_add():
             room_id = request.form['room_id']
             value = 1
             if not str(room_id) == "false":
-                cam_id = request.form['cam_id']
                 res = request.form['res']
                 model = request.form['model']
                 link = request.form['link']
-                data = DataBase.cam_master('insert')(int(cam_id),int(room_id),res,model,link)
+                data = DataBase.cam_master('insert')(int(room_id),res,model,link)
                 data = json.loads(data)
                 if int(data.get('status')) == 1:
                     success = data.get('message')

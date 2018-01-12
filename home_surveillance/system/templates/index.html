@@ -290,6 +290,7 @@
         success: function (cam) {
           console.log(cam);
           console.log("camera removed");
+          $('#'+camID+'_cambox').alert('close');
           location.reload(true);
           $('#removeCamModal').modal('hide');
         },
@@ -321,40 +322,6 @@
     </div>`);
     $('#removeCamModal').modal('show');
     }
-
-    // function addCamera() {
-    //   //getting selected option from dropdowns
-
-    //   var camURL = document.getElementById("camURL").value;
-
-    //   var icon = '<i class="fa fa-video-camera fa-3x" aria-hidden="true"></i>'
-    //   var icondiv = '<div class="product-info">' + icon + '</div>'
-
-    //   $('#addcam').html('<div><i class="fa fa-spin fa-cog fa-3x fa-fw" style="font-size:12px;"></i> Adding Camera</div>');
-
-    //   console.log("Front end logging:" + camURL);
-    //   $.ajax({
-    //     type: "POST",
-    //     url: "{{ url_for('add_camera') }}",
-    //     data: { 'camURL': camURL },
-    //     success: function (cam) {
-    //       console.log(cam);
-
-    //       loadingText = `<div class="text-center">${icon}<div><strong>Camera ${cam.camNum} FPS: </strong><strong id="camera_${cam.camNum}_fps">Loading... </strong></div><div>${camURL}</div></div>`;
-    //       $('#system-cameras').append(`<div class="alert alert-success alert-dismissable fade show">
-    //       <button type="button" class="close" data-dismiss="alert" aria-hidden="false" onclick="removeCameraHelper(this.id)" id="camera_${cam.camNum}"
-    //       >&times;</button>${loadingText}</div>`);
-
-    //       $('#surveillance_panel').append(`<div class="col-12 col-sm-6 col-md-4"><div class="card"><img class="card-img" id="${cam.camNum}" src="/video_streamer/${cam.camNum}"/><div class="card-img-overlay"><h7 class="card-title" style="color: #fff">${cam.camNum}</h7></div></div></div>`);
-
-    //       $('#addcam').html('Add Camera');
-
-    //     },
-    //     error: function (error) {
-    //       console.log(error);
-    //     }
-    //   });
-    // }
 
     function retrainClassifier() {
 
@@ -457,18 +424,6 @@
       var numbers_received = [];
       var people_received = [];
 
-      // socket.on('my response', function (msg) {           //socket.on used to define event handeler
-      //   $('#log').append('<p>' + msg.data + '</p>');
-      // });
-
-      // $('form#emit').submit(function (event) {
-      // });
-
-      // $('form#broadcast').submit(function (event) {
-      //   socket.emit('my broadcast event', { data: $('#broadcast_data').val() });
-      //   return false;
-      // });
-      
       socket.on('new_alert', function(json) {
         console.log('New alert data: ', json);
         json = JSON.parse(json)
@@ -527,51 +482,12 @@
             btndiv.setAttribute("class", "btn-group");
             var btn = document.createElement("button");
             btn.setAttribute("type", "button");
-            btn.setAttribute("class", "btn btn-sm btn-light dropdown-toggle");
-            btn.setAttribute("data-toggle", "dropdown");
-
-            var spn = document.createElement("span");
-            spn.setAttribute("class", "caret");
-            btn.appendChild(spn);
-
-            var list = document.createElement("ul");
-            list.setAttribute("class", "dropdown-menu");
-            list.setAttribute("role", "menu");
-            list.setAttribute("id", "faceActionList");
-
-            var listitem = document.createElement("li");
-            var inner = document.createElement("a");
-            inner.setAttribute("class", "dropdown-item");
-            inner.setAttribute("id", people[i].identity + "_" + people[i].camera + "_remove");
-            inner.setAttribute("onclick", "removeFace(this.id)");
-            inner.innerHTML = "Remove";
-            //addFace(id)
-            listitem.appendChild(inner);
-            list.appendChild(listitem);
-
-            var listitem = document.createElement("li");
-            var inner = document.createElement("a");
-            inner.setAttribute("class", "dropdown-item");
-            inner.setAttribute("id", people[i].identity + "_" + people[i].camera + "_trust");
-            inner.setAttribute("onclick", "addFace(this.id)");
-            inner.innerHTML = "Trust";
-
-            listitem.appendChild(inner);
-            list.appendChild(listitem);
-
-            var listitem = document.createElement("li");
-            var inner = document.createElement("a");
-            inner.setAttribute("class", "dropdown-item");
-            inner.setAttribute("data-toggle", "modal");
-            inner.setAttribute("id", "addfacebtnID");
-            inner.setAttribute("data-target", "#" + people[i].identity + "_" + people[i].camera + "_modal");
-            inner.innerHTML = "Add New Face";
-
-            listitem.appendChild(inner);
-            list.appendChild(listitem);
-
+            btn.setAttribute('style','padding:5px;margin-left:2px')
+            btn.setAttribute("class", "btn btn-danger");
+            btn.setAttribute("id", people[i].identity + "_" + people[i].camera + "_remove");
+            btn.setAttribute("onclick", "removeFace(this.id)");
+            btn.innerHTML = "x";
             btndiv.appendChild(btn);
-            btndiv.appendChild(list);
             aligndiv.appendChild(btndiv);
 
             //document.getElementById("progressbar").appendChild(btndiv);   
@@ -748,12 +664,12 @@
             }
 
             loadingText = `<div class="text-center">${icon}<div><strong>Camera ${value.camNum} FPS: </strong><strong id="camera_${value.camNum}_fps">Loading... </strong></div><div>${value.url}</div></div>`;
-            $('#system-cameras').append(`<div class="alert alert-success alert-dismissable fade show">
-            <button type="button" class="close" data-dismiss="alert" aria-hidden="false" onclick="removeCameraHelper(this.id)" id="camera_${value.camNum}"
+            $('#system-cameras').append(`<div class="alert alert-success alert-dismissable fade show" id="${value.camNum}_cambox">
+            <button type="button" class="close" aria-hidden="false" onclick="removeCameraHelper(this.id)" id="camera_${value.camNum}"
             >&times;</button>${loadingText}</div>`);
             setTimeout(function(){
-              $('#surveillance_panel').append(`<div class="col-12 col-sm-6 col-md-4"><div class="card"><img class="card-img" id="${ value.camNum }" src="/video_streamer/${ value.camNum }" width="33%" height="20%"><div class="card-img-overlay"><h7 class="card-title" style="color: #fff;">${ value.camNum }</h7></div></div></div>`);
-            }, 100);
+              $('#surveillance_panel').append(`<div class="col-12 col-sm-6 col-md-4"><div class="card"><img class="card-img" id="camera_${ value.camNum }" src="/video_streamer/${ value.camNum }" width="33%" height="20%"><div class="card-img-overlay"><h7 class="card-title" style="color: #fff;">${ value.camNum }</h7></div></div></div>`);
+            },1000);
           }, function(err) {
             console.log("ERRRPR HERE!!");
           });

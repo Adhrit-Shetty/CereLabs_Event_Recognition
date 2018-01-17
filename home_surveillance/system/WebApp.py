@@ -443,7 +443,7 @@ def get_events():
     return Response(allEvents)
 
 def getClip(eventNum):
-    url = DataBase.events('get')(event_id = eventNum, 'data')
+    url = DataBase.events('get')(eventNum, 'data')
     print(url)
     video_capture = cv2.VideoCapture(url)  
     while True:

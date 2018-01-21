@@ -36,7 +36,7 @@ app = Flask('SurveillanceWebServer')
 app.config['SECRET_KEY'] = os.urandom(24) # Used for session management
 socketio = SocketIO(app)
 photos = UploadSet('photos', IMAGES)
-base_dir = 'uploads/imgs/'
+base_dir = 'training-images/'
 app.config['UPLOADED_PHOTOS_DEST'] = base_dir 
 configure_uploads(app, photos)
 
@@ -310,10 +310,10 @@ def register_employee():
                 recog_data = list()
                 if len(files) > 0:
                     print(os.getcwd())
-                    if(os.path.isdir(os.getcwd()+'/uploads/imgs/' +fname) == True):
+                    if(os.path.isdir(os.getcwd()+'/training-images/' +fname) == True):
                         print('deleted old folder!')
-                        shutil.rmtree(os.getcwd()+'/uploads/imgs/' +fname)
-                    os.mkdir(os.getcwd()+'/uploads/imgs/' +fname)
+                        shutil.rmtree(os.getcwd()+'/training-images/' +fname)
+                    os.mkdir(os.getcwd()+'/training-images/' +fname)
                     app.config['UPLOADED_PHOTOS_DEST'] = base_dir+fname
                     configure_uploads(app, photos)
                     print(app.config['UPLOADED_PHOTOS_DEST'])    
@@ -334,6 +334,7 @@ def register_admin():
     """Register an Administrator"""
     error = None
     data = DataBase.privilege_master('get')()
+    print(data)
     success = None
     g.user = 'admin' # Hack
     if request.method == 'POST' and g.user:
@@ -346,6 +347,8 @@ def register_admin():
             error = "Please select a privilege level from the dropdown"
         emp_id = int(request.form['emp_id'])
         db_result = DataBase.employee('get')(emp_id)
+        db_result = [v[0] for v in db_result]
+        print(db_result)
         if emp_id not in db_result:
             emp_id = None
             error = "Employee does not exist"
@@ -436,8 +439,8 @@ def get_events():
         return redirect(url_for('/events'))
     else:
         allEvents = DataBase.events('get')()
-        print(allEvents)
-    return allEvents
+        print("All events:",allEvents)
+    return Response(allEvents)
 
 def getClip(eventNum):
     url = DataBase.events('get')('data',event_id = eventNum)

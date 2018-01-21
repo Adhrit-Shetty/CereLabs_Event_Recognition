@@ -21,7 +21,7 @@ function start_websocket(data) {
             async.series([function (next) {
                 console.log(unusedPort);
                 console.log(__dirname);
-                var python = spawn('python', [path.join(__dirname, '..', 'Python_scripts/websock.py'), unusedPort.toString(), url], {
+                var python = spawn('python3', [path.join(__dirname, '..', 'Python_scripts/websock.py'), unusedPort.toString(), url], {
                     detached: true,
                     stdio: 'ignore'
                 });
@@ -31,6 +31,7 @@ function start_websocket(data) {
             }], function (err) {
                 if (err) {
                     console.log(err);
+                    alert(err);
                 } else {
                     x = valid
                     valid++;
@@ -64,6 +65,8 @@ function connect(port, value) {
         if(value == (valid - 1)) {
             var received_msg = evt.data;
             var urlCreator = window.URL || window.webkitURL;
+            console.log(urlCreator)
+            console.log(received_msg)
             var imageUrl = urlCreator.createObjectURL(received_msg);
             document.querySelector("#img").src = imageUrl;
         }

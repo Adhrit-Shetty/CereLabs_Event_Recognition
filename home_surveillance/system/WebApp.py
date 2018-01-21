@@ -440,7 +440,7 @@ def get_events():
     return allEvents
 
 def getClip(eventNum):
-    url = DataBase.events('get')(event_id = eventNum, 'data')
+    url = DataBase.events('get')('data',event_id = eventNum)
     print(url)
     video_capture = cv2.VideoCapture(url)  
     while True:
@@ -505,12 +505,12 @@ def remove_camera():
         sd, camNum = camID.split('_')
         app.logger.info("Removing camera: ")
         app.logger.info(camID)
-        # with HomeSurveillance.camerasLock:
-        #     HomeSurveillance.remove_camera(int(camNum))
-        DataBase.cam_master('delete')(int(camNum))
-        app.logger.info("Removing camera number : " + camNum)
-        data = {"alert_status": "removed"}
-        return jsonify(data)
+        with HomeSurveillance.camerasLock:
+            HomeSurveillance.remove_camera(int(camNum))
+            DataBase.cam_master('delete')(int(camNum))
+            app.logger.info("Removing camera number : " + camNum)
+            data = {"alert_status": "removed"}
+            return jsonify(data)
     return render_template('index.html')
 
 @app.route('/remove_face', methods = ['GET','POST'])

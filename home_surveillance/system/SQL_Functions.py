@@ -38,7 +38,7 @@ class EventsHelper:
             self.db.rollback()
             print('{} Error: Delete Unsuccessful!'.format(self.LOG_TAG))
 
-    def get_event(self, event_id=None, *args):
+    def get_event(self, *args, event_id=None):
         cursor = self.db.cursor()
         sql = 'SELECT * FROM events;'
         type_of_fetch = 1

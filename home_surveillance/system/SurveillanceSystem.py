@@ -169,11 +169,12 @@ class SurveillanceSystem(object):
         thread.start()
 
     def remove_camera(self, camNum):
+        print(self.cameras[camNum].video)
         """remove a camera to the System and kill its processing thread"""
         print('inside 1')
         self.cameras[camNum].captureThread.stop = False
         print('inside 2')
-        self.cameras[camNum].video.release()
+        # self.cameras[camNum].video.release()
         print('inside 3')
         self.cameras.pop(camNum)
         print('inside 4')

@@ -1,4 +1,40 @@
 # Cerelabs Internship - Event Recognition System
+### Brief Description:
+1. The main goal of the event recognition system is to incorporate as many features with respect to an event in a work environment which can be detected via cctv feeds of that work environment
+2. An event is defined as an occurance in that work environment which affects the security in any manner. This occurance can be of any variety such as as intruder in the work place, a previously dynamic but currently static object detection, line crossing into sensitive regions of the work place  and many more
+3. Based on the risk that the event poses we can carry inform the users of the system and they can carry out the appropriate actions
+4. Once an event occurs and is detected via the system it is recorder for further review
+
+### In Depth Detils:
+The system as it stands has these components:
+1. ##### Cameras:
+   * The system can accept rtsp links to add camera feeds for monitoring
+   * The cameras have details associated with it in order such as the room it is located in, resolution etc in order to get better understanding of how all the cameras fit together to form the system
+   * Cameras can be added and removed from the system via the interfaces created for these functionalities
+2. ##### Rooms:
+   * A room is a location in the workspace
+   * It has it's own set of privileges and restrictions associated with it i.e. each room can have a security clearance level and should be accessed only by employees having the same or greater clearance level.
+   * Any event detected via a camera in a particular room is tagged and stored with room details to help the users of the system understand the level of security threat that the workplace is facing
+   * Rooms can be added and removed from the system via the interfaces created for these functionalities
+3. ##### Employees:
+   * An employee is a person who is associated with the workspace in any manner and is authorized to be detected within the region being monitored by the system
+   * Each employee has a clearance level associated with him/her and based on this he/she can be labelled as authorized or unauthorized in a particular room
+   * Each employee has a set of images associated with him/her which will be used to classify him/her on being detected
+   * Employees can be added and removed from the system via the interfaces created for these functionalities
+4. ##### Administrator (Admin):
+   * An administrator is an employee who is given the responsibility of monitoring the system and are notified of the events that are detected via the system
+   * Usually the administator should be an employee of the security department as he/she can carry out reqired actions based on the level of risk detected via the system
+   * Administators can be added and removed from the system via the interfaces created for these functionalities
+5. ##### Events:
+   * An event has already been defined in the earlier section
+   * Each event has a video stored which shows the event occuring and can be played later when required for review or any other purpose
+   * Each event has a risk level associated with it
+   * Events can be added and removed from the system via the interfaces created for these functionalities
+  
+### Events:
+1. ##### Intuder detection via face recognition: 
+   * 
+
 ### Prerequisites: 
 1. Download [**models**](*https://drive.google.com/file/d/1cyWfndBLEfKTe8eBIOivDIIbBsy-E_eA/view*) and extract it to *home_surveillance/* directory  
 2. Download [openface](https://github.com/cmusatyalab/openface) then add it to your PYTHONPATH environment variable

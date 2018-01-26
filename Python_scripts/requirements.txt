@@ -1,4 +1,0 @@
-numpy
-websockets
-Pillow
-scipy

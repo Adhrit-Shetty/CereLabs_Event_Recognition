@@ -31,8 +31,7 @@ import logging
 import ImageUtils
 
 class FaceDetector(object):
-    """This class implements both OpenCV's Haar Cascade
-    detector and Dlib's HOG based face detector"""
+    """This class implements Dlib's HOG based face detector"""
 
     def __init__(self):
         self.facecascade = cv2.CascadeClassifier("cascades/haarcascade_frontalface_alt2.xml")

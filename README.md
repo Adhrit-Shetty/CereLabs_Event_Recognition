@@ -35,6 +35,32 @@ The system as it stands has these components:
 1. ##### Intuder detection via face recognition: 
    * 
 
+### Pipeline:
+
+
+### Implenetation details:
+   * The system is made in Python3.5+
+   * It makes use of Flask to create the server and Jinja2 to create the templates for the pages
+    * It uses websockets to stream the video to the output page
+
+### File and Folder Description:
+   * ##### Batch Represent
+      It stores the lua files which are used to create features from the aligned images 
+   * ##### Openface
+     Stores the files required by the openface face detection system
+   * ##### System
+      * **static :** The CSS, bootstrap and JavaScript files used while rendering the pages are stored in this folder
+      * **templates :** The Jinja2 templates for the different pages are stored here
+      * **aligndlib.py :** Here the faces captured are aligned for better detection
+      * **Camera.py :** Stores all the data related to the cctv cameras that are added to the system. It has the functionality to get frames from the video stream and processes the frames
+      * **FaceDetector.py :** Implements Dlib's HOG based face detector to detect faces
+      * **FaceRecogniser.py :** Implements LightGBM to classify detected faces using the faces that the model has already been trained with. It also has functionality for training with new faces
+      * **ImageUtils.py :** Carries out all the image pre-processing that occurs before an image is used for detecting and infering faces
+      * **MotionDetecor.py :** It is used to track the motion of detected objects by constructing background models by frame filtering and averaging
+      * **SQLFunctions.py :** An helper function which contains simple and reusable code for database related functionalities
+      * **SurveillanceSystem.py :** It is the main file which provides all the central proccessing and ties everything together. It has all the functionality to add and remove cameras, start processing frames, check for events etc
+    together.
+      * **WebApp.py :** It is the Flask server file and has all the functions related to the web application
 ### Prerequisites: 
 1. Download [**models**](*https://drive.google.com/file/d/1cyWfndBLEfKTe8eBIOivDIIbBsy-E_eA/view*) and extract it to *home_surveillance/* directory  
 2. Download [openface](https://github.com/cmusatyalab/openface) then add it to your PYTHONPATH environment variable

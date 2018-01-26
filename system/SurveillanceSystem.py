@@ -171,16 +171,11 @@ class SurveillanceSystem(object):
     def remove_camera(self, camNum):
         print(self.cameras[camNum].video)
         """remove a camera to the System and kill its processing thread"""
-        print('inside 1')
         self.cameras[camNum].captureThread.stop = False
-        print('inside 2')
         # self.cameras[camNum].video.release()
-        print('inside 3')
         self.cameras.pop(camNum)
-        print('inside 4')
         self.cameraProcessingThreads.pop(camNum)
-        print('inside 5')
-
+        
     def process_frame(self,camera):
         """This function performs all the frame proccessing.
         It reads frames captured by the IPCamera instance,
@@ -744,6 +739,7 @@ class SurveillanceSystem(object):
                 for i,camera in enumerate(cameras): # Look through all cameras
                     for person in camera.people.values():
                         if alert.person == person.identity: # Has person been detected
+                            print(person.identity)
                             alert.eventTime = time.time()
                             alert.eventTimePretty = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
                             alert.my_alert = { 
@@ -783,13 +779,14 @@ class SurveillanceSystem(object):
             output_file = output_dir+'/Alert-'+str(alert.alert_count)+'_Time-'+str(alert.eventTimePretty)+'.avi'
             if not os.path.isdir(output_dir):
                 os.mkdir(output_dir)
-            print('alert is: ', alert.my_alert)
+            # print('alert')
+            #print('alert is: ', alert.my_alert)
             alert.socket.emit('new_alert', json.dumps(alert.my_alert), namespace="/surveillance")
             alert.action_taken = True
-            
             # Store Clip
             fourcc = cv2.VideoWriter_fourcc(*'XVID')
-            out = cv2.VideoWriter(output_file, fourcc, 20.0, (1280,720))
+            height, width, channels = camera.read_bframe().shape
+            out = cv2.VideoWriter(output_file, fourcc, 20.0, (width, height))
             while True:
                 frame = camera.read_bframe()
                 #frame = cv2.flip(frame,0)
@@ -806,10 +803,9 @@ class SurveillanceSystem(object):
                 time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()),  
                 1,
                 camNum,
-                0,
-                'Shiz',
+                'Intruder detected',
                 output_file)
-
+            
     def add_face(self, db, name, image, upload):
         """Adds face to directory used for training the classifier"""
         #security clearance left

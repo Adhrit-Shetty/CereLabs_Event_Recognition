@@ -36,7 +36,7 @@ The system as it stands has these components:
    * 
 
 ### Pipeline:
-
+![Pipeline](https://github.com/AkshatShetty101/CereLabs_Event_Recognition/blob/master/Pipeline.png)
 
 ### Implenetation details:
    * The system is made in Python3.5+

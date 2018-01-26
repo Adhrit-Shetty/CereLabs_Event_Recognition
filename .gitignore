@@ -1,7 +1,11 @@
 # code editor
 .vscode/
 
+# training models
 models/
+
+# temp image
+motion.jpg
 
 # Stored video files
 *.avi
@@ -176,13 +180,7 @@ typings/
 # dotenv environment variables file
 .env
 
-#images
-*.png
-*.jpg
-*.jpeg
-
 # Webstorm config
-
 .idea/
 
 # temporary files

@@ -1,0 +1,56 @@
+# Database creation
+
+drop database if exists surveillance;
+
+create database surveillance;
+use surveillance;
+
+# DDL
+
+create table clearance_level_master(level int primary key, description varchar(200), last_updated timestamp not null default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP);
+
+create table privilege_master(plvl int primary key, description varchar(200), last_updated timestamp not null default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP);
+
+create table room(room_id int primary key, accessiblity int not null, foreign key(accessiblity) references clearance_level_master(level));
+
+create table cam_master(cam_id int primary key auto_increment, room_id int not null, resolution varchar(10), model varchar(50), rtsp_link varchar(200) not null unique, last_updated timestamp not null default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP, foreign key(room_id) references room(room_id) on delete cascade);
+
+create table risk_level_master(risk_level int primary key, description varchar(200), last_updated timestamp not null default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP);
+
+create table type_master(type_id int primary key, risk_level int not null default 0, description varchar(200), last_updated timestamp not null default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP, foreign key(risk_level) references risk_level_master(risk_level) on delete cascade);
+
+create table events(event_id int primary key auto_increment, ts_start timestamp not null default CURRENT_TIMESTAMP, ts_stop timestamp not null default CURRENT_TIMESTAMP, type_id int not null, cam_id int not null, notif_status BIT default 0, tags varchar(100) default '', data blob not null,foreign key(type_id) references type_master(type_id) on delete cascade, foreign key(cam_id) references cam_master(cam_id) on delete cascade); 
+
+create table employee(emp_id int primary key auto_increment, name varchar(100) not null, recog_data BLOB default null, clearance_level int not null, foreign key(clearance_level) references clearance_level_master(level));
+
+create table admin(admin_id int primary key auto_increment, emp_id int unique not null, privilege_level int not null default 0, username varchar(50), password CHAR(64), foreign key (privilege_level) references privilege_master(plvl) on delete cascade, foreign key (emp_id) references employee(emp_id));
+
+# DML Mock data
+
+insert into clearance_level_master(level, description) values(1, "Areas with Level 1 clearance");
+insert into clearance_level_master(level, description) values(2, "Areas with Level 2 clearance");
+insert into clearance_level_master(level, description) values(3, "Areas with Level 3 clearance");
+
+insert into privilege_master(plvl, description) values(1, "Read Write Execute");
+insert into privilege_master(plvl, description) values(2, "Read Execute"); # Read as in Read Database
+insert into privilege_master(plvl, description) values(3, "Execute");
+
+insert into room(room_id, accessiblity) values(101, 1);
+insert into room(room_id, accessiblity) values(102, 2);
+insert into room(room_id, accessiblity) values(201, 3);
+insert into room(room_id, accessiblity) values(202, 1);
+
+insert into cam_master(room_id, resolution, model, rtsp_link) values(101, "1024x768", "LiveCam101a", "rtsp://admin:admin1234@192.168.1.207:1027/MPEG-4/ch06/main/av_stream");
+insert into cam_master(room_id, resolution, model, rtsp_link) values(101, "1024x768", "LiveCam101b", "rtsp://admin:admin1234@192.168.1.207:1027/MPEG-4/ch01/main/av_stream");
+insert into cam_master(room_id, resolution, model, rtsp_link) values(201, "1024x768", "LiveCam201a", "rtsp://admin:admin1234@192.168.1.207:1027/MPEG-4/ch04/main/av_stream");
+insert into cam_master(room_id, resolution, model, rtsp_link) values(201, "1024x768", "LiveCam201b", "rtsp://admin:admin1234@192.168.1.207:1027/MPEG-4/ch10/main/av_stream");
+
+insert into risk_level_master(risk_level, description) values(0, "No Risk");
+insert into risk_level_master(risk_level, description) values(1, "Low Risk");
+insert into risk_level_master(risk_level, description) values(2, "High Risk");
+
+insert into type_master(type_id, description) values(0, "No Event Detected");
+insert into type_master(type_id, risk_level, description) values(1, 2, "Unknown Face detected");
+insert into type_master(type_id, risk_level, description) values(2, 1, "Unknown Face detected");
+insert into type_master(type_id, risk_level, description) values(3, 2, "Static object detected");
+

@@ -1,3 +1,7 @@
+# code editor
+.vscode/
+
+models/
 
 # Stored video files
 *.avi

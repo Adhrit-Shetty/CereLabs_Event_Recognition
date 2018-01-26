@@ -5,6 +5,9 @@
 3. Based on the risk that the event poses we can carry inform the users of the system and they can carry out the appropriate actions
 4. Once an event occurs and is detected via the system it is recorder for further review
 
+### Use-Case
+To be added soon...
+
 ### In Depth Detils:
 The system as it stands has these components:
 1. ##### Cameras:
@@ -38,6 +41,9 @@ The system as it stands has these components:
 ### Pipeline:
 ![Pipeline](https://github.com/AkshatShetty101/CereLabs_Event_Recognition/blob/master/Pipeline.png)
 
+### Enterprise Resource Diagram:
+![Enterprise Resource Diagram](https://github.com/AkshatShetty101/CereLabs_Event_Recognition/blob/master/ERD.png)
+
 ### Implenetation details:
    * The system is made in Python3.5+
    * It makes use of Flask to create the server and Jinja2 to create the templates for the pages
@@ -61,6 +67,7 @@ The system as it stands has these components:
       * **SurveillanceSystem.py :** It is the main file which provides all the central proccessing and ties everything together. It has all the functionality to add and remove cameras, start processing frames, check for events etc
     together.
       * **WebApp.py :** It is the Flask server file and has all the functions related to the web application
+      
 ### Prerequisites: 
 1. Download [models](https://nofile.io/f/WQ1zrvx3XbA/models.tar.gz) and extract it to *home_surveillance/* directory  
 2. Download [openface](https://github.com/cmusatyalab/openface) then add it to your PYTHONPATH environment variable

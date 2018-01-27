@@ -1,20 +1,4 @@
 # Camera Class
-# Brandon Joffe
-# 2016
-#
-# Copyright 2016, Brandon Joffe, All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 
 import threading
 import time
@@ -30,10 +14,6 @@ import logging
 import SurveillanceSystem
 import MotionDetector
 import FaceDetector
-
-#logging.basicConfig(level=logging.DEBUG,
-#                    format='(%(threadName)-10s) %(message)s',
-#                    )
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +75,6 @@ class IPCamera(object):
 		self.url = camURL
 		logger.info("We are opening the video feed.")
 		logger.info("Video feed open.")
-		#self.dump_video_info()  # logging every specs of the video feed
 		# Start a thread to continuously capture frames.
 		# The capture thread ensures the frames being processed are up to date and are not old
 		self.captureLock = threading.Lock() # Sometimes used to prevent concurrent access
@@ -170,41 +149,3 @@ class IPCamera(object):
 		frame = ImageUtils.resize_mjpeg(frame)
 		ret, jpeg = cv2.imencode('.jpg', frame)
 		return jpeg.tostring()
-			
-	def dump_video_info(self):
-		logger.info("---------Dumping video feed info---------------------")
-		logger.info("Position of the video file in milliseconds or video capture timestamp: ")
-		logger.info(self.video.get(cv2.CAP_PROP_POS_MSEC))
-		logger.info("0-based index of the frame to be decoded/captured next: ")
-		logger.info(self.video.get(cv2.CAP_PROP_POS_FRAMES))
-		logger.info("Relative position of the video file: 0 - start of the film, 1 - end of the film: ")
-		logger.info(self.video.get(cv2.CAP_PROP_POS_AVI_RATIO))
-		logger.info("Width of the frames in the video stream: ")
-		logger.info(self.video.get(cv2.CAP_PROP_FRAME_WIDTH))
-		logger.info("Height of the frames in the video stream: ")
-		logger.info(self.video.get(cv2.CAP_PROP_FRAME_HEIGHT))
-		logger.info("Frame rate:")
-		logger.info(self.video.get(cv2.CAP_PROP_FPS))
-		logger.info("4-character code of codec.")
-		logger.info(self.video.get(cv2.CAP_PROP_FOURCC))
-		logger.info("Number of frames in the video file.")
-		logger.info(self.video.get(cv2.CAP_PROP_FRAME_COUNT))
-		logger.info("Format of the Mat objects returned by retrieve() .")
-		logger.info(self.video.get(cv2.CAP_PROP_FORMAT))
-		logger.info("Backend-specific value indicating the current capture mode.")
-		logger.info(self.video.get(cv2.CAP_PROP_MODE))
-		logger.info("Brightness of the image (only for cameras).")
-		logger.info(self.video.get(cv2.CAP_PROP_BRIGHTNESS))
-		logger.info("Contrast of the image (only for cameras).")
-		logger.info(self.video.get(cv2.CAP_PROP_CONTRAST))
-		logger.info("Saturation of the image (only for cameras).")
-		logger.info(self.video.get(cv2.CAP_PROP_SATURATION))
-		logger.info("Hue of the image (only for cameras).")
-		logger.info(self.video.get(cv2.CAP_PROP_HUE))
-		logger.info("Gain of the image (only for cameras).")
-		#logger.info(self.video.get(cv2.CAP_PROP_GAIN))
-		logger.info("Exposure (only for cameras).")
-		logger.info(self.video.get(cv2.CAP_PROP_EXPOSURE))
-		logger.info("Boolean flags indicating whether images should be converted to RGB.")
-		logger.info(self.video.get(cv2.CAP_PROP_CONVERT_RGB))
-		logger.info("--------------------------End of video feed info---------------------")

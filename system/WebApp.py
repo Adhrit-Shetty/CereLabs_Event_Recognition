@@ -469,7 +469,7 @@ def getClip(eventNum):
     event_capture = cv2.VideoCapture(url)  
     while True:
         ret, frame = event_capture.read()
-        # frame = ImageUtils.resize_mjpeg(frame)
+        frame = ImageUtils.resize_mjpeg(frame)
         ret, jpeg = cv2.imencode('.jpg', frame)
         jpeg = jpeg.tostring()
         if not ret:

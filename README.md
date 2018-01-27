@@ -34,7 +34,7 @@ The system as it stands has these components:
 ### Implenetation details:
    * The system is made in Python3.5+
    * It makes use of Flask to create the server and Jinja2 to create the templates for the pages
-    * It uses websockets to stream the video to the output page
+   * It uses websockets to stream the video to the output page
 
 ### File and Folder Description:
    * ##### Batch Represent/
@@ -70,9 +70,13 @@ To be added soon...
       
 ### Prerequisites: 
 1. Download [models](https://nofile.io/f/WQ1zrvx3XbA/models.tar.gz) and extract it to *home_surveillance/* directory  
-2. Download [openface](https://github.com/cmusatyalab/openface) then add it to your PYTHONPATH environment variable
-3. Download and build [LightGBM](https://lightgbm.readthedocs.io/en/latest/) then add it to your PYTHONPATH environment variable
-4. Database schema is available [here](https://github.com/AkshatShetty101/CereLabs_Event_Recognition/blob/master/database.txt). MySQL 5.7+ required
+2. Download and build [OpenCV 3](https://docs.opencv.org/trunk/d7/d9f/tutorial_linux_install.html) from source with ffmpeg 
+3. Download [openface](https://github.com/cmusatyalab/openface) then add it to your PYTHONPATH environment variable
+4. Download and build [LightGBM](https://lightgbm.readthedocs.io/en/latest/) then add it to your PYTHONPATH environment variable
+5. Database schema is available [here](https://github.com/AkshatShetty101/CereLabs_Event_Recognition/blob/master/database.txt). MySQL 5.7+ required
 
-After completing the pre-requisites to run the server, navigate to *home_surveillance/system* and run `python WebApp.py` then access website at http://localhost:5000
+After completing the pre-requisites to run the server, navigate to *system* and run `python WebApp.py` then access website at http://localhost:5000
 
+### Usage:
+   * The system is started by running the system/WebApp.py file
+   * Before running the python file make sure the path variables for the database is set along with the username and password

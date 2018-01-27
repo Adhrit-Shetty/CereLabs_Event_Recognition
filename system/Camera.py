@@ -141,11 +141,6 @@ class IPCamera(object):
 		frame = None
 		with self.captureLock:
 			frame = self.processing_frame	
-		'''
-		while frame == None: # If there are problems, keep retrying until an image can be read.
-			with self.captureLock:	
-				frame = self.processing_frame		
-		'''
 		frame = ImageUtils.resize_mjpeg(frame)
 		ret, jpeg = cv2.imencode('.jpg', frame)
 		return jpeg.tostring()

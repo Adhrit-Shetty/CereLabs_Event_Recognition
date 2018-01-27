@@ -1,4 +1,3 @@
-
 # Surveillance System Controller.
 
 import time
@@ -79,10 +78,6 @@ handler.setLevel(logging.INFO)
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
-
-#logging.basicConfig(level=logging.DEBUG,
-#                    format='(%(threadName)-10s) %(message)s',
-#                    )
                   
 class SurveillanceSystem(object):
     """ The SurveillanceSystem object is the heart of this application.
@@ -125,10 +120,6 @@ class SurveillanceSystem(object):
 
         self.get_face_database_names() # Gets people in database for web client
 
-        #//////////////////////////////////////////////////// Camera Examples ////////////////////////////////////////////////////
-        #self.cameras.append(Camera.IPCamera("testing/iphoneVideos/singleTest.m4v","detect_recognise_track",False)) # Video Example - uncomment and run code
-        # self.cameras.append(Camera.IPCamera("http://192.168.1.33/video.mjpg","detect_recognise_track",False))
-        
         # processing frame threads 
         for i, cam in enumerate(self.cameras):       
             thread = threading.Thread(name='frame_process_thread_' + str(i),target=self.process_frame,args=(cam,))
@@ -152,7 +143,7 @@ class SurveillanceSystem(object):
         print(self.cameras[camNum].video)
         """remove a camera to the System and kill its processing thread"""
         self.cameras[camNum].captureThread.stop = False
-        # self.cameras[camNum].video.release()
+        self.cameras[camNum].video.release()
         self.cameras.pop(camNum)
         self.cameraProcessingThreads.pop(camNum)
         
@@ -254,7 +245,7 @@ class SurveillanceSystem(object):
                                     # if not the same person check to see if tracked person is unknown and update or change tracker accordingly
                                     # l2Distance is between 0-4 Openf not in  not in  not in ace found that 0.99 was the average cutoff between the same and different faces
                                     # the same face having a distance less than 0.99 
-                                    if (self.recogniser.getSquaredl2Distance(camera.trackers[i].person.rep ,predictions['rep']) > 0.6 and camera.trackers[i].person.identity == predictedName): 
+                                    if (self.recogniser.getSquaredl2Distance(camera.trackers[i].person.rep ,predictions['rep']) > 0.9 and camera.trackers[i].person.identity == predictedName): 
                                       
                                             alreadyBeenDetected = False
                                             with camera.peopleDictLock:
@@ -382,9 +373,6 @@ class SurveillanceSystem(object):
                         continue
 
                     training_blocker = self.trainingEvent.wait()  
-                    # tempframe = frame
-                    frame = cv2.flip(frame, 1)
-
                     camera.faceBoxes = camera.faceDetector.detect_faces(frame,camera.dlibDetection)
   
                     logger.debug('//  FACES DETECTED: '+ str(len(camera.faceBoxes)) +' ///')
@@ -701,6 +689,5 @@ class Alert(object):
 
     def set_custom_alertmessage(self,message):
         self.alertString = message
-
 
 

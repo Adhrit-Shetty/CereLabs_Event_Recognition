@@ -70,26 +70,12 @@ def resize_mjpeg(frame):
     frame = cv2.resize(frame, dim, interpolation = cv2.INTER_AREA)    
     return frame  
 
-def crop(image, box, dlibRect = False):
-
-    if dlibRect == False:
-       x, y, w, h = box
-       return image[y: y + h, x: x + w] 
-
-    return image[box.top():box.bottom(), box.left():box.right()]
-
-def is_inside(o, i):
-    ox, oy, ow, oh = o
-    ix, iy, iw, ih = i
-    return ox > ix and oy > iy and ox + ow < ix + iw and oy + oh < iy + ih
-
 def draw_boxes(image, rects, dlibrects):
    if dlibrects:
        image = draw_rects_dlib(image, rects)
    else:
        image = draw_rects_cv(image, rects)
    return image
-
 
 def draw_rects_cv(img, rects, color=(0, 40, 255)):
     overlay = img.copy()
@@ -157,7 +143,6 @@ def pre_processing(image):
      grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
      clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
      cl1 = clahe.apply(grey)
-     cv2.imwrite('clahe_2.jpg',cl1)
      return cl1
 
 def detect_people_cascade(image):
@@ -181,7 +166,6 @@ def detectlight_face(image):
 
     cv2.imwrite('RGBlighting_Normalization.jpg',processedimg)
 
-
 def detectdlibgrey_face(grey):
     bbs = detector(grey,1)
     return bbs
@@ -195,9 +179,7 @@ def detectdlib_face(img,height,width):
 
     annotatedFrame = np.copy(buf)
     bbs = align.getAllFaceBoundingBoxes(rgbFrame)
-
     return bbs #, annotatedFrame
-
 
 def convertImageToNumpyArray(img,height,width): # Numpy array used by dlib for image operations
     buf = np.asarray(img)
@@ -208,10 +190,20 @@ def convertImageToNumpyArray(img,height,width): # Numpy array used by dlib for i
     annotatedFrame = np.copy(buf)
     return annotatedFrame
 
-
 def writeToFile(filename,lineString): # Used for writing testing data to file
        f = open(filename,"a") 
        f.write(lineString + "\n")    
        f.close()
 
+def crop(image, box, dlibRect = False):
 
+    if dlibRect == False:
+       x, y, w, h = box
+       return image[y: y + h, x: x + w] 
+
+    return image[box.top():box.bottom(), box.left():box.right()]
+
+def is_inside(o, i):
+    ox, oy, ow, oh = o
+    ix, iy, iw, ih = i
+    return ox > ix and oy > iy and ox + ow < ix + iw and oy + oh < iy + ih

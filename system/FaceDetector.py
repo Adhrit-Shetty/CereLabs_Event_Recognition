@@ -36,12 +36,7 @@ class FaceDetector(object):
          grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
          clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
          cl1 = clahe.apply(grey)
-<<<<<<< HEAD
-        #  cl1 = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-=======
          #cl1 = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
->>>>>>> 76f89ab27aaf5d6769ec0fccfd9ce0d04b60298d
-         # cv2.imwrite('clahe_2.jpg',cl1)
          return cl1
 
 
@@ -55,7 +50,6 @@ class FaceDetector(object):
         R = clahe.apply(R)
         G = clahe.apply(G)
         B = clahe.apply(B)
-     
         filtered = cv2.merge([B, G, R])
         cv2.imwrite('notfilteredRGB.jpg',image)
         cv2.imwrite('filteredRGB.jpg',filtered)
@@ -63,24 +57,11 @@ class FaceDetector(object):
 
 
     def detect_dlib_face(self,image):
-        # rgbFrame = rgb_pre_processing(rgbFrame)
         image = self.pre_processing(image)
         bbs = self.detector(image, 1)
-        # bbs = []
-        # dets, scores, idx = self.detector.run(image, 1, -1)
-        # for i, d in enumerate(dets):
-        #     print("Detection {}, score: {}, face_type:{}".format(
-        #         d, scores[i], idx[i]))
-        #     if -1*scores[i] < 0.4 or scores[i] > 0:
-        #         bbs.append(d)
-        #         print "appended: " + str(scores[i])
-        #     else:
-        #         print "notappended: " + str(scores[i])
-
         return bbs  
 
     def detect_cascade_face(self,image):
-       
         with self.cascade_lock:  # Used to block simultaneous access to resource, stops segmentation fault when using more than one camera
             image = self.pre_processing(image)
             rects = self.facecascade.detectMultiScale(image, scaleFactor=1.25, minNeighbors=3, minSize=(20, 20), flags = cv2.CASCADE_SCALE_IMAGE)

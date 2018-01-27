@@ -4,11 +4,8 @@
 2. An event is defined as an occurance in that work environment which affects the security in any manner. This occurance can be of any variety such as as intruder in the work place, a previously dynamic but currently static object detection, line crossing into sensitive regions of the work place  and many more
 3. Based on the risk that the event poses we can carry inform the users of the system and they can carry out the appropriate actions
 4. Once an event occurs and is detected via the system it is recorder for further review
-
-### Use-Case
-To be added soon...
-
-### In Depth Detils:
+  
+### Components:
 The system as it stands has these components:
 1. ##### Cameras:
    * The system can accept rtsp links to add camera feeds for monitoring
@@ -33,16 +30,6 @@ The system as it stands has these components:
    * Each event has a video stored which shows the event occuring and can be played later when required for review or any other purpose
    * Each event has a risk level associated with it
    * Events can be added and removed from the system via the interfaces created for these functionalities
-  
-### Events:
-1. ##### Intuder detection via face recognition: 
-   * 
-
-### Pipeline:
-![Pipeline](https://github.com/AkshatShetty101/CereLabs_Event_Recognition/blob/master/Pipeline.png)
-
-### Enterprise Resource Diagram:
-![Enterprise Resource Diagram](https://github.com/AkshatShetty101/CereLabs_Event_Recognition/blob/master/ERD.png)
 
 ### Implenetation details:
    * The system is made in Python3.5+
@@ -50,11 +37,11 @@ The system as it stands has these components:
     * It uses websockets to stream the video to the output page
 
 ### File and Folder Description:
-   * ##### Batch Represent
+   * ##### Batch Represent/
       It stores the lua files which are used to create features from the aligned images 
-   * ##### Openface
+   * ##### Openface/
      Stores the files required by the openface face detection system
-   * ##### System
+   * ##### System/
       * **static :** The CSS, bootstrap and JavaScript files used while rendering the pages are stored in this folder
       * **templates :** The Jinja2 templates for the different pages are stored here
       * **aligndlib.py :** Here the faces captured are aligned for better detection
@@ -67,6 +54,19 @@ The system as it stands has these components:
       * **SurveillanceSystem.py :** It is the main file which provides all the central proccessing and ties everything together. It has all the functionality to add and remove cameras, start processing frames, check for events etc
     together.
       * **WebApp.py :** It is the Flask server file and has all the functions related to the web application
+  
+### Events:
+1. ##### Intuder detection via face recognition: 
+   * 
+
+### Pipeline:
+![Pipeline](https://github.com/AkshatShetty101/CereLabs_Event_Recognition/blob/master/Pipeline.png)
+
+### Enterprise Resource Diagram:
+![Enterprise Resource Diagram](https://github.com/AkshatShetty101/CereLabs_Event_Recognition/blob/master/ERD.png)
+
+### Use-Case
+To be added soon...
       
 ### Prerequisites: 
 1. Download [models](https://nofile.io/f/WQ1zrvx3XbA/models.tar.gz) and extract it to *home_surveillance/* directory  

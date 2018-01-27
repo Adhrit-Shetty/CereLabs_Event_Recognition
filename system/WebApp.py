@@ -16,6 +16,8 @@ import cv2
 import psutil
 import SQL_Functions
 import re
+import ImageUtils
+import numpy as np
 
 LOG_FILE = 'logs/WebApp.log'
 
@@ -30,6 +32,7 @@ monitoringThread = threading.Thread()
 alarmStateThread.daemon = False
 facesUpdateThread.daemon = False
 monitoringThread.daemon = False
+event_capture = None
 
 # Flask setup
 app = Flask('SurveillanceWebServer')
@@ -411,7 +414,6 @@ def gen(camera):
     class, you can see all detection bounding boxes. This
     however slows down streaming and therefore read_jpg()
     is recommended"""
-    #print('Entered gen')
     while True:
         frame = camera.read_processed()    # read_jpg()  # read_processed()    
         yield (b'--frame\r\n'
@@ -419,8 +421,11 @@ def gen(camera):
 
 @app.route('/video_streamer/<camNum>')
 def video_streamer(camNum):
+    global event_capture
+    if event_capture != None:
+        print('Released!')
+        event_capture.release()
     """Used to stream frames to client, camNum represents the camera index in the cameras array"""
-    print(HomeSurveillance.cameras[int(camNum)])
     return Response(gen(HomeSurveillance.cameras[int(camNum)]),
                     mimetype='multipart/x-mixed-replace; boundary=frame') # A stream where each part replaces the previous part the multipart/x-mixed-replace content type must be used.
 
@@ -439,24 +444,42 @@ def get_events():
         return redirect(url_for('/events'))
     else:
         allEvents = DataBase.events('get')()
-        print("All events:",allEvents)
-    return Response(allEvents)
+        results = list()
+        for i,row in enumerate(allEvents):
+            data = {
+                'event_id': row[0],
+                'time_start': row[1].strftime("%Y-%m-%d %H:%M:%S"),
+                'time_end': row[2].strftime("%Y-%m-%d %H:%M:%S"),
+                'type_id': row[3],
+                'cam_id': row[4],
+                'event_description': row[6]
+                # 'url': row
+            }
+            results.append(data) 
+    return Response(json.dumps(results), mimetype='text/json')
 
 def getClip(eventNum):
-    url = DataBase.events('get')('data',event_id = eventNum)
+    global event_capture
+    if event_capture != None:
+        print('Released!')
+        event_capture.release() 
+    url = DataBase.events('get')(eventNum, 'data')
+    url = url[0][0].decode()
     print(url)
-    video_capture = cv2.VideoCapture(url)  
+    event_capture = cv2.VideoCapture(url)  
     while True:
-        ret, frame = video_capture.read()
+        ret, frame = event_capture.read()
+        # frame = ImageUtils.resize_mjpeg(frame)
+        ret, jpeg = cv2.imencode('.jpg', frame)
+        jpeg = jpeg.tostring()
         if not ret:
             continue
         yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')  # Builds 'jpeg' data with header and payload
+               b'Content-Type: image/jpeg\r\n\r\n' + jpeg + b'\r\n\r\n')  # Builds 'jpeg' data with header and payload
 
 @app.route('/events_streamer/<eventNum>')
 def events_streamer(eventNum):
     """Used to stream frames to client, eventNum represents the event_id"""
-    print(eventNum)
     return Response(getClip(eventNum), 
         mimetype='multipart/x-mixed-replace; boundary=frame')# A stream where each part replaces the previous part the multipart/x-mixed-replace content type must be used.
 
@@ -467,7 +490,6 @@ def system_monitoring():
         for camera in HomeSurveillance.cameras:
     
             cameraProcessingFPS.append("{0:.2f}".format(camera.processingFPS))
-            #print "FPS: " +str(camera.processingFPS) + " " + str(camera.streamingFPS)
             app.logger.info("FPS: " +str(camera.processingFPS) + " " + str(camera.streamingFPS))
         systemState = {'cpu':cpu_usage(),'memory':memory_usage(), 'processingFPS': cameraProcessingFPS}
         socketio.emit('system_monitoring', json.dumps(systemState) ,namespace='/surveillance')
@@ -477,13 +499,11 @@ def cpu_usage():
       psutil.cpu_percent(interval=1, percpu=False) #ignore first call - often returns 0
       time.sleep(0.12)
       cpu_load = psutil.cpu_percent(interval=1, percpu=False)
-      #print "CPU Load: " + str(cpu_load)
       app.logger.info("CPU Load: " + str(cpu_load))
       return cpu_load  
 
 def memory_usage():
      mem_usage = psutil.virtual_memory().percent
-     #print "System Memory Usage: " + str( mem_usage)
      app.logger.info("System Memory Usage: " + str( mem_usage))
      return mem_usage 
 
@@ -551,7 +571,6 @@ def add_face():
             except Exception as e:
                 app.logger.error("ERROR could not add Face" + e)
  
-        #print "trust " + str(trust)
         app.logger.info("trust " + str(trust))
         if str(trust) == "false":
             wriitenToDir = HomeSurveillance.add_face(new_name,img, upload = False)
@@ -571,7 +590,6 @@ def retrain_classifier():
         print("It has begun!")
         app.logger.info("retrain button pushed. clearing event in surveillance objt and calling trainingEvent")
         o_fname, n_fname, o_fname2, n_fname2, retrained = HomeSurveillance.recogniser.trainClassifier(DataBase)#calling the module in FaceRecogniser to start training
-        #print(o_fname, n_fname, o_fname2, n_fname2)
         HomeSurveillance.trainingEvent.clear() # Block processing threads
         HomeSurveillance.recogniser.switchClassifiers(o_fname, n_fname, o_fname2, n_fname2)
         HomeSurveillance.trainingEvent.set() # Release processing threads       
@@ -587,7 +605,7 @@ def get_faceimg(name):
         with HomeSurveillance.cameras[int(camNum)].peopleDictLock:
             img = HomeSurveillance.cameras[int(camNum)].people[key].thumbnail 
     except Exception as e:
-        app.logger.error("Error " + e)
+        app.logger.error("Error " + str(e))
         img = ""
 
     if img == "":
@@ -621,7 +639,7 @@ def update_faces():
         thumbnail = None
         with HomeSurveillance.camerasLock :
             for i, camera in enumerate(HomeSurveillance.cameras):
-                print("{}---{}".format(i,HomeSurveillance.cameras[i].url))
+                # print("{}---{}".format(i,HomeSurveillance.cameras[i].url))
                 with HomeSurveillance.cameras[i].peopleDictLock:
                     for key, person in camera.people.items():  
                         persondict = {'identity': key , 'confidence': person.confidence, 'camera': i, 'timeD':person.time, 'prediction': person.identity,'thumbnailNum': len(person.thumbnails)}
@@ -660,9 +678,9 @@ def connect():
     allCameras = DataBase.cam_master('get')('NULL')
     db_url_list = [val[1] for val in allCameras.items()]
     url_list = [c.url for c in HomeSurveillance.cameras]
-    print("DB: {}".format(db_url_list))
-    print("System: {}".format(url_list))
-    print(cameraData)
+    #print("DB: {}".format(db_url_list))
+    #print("System: {}".format(url_list))
+    #print(cameraData)
     with HomeSurveillance.camerasLock :
         for key, value in allCameras.items():
             cameraData = {'camNum': key, 'url': value}
@@ -672,7 +690,7 @@ def connect():
                 HomeSurveillance.add_camera(SurveillanceSystem.Camera.IPCamera(value))
             else:
                 print('cam already present')
-    print(cameraData)
+    #print(cameraData)
     systemData = {
         'camNum': len(HomeSurveillance.cameras) ,
         'people': HomeSurveillance.peopleDB, 

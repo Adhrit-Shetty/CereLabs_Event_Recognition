@@ -141,7 +141,7 @@ class FaceRecogniser(object):
         threshold = 0.75
         distanceThreshold = 0.75
         variance = 0.0
-        factor = 1.6
+        factor = 0
 
         if self.getRep(img) is None:
             return None

@@ -95,7 +95,7 @@ class IPCamera(object):
 		self.url = camURL
 		logger.info("We are opening the video feed.")
 		logger.info("Video feed open.")
-		self.dump_video_info()  # logging every specs of the video feed
+		#self.dump_video_info()  # logging every specs of the video feed
 		# Start a thread to continuously capture frames.
 		# The capture thread ensures the frames being processed are up to date and are not old
 		self.captureLock = threading.Lock() # Sometimes used to prevent concurrent access

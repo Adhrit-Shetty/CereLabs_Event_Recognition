@@ -17,7 +17,6 @@ class EventsHelper:
         myts_start = datetime.datetime.strptime(ts_start, '%Y-%m-%d %H:%M:%S')
         myts_stop = datetime.datetime.strptime(ts_stop, '%Y-%m-%d %H:%M:%S')
         sql = "INSERT INTO events(ts_start, ts_stop, type_id, cam_id, tags, data) values('%s', '%s', %d, %d, '%s', '%s')" % (myts_start, myts_stop, type_id, cam_id, tags, data)
-        print(sql)
         try:
             cursor.execute(sql)
             self.db.commit()
@@ -38,10 +37,11 @@ class EventsHelper:
             self.db.rollback()
             print('{} Error: Delete Unsuccessful!'.format(self.LOG_TAG))
 
-    def get_event(self, *args, event_id=None):
+    def get_event(self, event_id=None, *args):
         cursor = self.db.cursor()
         sql = 'SELECT * FROM events;'
         type_of_fetch = 1
+        print(event_id)
         if event_id != None:
             type_of_fetch = 2
             projection = ''
@@ -49,11 +49,12 @@ class EventsHelper:
                 projection = str(projection)+str(arg)+" ,"
             projection = projection[:-2]  # Remove trailing comma and space
             print('{} get_event projection => {}'.format(self.LOG_TAG, projection))
-            sql = "SELECT %s FROM events JOIN type_master ON events.type_id = type_master.type_id JOIN cam_master ON events.cam_id = cam_master.cam_id WHERE event_id = %d " % (projection, event_id)
+            sql = "SELECT %s FROM events JOIN type_master ON events.type_id = type_master.type_id JOIN cam_master ON events.cam_id = cam_master.cam_id WHERE event_id = %s " % (projection, event_id)
         try:
+            print(sql)
             cursor.execute(sql)
             results = cursor.fetchall()
-            print('{} fetch data successfull! {}'.format(self.LOG_TAG, results))
+            print('{} fetch data successfull!'.format(self.LOG_TAG))
             # if type_of_fetch == 1:
             #     return results
             return results
@@ -119,7 +120,7 @@ class EmployeeHelper:
 
     def get_employee_details(self, emp_id=None, *args):
         cursor = self.db.cursor()
-        projection = '*'
+        projection = ''
         type_of_fetch = 1
         if len(args) > 0:
             for arg in args:
@@ -133,7 +134,7 @@ class EmployeeHelper:
 
 
         print('{} get_employee projection = {}'.format(self.LOG_TAG, projection))
-
+        #print(type_of_fetch)
         try:
             cursor.execute(sql)
             results = cursor.fetchall()

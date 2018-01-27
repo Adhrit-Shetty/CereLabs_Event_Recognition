@@ -14,7 +14,6 @@ modelDir = os.path.join(fileDir, '..', 'models')
 dlibModelDir = os.path.join(modelDir, 'dlib')
 openfaceModelDir = os.path.join(modelDir, 'openface')
 
-
 def write(vals, fName):
     if os.path.isfile(fName):
         print("{} exists. Backing up.".format(fName))
@@ -23,7 +22,6 @@ def write(vals, fName):
         for p in vals:
             f.write(",".join(str(x) for x in p))
             f.write("\n")
-
 
 def computeMeanMain(args):
     align = openface.AlignDlib(args.dlibFacePredictor)
@@ -58,7 +56,6 @@ def computeMeanMain(args):
     for i, p in enumerate(mean):
         ax.annotate(str(i), (p[0] + 0.005, -p[1] + 0.005), fontsize=8)
     plt.savefig("{}/mean.png".format(args.modelDir))
-
 
 def alignMain(inputDir,outputDir,landmarks,dlibFacePredictor,size):
     openface.helper.mkdirP(outputDir)

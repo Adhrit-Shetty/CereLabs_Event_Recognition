@@ -32,9 +32,6 @@ class MotionDetector(object):
         self.person = False
         self.peopleRects = [] # Holds all regions of interest that may contain a person
 
-    def reset_background_model(self):
-        self.history = 0
-
     def detect_movement(self,frame, get_rects):
             # Calculate mean standard deviation then determine if motion has actually accurred
             height, width, channels = frame.shape
@@ -119,3 +116,6 @@ class MotionDetector(object):
                 return occupied,  self.peopleRects 
             else:
                 return occupied,  frame
+
+    def reset_background_model(self):
+        self.history = 0

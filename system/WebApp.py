@@ -156,8 +156,6 @@ def master_remove():
                 return Response(json.dumps({'url': output,'message':'Failed to remove administrator'}), mimetype='text/json')
     return render_template('master_remove.html', room_data = room_data, clear_data = clear_data, cam_data = cam_data, \
      privilege_data = privilege_data, risk_data = risk_data, type_data = type_data,employee_data = employee_data, admin_data = admin_data)
-     
-   
 
 @app.route('/master_add', methods=['GET','POST'])
 def master_add():
@@ -706,7 +704,6 @@ def connect():
 def disconnect():
     #print('Client disconnected')
     app.logger.info("Client disconnected")
-
 
 if __name__ == '__main__':
     # Starts server on default port 5000 and makes socket connection available to other hosts (host = '0.0.0.0')

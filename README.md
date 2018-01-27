@@ -57,7 +57,10 @@ The system as it stands has these components:
   
 ### Events:
 1. ##### Intuder detection via face recognition: 
-   * 
+   * In this method we split the incoming video feed into frames and then process each frame individually.
+   * The frame received is them pre-processed by performing CLAHE on a grayscale image
+   * Then the frame is send to the face detection module. This detects all the faces and provides the bounding boxes for each face. Thi is done using DLIB's HOG Detector
+   * The bounding boxes are then passed to the face recognition module. Here the face is then recognized using the LGBM classifier. We also find the nearest neighbour distance using K-Neighbour classifier. Then using the confidence and distance values we produced an output based on some predetermined thresholds
 
 ### Pipeline:
 ![Pipeline](https://github.com/AkshatShetty101/CereLabs_Event_Recognition/blob/master/Pipeline.png)
@@ -69,14 +72,16 @@ The system as it stands has these components:
 To be added soon...
       
 ### Prerequisites: 
-1. Download [models](https://nofile.io/f/WQ1zrvx3XbA/models.tar.gz) and extract it to *home_surveillance/* directory  
-2. Download and build [OpenCV 3](https://docs.opencv.org/trunk/d7/d9f/tutorial_linux_install.html) from source with ffmpeg 
+1. Download [models](https://nofile.io/f/WQ1zrvx3XbA/models.tar.gz) and extract it to *home_surveillance/* directory 
+2. Download and build [OpenCV 3](https://docs.opencv.org/trunk/d7/d9f/tutorial_linux_install.html) from source with [ffmpeg](https://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu) 
 3. Download [openface](https://github.com/cmusatyalab/openface) then add it to your PYTHONPATH environment variable
 4. Download and build [LightGBM](https://lightgbm.readthedocs.io/en/latest/) then add it to your PYTHONPATH environment variable
 5. Database schema is available [here](https://github.com/AkshatShetty101/CereLabs_Event_Recognition/blob/master/database.txt). MySQL 5.7+ required
 
-After completing the pre-requisites to run the server, navigate to *system* and run `python WebApp.py` then access website at http://localhost:5000
+**OR**
+
+1. Run the installation script to install all dependancies automatically
 
 ### Usage:
-   * The system is started by running the system/WebApp.py file
-   * Before running the python file make sure the path variables for the database is set along with the username and password
+   * After completing the pre-requisites to run the server, navigate to *system* and run `python WebApp.py` then access website at http://localhost:5000
+   * Before running the python file make sure the path variables for the database is set along with the username and password 
